@@ -7,7 +7,7 @@
 --// 1. LOAD THE LIBRARY
 --------------------------------------------------------------------------------
 -- You can replace this part with the actual V15 Library code if not using loadstring
-local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/Pastefy/V15-UI-Lib/main/source.lua"))() 
+local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/m0dzn1/m0dzn-ui-lib-test/refs/heads/main/m0dzn%20ui%20lib"))() 
 -- ^ NOTE: Since I cannot upload to GitHub for you, you must PASTE THE V15 LIBRARY CODE ABOVE THIS LINE instead of using loadstring if you haven't uploaded it yet.
 -- If you are using the script I gave you in the previous message, just paste that BIG block of code first, then paste this below it.
 
