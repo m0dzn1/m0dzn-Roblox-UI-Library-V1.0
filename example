@@ -1,19 +1,56 @@
+-- 1. Load Lib
 local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/m0dzn1/m0dzn-ui-lib-test/refs/heads/main/m0dzn%20ui%20lib"))()
 
 if not Library then return end
 
--- You only need to define Title and Default Keybind now
+-- 2. Make Window
 local Window = Library:CreateWindow({
-    Title = "M0dzn Hub Premium",
-    Keybind = Enum.KeyCode.M -- You can change Clickgui keybind
+    Title = "lazy hub", -- short title
+    Keybind = Enum.KeyCode.M
 })
 
--- Just add your MAIN features. Settings is auto-added.
-local Main = Window:Tab("Main")
+-- 3. Tabs (Settings is auto-added at end)
+local Main = Window:Tab("main")
+local Fun = Window:Tab("fun")
 
-Main:Section("Player")
-Main:Button("WalkSpeed", function()
-    game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = 50
+--// MAIN TAB
+Main:Section("movement")
+
+Main:Slider("speed", 16, 300, 16, function(v)
+    pcall(function()
+        game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = v
+    end)
 end)
 
-Window:Notification("Script Loaded!")
+Main:Slider("jump", 50, 400, 50, function(v)
+    pcall(function()
+        game.Players.LocalPlayer.Character.Humanoid.JumpPower = v
+    end)
+end)
+
+Main:Section("char")
+
+Main:Button("die", function() -- lazy for "Reset Character"
+    game.Players.LocalPlayer.Character:BreakJoints()
+    Window:Notification("u died")
+end)
+
+Main:Toggle("inf jump", false, function(v)
+    -- infinite jump logic here
+    print("inf jump:", v)
+end)
+
+--// FUN TAB
+Fun:Section("visuals")
+
+Fun:Toggle("esp", false, function(v)
+    print("esp:", v)
+end)
+
+Fun:Button("print hi", function()
+    print("hi")
+    Window:Notification("hi")
+end)
+
+-- Loaded
+Window:Notification("loaded.")
