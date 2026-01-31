@@ -1,30 +1,55 @@
 -- LOAD THE LIBRARY
-local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/m0dzn1/m0dzn-ui-lib-test/refs/heads/main/m0dzn%20ui%20libb"))()
+local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/m0dzn1/m0dzn-ui-lib-test/refs/heads/main/m0dzn%20ui%20lib"))()
 
--- CREATE THE WINDOW
+-- CREATE WINDOW
 local Window = Library:CreateWindow({
-    Title = "TEST HUB",
+    Title = "FULL FEATURE TEST",
     Keybind = Enum.KeyCode.RightControl
 })
 
--- SET CONFIG FOLDER
-Window:SetFolder("TEST HUB") --Name of config folder
+-- MAIN FEATURES
+local Main = Window:Tab("Main")
 
--- EXAMPLE TAB
-local MainTab = Window:Tab("Main")
+Main:Section("New Function")
 
-MainTab:Section("Welcome")
-
-MainTab:Button("Test Button", function()
-    print("Button Clicked!")
+-- 1. TEST VALUE
+Main:Value("Hitbox Size", "10", function(Value)
+    print("Hitbox changed to:", Value)
 end)
 
-MainTab:Toggle("Test Toggle", false, function(Value)
-    print("Toggle is now:", Value)
+Main:Section("Standard Features")
+
+-- 2. TEST TOGGLE
+Main:Toggle("Auto Farm", false, function(State)
+    Window:Notification("Auto Farm: " .. tostring(State))
 end)
 
-MainTab:Slider("WalkSpeed", 16, 100, 16, function(Value)
+-- 3. TEST BUTTON
+Main:Button("Click Me!", function()
+    Window:Notification("Button Clicked!")
+end)
+
+-- 4. TEST SLIDER
+Main:Slider("WalkSpeed", 16, 100, 16, function(Value)
     if game.Players.LocalPlayer.Character then
         game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = Value
     end
+end)
+
+-- TAB 2: EXTRA FEATURES
+local Extra = Window:Tab("Extra")
+
+-- 5. TEST DROPDOWN
+Extra:Dropdown("Select Weapon", {"Sword", "Gun", "Bow"}, function(Option)
+    print("Selected:", Option)
+end)
+
+-- 6. TEST TEXTBOX (Large)
+Extra:Textbox("Enter Message", "Type here...", function(Text)
+    print("User typed:", Text)
+end)
+
+-- 7. TEST KEYBIND
+Extra:Keybind("Fly Key", Enum.KeyCode.F, function(Key)
+    Window:Notification("Keybind set to: " .. Key.Name)
 end)
