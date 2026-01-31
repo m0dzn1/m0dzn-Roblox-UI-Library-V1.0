@@ -8,6 +8,7 @@ local Library = {}
 local RainbowEnabled = false
 local Registry = {} 
 
+--SFX
 local Sounds = {
     Hover = "rbxassetid://6895076327",
     Click = "rbxassetid://4510085601",
@@ -26,6 +27,7 @@ local function PlaySound(id)
     end)
 end
 
+--Theme: Dark ,White ,Purple ,Blue, Red, ,Yellow, Green
 local Themes = {
     Dark   = {Main = Color3.fromRGB(25, 25, 25), Top = Color3.fromRGB(35, 35, 35), Text = Color3.fromRGB(255, 255, 255), Accent = Color3.fromRGB(114, 137, 218), Stroke = Color3.fromRGB(60, 60, 60)},
     White  = {Main = Color3.fromRGB(240, 240, 240), Top = Color3.fromRGB(255, 255, 255), Text = Color3.fromRGB(25, 25, 25), Accent = Color3.fromRGB(0, 120, 215), Stroke = Color3.fromRGB(200, 200, 200)},
@@ -42,6 +44,7 @@ local function AddToRegistry(obj, prop, themeIndex)
     obj[prop] = CurrentTheme[themeIndex]
 end
 
+--animation of gui
 local function Tween(obj, props, time)
     TweenService:Create(obj, TweenInfo.new(time or 0.3, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), props):Play()
 end
@@ -57,6 +60,7 @@ function Library:SetTheme(themeName)
     end
 end
 
+--Rainbow Edge
 function Library:ToggleRainbow(bool)
     RainbowEnabled = bool
 end
@@ -64,7 +68,8 @@ end
 function Library:CreateWindow(Config)
     local Window = {}
     local Title = Config.Title or "M0dzn UI"
-    local Keybind = Config.Keybind
+    --// 4. Clickgui keybind: none
+    local Keybind = Config.Keybind 
 
     local ScreenGui = Instance.new("ScreenGui")
     ScreenGui.Name = "M0dznLib_V3"
@@ -80,6 +85,7 @@ function Library:CreateWindow(Config)
     Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 10)
     AddToRegistry(MainFrame, "BackgroundColor3", "Main")
 
+    --// 3. Background; image ID
     local BgImage = Instance.new("ImageLabel")
     BgImage.Size = UDim2.new(1, 0, 1, 0)
     BgImage.BackgroundTransparency = 1
@@ -93,6 +99,7 @@ function Library:CreateWindow(Config)
     Stroke.Parent = MainFrame
     AddToRegistry(Stroke, "Color", "Stroke")
 
+    --Rainbow Logic
     task.spawn(function()
         while ScreenGui.Parent do
             if RainbowEnabled then
@@ -159,6 +166,7 @@ function Library:CreateWindow(Config)
 
     Tween(MainFrame, {Size = UDim2.new(0, 600, 0, 375)}, 0.6)
 
+    --smooth drag
     local dragging, dragInput, dragStart, startPos
     Topbar.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 then
@@ -189,7 +197,6 @@ function Library:CreateWindow(Config)
         end
     end)
 
-    --//NOTIFICATION
     function Window:Notification(text)
         task.spawn(function()
             PlaySound(Sounds.Notification)
@@ -216,6 +223,7 @@ function Library:CreateWindow(Config)
         if tonumber(id) then BgImage.Image = "rbxassetid://"..id else BgImage.Image = id end
     end
     function Window:SetKeybind(key) Keybind = key end
+    --Destroy Gui
     function Window:Destroy() ScreenGui:Destroy() end
 
     local firstTab = true
@@ -279,7 +287,6 @@ function Library:CreateWindow(Config)
             AddToRegistry(S, "TextColor3", "Accent")
         end
 
-        --// NEW KEYBIND ELEMENT
         function Elements:Keybind(text, default, callback)
             local Key = default or Enum.KeyCode.M
             local Btn = Instance.new("TextButton")
@@ -314,16 +321,13 @@ function Library:CreateWindow(Config)
             Btn.MouseButton1Click:Connect(function()
                 PlaySound(Sounds.Click)
                 KeyLabel.Text = "..."
-                
-                -- Wait for input (Non-blocking because notification is spawned now)
                 local input = UserInputService.InputBegan:Wait()
-                
                 if input.KeyCode.Name ~= "Unknown" then
                     Key = input.KeyCode
                     KeyLabel.Text = Key.Name
                     callback(Key)
                 else
-                    KeyLabel.Text = Key.Name -- Cancelled or mouse click
+                    KeyLabel.Text = Key.Name
                 end
             end)
         end
