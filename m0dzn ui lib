@@ -3,31 +3,40 @@ local UserInputService = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
 local CoreGui = game:GetService("CoreGui")
 local SoundService = game:GetService("SoundService")
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
 
 local Library = {}
 local RainbowEnabled = false
-local SFXEnabled = true -- Default SFX On
+local RainbowType = "Animated/Cycling Rainbow" -- Default
+local SFXEnabled = true
 local Registry = {} 
 
+--SFX
 local Sounds = {
     Hover = "rbxassetid://6895076327",
     Click = "rbxassetid://4510085601",
-    Toggle = "rbxassetid://6895076329",
-    Notification = "rbxassetid://4590657391"
+    ToggleOn = "rbxassetid://6895076329",
+    ToggleOff = "rbxassetid://6895076300",
+    Slide = "rbxassetid://6895076290",
+    Notification = "rbxassetid://4590657391",
+    Back = "rbxassetid://6895076277",
+    Error = "rbxassetid://421058948"
 }
 
 local function PlaySound(id)
-    if not SFXEnabled then return end -- Check if SFX is enabled
+    if not SFXEnabled then return end
     task.spawn(function()
         local s = Instance.new("Sound")
         s.SoundId = id
-        s.Volume = 0.5
+        s.Volume = 0.6
         s.Parent = SoundService
         s:Play()
         game.Debris:AddItem(s, 2)
     end)
 end
 
+--THEMES
 local Themes = {
     Dark   = {Main = Color3.fromRGB(25, 25, 25), Top = Color3.fromRGB(35, 35, 35), Text = Color3.fromRGB(255, 255, 255), Accent = Color3.fromRGB(114, 137, 218), Stroke = Color3.fromRGB(60, 60, 60)},
     White  = {Main = Color3.fromRGB(240, 240, 240), Top = Color3.fromRGB(255, 255, 255), Text = Color3.fromRGB(25, 25, 25), Accent = Color3.fromRGB(0, 120, 215), Stroke = Color3.fromRGB(200, 200, 200)},
@@ -59,22 +68,22 @@ function Library:SetTheme(themeName)
     end
 end
 
-function Library:ToggleRainbow(bool)
-    RainbowEnabled = bool
-end
+--RAINBOW CONTROL
+function Library:ToggleRainbow(bool) RainbowEnabled = bool end
+function Library:SetRainbowType(val) RainbowType = val end
 
 function Library:CreateWindow(Config)
     local Window = {}
     local Title = Config.Title or "M0dzn UI"
-    local Keybind = Config.Keybind -- Can be nil, defaults in settings
+    local Keybind = Config.Keybind 
 
     local ScreenGui = Instance.new("ScreenGui")
-    ScreenGui.Name = "M0dznLib_V3"
+    ScreenGui.Name = "M0dznLib_V3.4"
     ScreenGui.Parent = CoreGui
     if syn and syn.protect_gui then syn.protect_gui(ScreenGui) elseif gethui then ScreenGui.Parent = gethui() end
 
     local MainFrame = Instance.new("Frame")
-    MainFrame.Size = UDim2.new(0, 0, 0, 0)
+    MainFrame.Size = UDim2.new(0, 0, 0, 0) -- Opening Anim
     MainFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
     MainFrame.AnchorPoint = Vector2.new(0.5, 0.5)
     MainFrame.ClipsDescendants = true
@@ -95,12 +104,86 @@ function Library:CreateWindow(Config)
     Stroke.Parent = MainFrame
     AddToRegistry(Stroke, "Color", "Stroke")
 
+    local Gradient = Instance.new("UIGradient")
+    Gradient.Parent = Stroke
+    Gradient.Enabled = false
+
+    --RAINBOW TYPES LOGIC
     task.spawn(function()
+        local rot = 0
         while ScreenGui.Parent do
             if RainbowEnabled then
-                local hue = tick() % 5 / 5
-                Stroke.Color = Color3.fromHSV(hue, 1, 1)
+                local t = tick()
+                
+                if RainbowType == "Linear Gradient (Solid Rainbow)" then
+                    Gradient.Enabled = true
+                    Gradient.Rotation = 0
+                    Gradient.Color = ColorSequence.new({
+                        ColorSequenceKeypoint.new(0, Color3.fromRGB(255,0,0)), 
+                        ColorSequenceKeypoint.new(0.2, Color3.fromRGB(255,255,0)),
+                        ColorSequenceKeypoint.new(0.4, Color3.fromRGB(0,255,0)), 
+                        ColorSequenceKeypoint.new(0.6, Color3.fromRGB(0,255,255)),
+                        ColorSequenceKeypoint.new(0.8, Color3.fromRGB(0,0,255)), 
+                        ColorSequenceKeypoint.new(1, Color3.fromRGB(255,0,255))
+                    })
+                    Stroke.Color = Color3.new(1,1,1) -- Required for gradient
+
+                elseif RainbowType == "Animated/Cycling Rainbow" then
+                    Gradient.Enabled = false
+                    Stroke.Color = Color3.fromHSV(t % 5 / 5, 1, 1)
+
+                elseif RainbowType == "Smooth Fading Gradient" then
+                    Gradient.Enabled = true
+                    rot = rot + 2
+                    Gradient.Rotation = rot
+                    Gradient.Color = ColorSequence.new({
+                        ColorSequenceKeypoint.new(0, Color3.fromRGB(255,0,0)), 
+                        ColorSequenceKeypoint.new(0.5, Color3.fromRGB(0,255,255)), 
+                        ColorSequenceKeypoint.new(1, Color3.fromRGB(255,0,0))
+                    })
+                    Stroke.Color = Color3.new(1,1,1)
+
+                elseif RainbowType == "Step/Band Rainbow" then
+                    Gradient.Enabled = false
+                    local step = math.floor((t % 2) * 4) / 4 -- 4 steps
+                    Stroke.Color = Color3.fromHSV(step, 1, 1)
+
+                elseif RainbowType == "Rainbow Pulse" then
+                    Gradient.Enabled = false
+                    local pulse = (math.sin(t * 3) + 1) / 2
+                    Stroke.Color = Color3.fromHSV(t % 5 / 5, pulse, 1)
+
+                elseif RainbowType == "Radial Rainbow" then
+                    -- Simulating Radial via rotating 2-split
+                    Gradient.Enabled = true
+                    rot = rot + 5
+                    Gradient.Rotation = rot
+                    Gradient.Color = ColorSequence.new({
+                        ColorSequenceKeypoint.new(0, Color3.fromRGB(255,0,255)), 
+                        ColorSequenceKeypoint.new(0.5, Color3.fromRGB(0,255,0)), 
+                        ColorSequenceKeypoint.new(1, Color3.fromRGB(255,0,255))
+                    })
+                    Stroke.Color = Color3.new(1,1,1)
+
+                elseif RainbowType == "Neon/Glowing Rainbow" then
+                    Gradient.Enabled = false
+                    -- High brightness perception simulation
+                    Stroke.Color = Color3.fromHSV(t % 2 / 2, 0.8, 1) 
+
+                elseif RainbowType == "Pastel Rainbow" then
+                    Gradient.Enabled = false
+                    Stroke.Color = Color3.fromHSV(t % 5 / 5, 0.4, 1) -- Low Saturation
+
+                elseif RainbowType == "Vertical/Horizontal Fade" then
+                    Gradient.Enabled = true
+                    Gradient.Rotation = 90
+                    local c = Color3.fromHSV(t % 5/5, 1, 1)
+                    local c2 = Color3.fromHSV((t+1) % 5/5, 1, 1)
+                    Gradient.Color = ColorSequence.new(c, c2)
+                    Stroke.Color = Color3.new(1,1,1)
+                end
             else
+                Gradient.Enabled = false
                 Stroke.Color = CurrentTheme.Stroke
             end
             RunService.RenderStepped:Wait()
@@ -138,7 +221,7 @@ function Library:CreateWindow(Config)
     Content.Parent = MainFrame
 
     local TabContainer = Instance.new("ScrollingFrame")
-    TabContainer.Size = UDim2.new(0, 140, 1, 0)
+    TabContainer.Size = UDim2.new(0, 140, 0.85, 0) -- Adjusted for Profile
     TabContainer.BackgroundTransparency = 1
     TabContainer.ScrollBarThickness = 0
     TabContainer.Parent = Content
@@ -146,6 +229,44 @@ function Library:CreateWindow(Config)
     TabList.Padding = UDim.new(0, 5)
     TabList.SortOrder = Enum.SortOrder.LayoutOrder
     TabList.Parent = TabContainer
+
+    --PROFILE DISPLAY (Bottom Left)
+    local ProfileFrame = Instance.new("Frame")
+    ProfileFrame.Size = UDim2.new(0, 140, 0, 35)
+    ProfileFrame.Position = UDim2.new(0, 0, 1, -35)
+    ProfileFrame.BackgroundTransparency = 1
+    ProfileFrame.Parent = Content
+    
+    local Avatar = Instance.new("ImageLabel")
+    Avatar.Size = UDim2.new(0, 30, 0, 30)
+    Avatar.Position = UDim2.new(0, 0, 0.5, -15)
+    Avatar.BackgroundColor3 = Color3.fromRGB(20,20,20)
+    Avatar.Image = Players:GetUserThumbnailAsync(LocalPlayer.UserId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size48x48)
+    Avatar.Parent = ProfileFrame
+    Instance.new("UICorner", Avatar).CornerRadius = UDim.new(1,0)
+    
+    local DispName = Instance.new("TextLabel")
+    DispName.Text = LocalPlayer.DisplayName
+    DispName.Size = UDim2.new(1, -35, 0, 15)
+    DispName.Position = UDim2.new(0, 35, 0, 2)
+    DispName.BackgroundTransparency = 1
+    DispName.Font = Enum.Font.GothamBold
+    DispName.TextSize = 12
+    DispName.TextXAlignment = Enum.TextXAlignment.Left
+    DispName.Parent = ProfileFrame
+    AddToRegistry(DispName, "TextColor3", "Text")
+    
+    local UsrName = Instance.new("TextLabel")
+    UsrName.Text = "@"..LocalPlayer.Name
+    UsrName.Size = UDim2.new(1, -35, 0, 15)
+    UsrName.Position = UDim2.new(0, 35, 0, 16)
+    UsrName.BackgroundTransparency = 1
+    UsrName.Font = Enum.Font.Gotham
+    UsrName.TextSize = 11
+    UsrName.TextTransparency = 0.4
+    UsrName.TextXAlignment = Enum.TextXAlignment.Left
+    UsrName.Parent = ProfileFrame
+    AddToRegistry(UsrName, "TextColor3", "Text")
 
     local Line = Instance.new("Frame")
     Line.Size = UDim2.new(0, 1, 1, 0)
@@ -161,6 +282,7 @@ function Library:CreateWindow(Config)
 
     Tween(MainFrame, {Size = UDim2.new(0, 600, 0, 375)}, 0.6)
 
+    --Dragging
     local dragging, dragInput, dragStart, startPos
     Topbar.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 then
@@ -366,7 +488,9 @@ function Library:CreateWindow(Config)
             Instance.new("UICorner", Dot).CornerRadius = UDim.new(1,0)
 
             Btn.MouseButton1Click:Connect(function()
-                Enabled = not Enabled; PlaySound(Sounds.Toggle); callback(Enabled)
+                Enabled = not Enabled; 
+                if Enabled then PlaySound(Sounds.ToggleOn) else PlaySound(Sounds.ToggleOff) end
+                callback(Enabled)
                 Tween(Switch, {BackgroundColor3 = Enabled and CurrentTheme.Accent or Color3.fromRGB(60,60,60)})
                 Tween(Dot, {Position = Enabled and UDim2.new(1,-18,0.5,-8) or UDim2.new(0,2,0.5,-8)})
             end)
@@ -390,7 +514,7 @@ function Library:CreateWindow(Config)
                 callback(Val)
             end
             local sliding
-            Bar.InputBegan:Connect(function(i) if i.UserInputType==Enum.UserInputType.MouseButton1 then sliding=true; Update(i) end end)
+            Bar.InputBegan:Connect(function(i) if i.UserInputType==Enum.UserInputType.MouseButton1 then sliding=true; PlaySound(Sounds.Slide); Update(i) end end)
             UserInputService.InputEnded:Connect(function(i) if i.UserInputType==Enum.UserInputType.MouseButton1 then sliding=false end end)
             UserInputService.InputChanged:Connect(function(i) if sliding and i.UserInputType==Enum.UserInputType.MouseMovement then Update(i) end end)
         end
@@ -415,6 +539,7 @@ function Library:CreateWindow(Config)
                 local O = Instance.new("TextButton"); O.Size = UDim2.new(1,0,0,30); O.Text = opt; O.TextColor3 = Color3.fromRGB(150,150,150); O.Font = Enum.Font.Gotham; O.TextSize = 13; O.BackgroundTransparency = 1; O.Parent = Container
                 O.MouseButton1Click:Connect(function()
                     Dropped = false; Lbl.Text = text..": "..opt; callback(opt)
+                    PlaySound(Sounds.Click)
                     Tween(Container, {Size = UDim2.new(1,0,0,0)}, 0.2); Tween(Icon, {Rotation = 0}, 0.2)
                     task.wait(0.2); Container.Visible = false
                 end)
@@ -422,6 +547,7 @@ function Library:CreateWindow(Config)
 
             Btn.MouseButton1Click:Connect(function()
                 Dropped = not Dropped
+                PlaySound(Sounds.Click)
                 if Dropped then
                     Container.Visible = true
                     Tween(Container, {Size = UDim2.new(1,0,0, #options*30)}, 0.3)
@@ -433,41 +559,61 @@ function Library:CreateWindow(Config)
                 end
             end)
         end
+        -- DO NOT CHANGE ANYTHING IN THIS SOURCE
+        --SETTINGS TAB LAYOUT
+        if name == "Settings" then
+            TabBtn.LayoutOrder = 99999
+        end
+
         return Elements
     end
 
-    --force to have setting tab if you done want this delete it (not recommend)
-    -- This runs automatically for every script using this library.
+    --SETTINGS TAB
     local Settings = Window:Tab("Settings")
     
     Settings:Section("Customization")
     
-    -- 1. Rainbow Edge
+    --Rainbow Edge
     Settings:Toggle("Rainbow Edge", false, function(v) 
         Library:ToggleRainbow(v) 
     end)
+
+    --Rainbow Types
+    Settings:Dropdown("Rainbow Type", {
+        "Linear Gradient (Solid Rainbow)",
+        "Animated/Cycling Rainbow",
+        "Smooth Fading Gradient",
+        "Step/Band Rainbow",
+        "Rainbow Pulse",
+        "Radial Rainbow",
+        "Neon/Glowing Rainbow",
+        "Pastel Rainbow",
+        "Vertical/Horizontal Fade"
+    }, function(val)
+        Library:SetRainbowType(val)
+    end)
     
-    -- 2. Theme
+    --Theme
     Settings:Dropdown("Theme", {"Dark", "White", "Purple", "Blue", "Red", "Yellow", "Green"}, function(v) 
         Library:SetTheme(v) 
     end)
     
-    -- 3. Background
+    --Background
     Settings:Textbox("Background ID", "Paste Image ID...", function(v) 
         Window:SetBg(v) 
     end)
     
-    -- 4. Keybind
+    --Keybind
     Settings:Keybind("Menu Keybind", Keybind or Enum.KeyCode.M, function(v) 
         Window:SetKeybind(v) 
     end)
     
-    -- 5. SFX
+    --SFX
     Settings:Toggle("UI SFX", true, function(v) 
         SFXEnabled = v 
     end)
     
-    -- 6. Destroy
+    --Destroy
     Settings:Button("Destroy UI", function() 
         Window:Destroy() 
     end)
