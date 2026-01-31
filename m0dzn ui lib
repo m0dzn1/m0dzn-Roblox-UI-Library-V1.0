@@ -1,9 +1,3 @@
---[[ 
-    M0DZN MODERN UI LIBRARY (V3.1 Fixed)
-    * Fixed: Notification no longer yields thread
-    * Added: Keybind Element
-]]
-
 local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
