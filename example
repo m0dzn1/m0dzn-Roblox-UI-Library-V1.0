@@ -1,105 +1,85 @@
---[[ 
-    V15 UI LIBRARY - FULL FEATURE SHOWCASE
-    This script demonstrates every element available in the V15 Library.
-]]
+=local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/m0dzn1/m0dzn-ui-lib-test/refs/heads/main/m0dzn%20ui%20lib"))()
 
---------------------------------------------------------------------------------
---// 1. LOAD THE LIBRARY
---------------------------------------------------------------------------------
--- You can replace this part with the actual V15 Library code if not using loadstring
-local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/m0dzn1/m0dzn-ui-lib-test/refs/heads/main/m0dzn%20ui%20lib"))() 
--- ^ NOTE: Since I cannot upload to GitHub for you, you must PASTE THE V15 LIBRARY CODE ABOVE THIS LINE instead of using loadstring if you haven't uploaded it yet.
--- If you are using the script I gave you in the previous message, just paste that BIG block of code first, then paste this below it.
-
--- For this example to work without you uploading anything, I will paste the V15 Library minified here internally:
-if not Library then
-    -- PASTE THE V15 LIBRARY CODE HERE IF LOADSTRING FAILS
-    warn("Library not loaded! Please paste the V15 Library code above this script.")
-    return
+-- Security check to make sure it loaded
+if not Library then 
+    warn("Failed to load library! Check your GitHub raw link.")
+    return 
 end
 
---------------------------------------------------------------------------------
---// 2. CREATE WINDOW
---------------------------------------------------------------------------------
+-- 2. Create the Window
 local Window = Library:CreateWindow({
-    Title = "m0dzn UI Lib Test",
-    Keybind = Enum.KeyCode.RightControl
+    Title = "M0dzn Premium Script",
+    Keybind = Enum.KeyCode.M -- Set default keybind to 'M' (User can change later)
 })
 
---------------------------------------------------------------------------------
---// 3. TAB 1: MAIN ELEMENTS
---------------------------------------------------------------------------------
-local MainTab = Window:Tab("Main Elements")
+-- 3. Create Tabs
+local MainTab = Window:Tab("Main")
+local VisualsTab = Window:Tab("Visuals")
+local SettingsTab = Window:Tab("Settings")
 
-MainTab:Section("Basic Interactions")
+--// MAIN TAB
+MainTab:Section("Character")
 
-MainTab:Button("Print Hello", function()
-    print("Hello World!")
-    Window:Notification("Hello printed to console!")
+MainTab:Toggle("God Mode", false, function(state)
+    -- This prints to the console (F9) so you know it works
+    print("God Mode is now:", state)
+    Window:Notification("God Mode: " .. tostring(state))
 end)
-
-MainTab:Toggle("Enable Feature", false, function(state)
-    print("Toggle State:", state)
-    Window:Notification("Feature is now: " .. (state and "ON" or "OFF"))
-end)
-
-MainTab:Section("Values & Inputs")
 
 MainTab:Slider("WalkSpeed", 16, 200, 16, function(value)
-    print("Slider Value:", value)
     if game.Players.LocalPlayer.Character then
         game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = value
     end
 end)
 
-MainTab:Textbox("Enter Name", "Type here...", function(text)
-    print("User typed:", text)
-    Window:Notification("You typed: " .. text)
+MainTab:Button("Reset Character", function()
+    game.Players.LocalPlayer.Character:BreakJoints()
+    Window:Notification("Character Reset!")
 end)
 
---------------------------------------------------------------------------------
---// 4. TAB 2: ADVANCED & LISTS
---------------------------------------------------------------------------------
-local ListTab = Window:Tab("Advanced")
+--// VISUALS TAB
+VisualsTab:Section("ESP Settings")
 
-ListTab:Section("Dropdowns")
-
-ListTab:Dropdown("Select Weapon", {"Sword", "Bow", "Gun", "Knife"}, function(selected)
-    print("Weapon Selected:", selected)
-    Window:Notification("Equipped: " .. selected)
+VisualsTab:Toggle("Enable ESP", false, function(v)
+    print("ESP Enabled:", v)
 end)
 
-ListTab:Dropdown("Select Theme", {"Dark", "White", "Purple", "Blue", "Red", "Yellow", "Green"}, function(theme)
-    Library:SetTheme(theme) -- V15 Native Theme Changer
+VisualsTab:Dropdown("ESP Color", {"Red", "Green", "Blue"}, function(selected)
+    print("Selected Color:", selected)
 end)
 
-ListTab:Section("Misc Features")
+--// SETTINGS TAB (The features you requested)
+SettingsTab:Section("Interface")
 
-ListTab:Toggle("Rainbow UI Mode", false, function(state)
-    Library:ToggleRainbow(state) -- V15 Native Rainbow Mode
+-- Theme Changer
+SettingsTab:Dropdown("Select Theme", {"Dark", "White", "Purple", "Blue", "Red", "Yellow", "Green"}, function(theme)
+    Library:SetTheme(theme)
 end)
 
-ListTab:Button("Test Notification", function()
-    Window:Notification("This is a test notification!")
+-- Rainbow Edge Toggle
+SettingsTab:Toggle("Rainbow Edge", false, function(state)
+    Library:ToggleRainbow(state)
 end)
 
---------------------------------------------------------------------------------
---// 5. TAB 3: SETTINGS
---------------------------------------------------------------------------------
-local SettingsTab = Window:Tab("Settings")
-
-SettingsTab:Section("Credits")
-SettingsTab:Button("Credit: m0dzn", function() end)
-SettingsTab:Button("Library: V15", function() end)
-
-SettingsTab:Section("Configuration")
-
-SettingsTab:Textbox("Background Image ID", "rbxassetid://...", function(id)
+-- Background Image Changer
+SettingsTab:Textbox("Background Image ID", "Paste ID here...", function(id)
     Window:SetBg(id)
 end)
 
-SettingsTab:Button("Destroy Interface", function()
+-- Keybind Changer
+SettingsTab:Button("Change Keybind (Click & Press Key)", function()
+    Window:Notification("Press any key to set bind...")
+    local input = game:GetService("UserInputService").InputBegan:Wait()
+    if input.KeyCode.Name ~= "Unknown" then
+        Window:SetKeybind(input.KeyCode)
+        Window:Notification("Keybind set to: " .. input.KeyCode.Name)
+    end
+end)
+
+-- Destroy GUI
+SettingsTab:Button("Unload Script (Destroy UI)", function()
     Window:Destroy()
 end)
 
-Window:Notification("Example Script Loaded!")
+-- Final notification to show it loaded
+Window:Notification("Script Loaded Successfully!")
