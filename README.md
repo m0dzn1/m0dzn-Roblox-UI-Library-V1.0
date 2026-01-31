@@ -150,7 +150,7 @@ Window:Notification("Script by M0dzn")
 ```
 
 ---
-
+##
 ## ⚙️ Settings & Customization
 
 The Settings Tab is built-in **automatically.** It allows the user to customize how the UI looks and feels without needing to change the script.
@@ -196,8 +196,8 @@ Completely removes the UI from the game screen.
 5. **Red**
 6. **Yellow**
 7. **Green**
-
-### 💾 Config System
+##
+## 💾 Config System
 The Config Tab is the save system. It allows users to save their settings (like Auto Farm toggle state, WalkSpeed value, etc.) so they don't have to set them up again every time they execute the script.
 **How it works:**
 Folder System: The script automatically creates a folder in the workspace named after your Window.Title. inside that, it creates a Config folder.
