@@ -1,56 +1,30 @@
--- 1. Load Lib
+-- LOAD THE LIBRARY
 local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/m0dzn1/m0dzn-ui-lib-test/refs/heads/main/m0dzn%20ui%20lib"))()
 
-if not Library then return end
-
--- 2. Make Window
+-- CREATE THE WINDOW
 local Window = Library:CreateWindow({
-    Title = "test hub", -- short title
-    Keybind = Enum.KeyCode.M
+    Title = "TEST HUB",
+    Keybind = Enum.KeyCode.RightControl
 })
 
--- 3. Tabs (Settings is auto-added at end)
-local Main = Window:Tab("main")
-local Fun = Window:Tab("fun")
+-- SET CONFIG FOLDER
+Window:SetFolder("TEST HUB") --Name of config folder
 
---// MAIN TAB
-Main:Section("movement")
+-- EXAMPLE TAB
+local MainTab = Window:Tab("Main")
 
-Main:Slider("speed", 16, 300, 16, function(v)
-    pcall(function()
-        game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = v
-    end)
+MainTab:Section("Welcome")
+
+MainTab:Button("Test Button", function()
+    print("Button Clicked!")
 end)
 
-Main:Slider("jump", 50, 400, 50, function(v)
-    pcall(function()
-        game.Players.LocalPlayer.Character.Humanoid.JumpPower = v
-    end)
+MainTab:Toggle("Test Toggle", false, function(Value)
+    print("Toggle is now:", Value)
 end)
 
-Main:Section("char")
-
-Main:Button("die", function() -- lazy for "Reset Character"
-    game.Players.LocalPlayer.Character:BreakJoints()
-    Window:Notification("u died")
+MainTab:Slider("WalkSpeed", 16, 100, 16, function(Value)
+    if game.Players.LocalPlayer.Character then
+        game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = Value
+    end
 end)
-
-Main:Toggle("inf jump", false, function(v)
-    -- infinite jump logic here
-    print("inf jump:", v)
-end)
-
---// FUN TAB
-Fun:Section("visuals")
-
-Fun:Toggle("esp", false, function(v)
-    print("esp:", v)
-end)
-
-Fun:Button("print hi", function()
-    print("hi")
-    Window:Notification("hi")
-end)
-
--- Loaded
-Window:Notification("loaded.")
