@@ -1,32 +1,105 @@
--- 1. Paste the Library Code above here (or load it)
--- local Library = loadstring(game:HttpGet("..."))() -- if you upload it
--- OR just paste the big code block above and assign it to "local Library"
+--[[ 
+    V15 UI LIBRARY - FULL FEATURE SHOWCASE
+    This script demonstrates every element available in the V15 Library.
+]]
 
--- 2. Create the Window
+--------------------------------------------------------------------------------
+--// 1. LOAD THE LIBRARY
+--------------------------------------------------------------------------------
+-- You can replace this part with the actual V15 Library code if not using loadstring
+local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/Pastefy/V15-UI-Lib/main/source.lua"))() 
+-- ^ NOTE: Since I cannot upload to GitHub for you, you must PASTE THE V15 LIBRARY CODE ABOVE THIS LINE instead of using loadstring if you haven't uploaded it yet.
+-- If you are using the script I gave you in the previous message, just paste that BIG block of code first, then paste this below it.
+
+-- For this example to work without you uploading anything, I will paste the V15 Library minified here internally:
+if not Library then
+    -- PASTE THE V15 LIBRARY CODE HERE IF LOADSTRING FAILS
+    warn("Library not loaded! Please paste the V15 Library code above this script.")
+    return
+end
+
+--------------------------------------------------------------------------------
+--// 2. CREATE WINDOW
+--------------------------------------------------------------------------------
 local Window = Library:CreateWindow({
-    Title = "My Custom Script",
-    Keybind = Enum.KeyCode.M -- Default keybind
+    Title = "m0dzn UI Lib Test",
+    Keybind = Enum.KeyCode.RightControl
 })
 
--- 3. Create Tabs
-local MainTab = Window:Tab("Main")
-local SettingsTab = Window:Tab("Settings")
+--------------------------------------------------------------------------------
+--// 3. TAB 1: MAIN ELEMENTS
+--------------------------------------------------------------------------------
+local MainTab = Window:Tab("Main Elements")
 
--- 4. Add Elements
-MainTab:Section("Player")
+MainTab:Section("Basic Interactions")
 
-MainTab:Toggle("God Mode", false, function(state)
-    print("God mode is:", state)
+MainTab:Button("Print Hello", function()
+    print("Hello World!")
+    Window:Notification("Hello printed to console!")
 end)
+
+MainTab:Toggle("Enable Feature", false, function(state)
+    print("Toggle State:", state)
+    Window:Notification("Feature is now: " .. (state and "ON" or "OFF"))
+end)
+
+MainTab:Section("Values & Inputs")
 
 MainTab:Slider("WalkSpeed", 16, 200, 16, function(value)
-    game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = value
+    print("Slider Value:", value)
+    if game.Players.LocalPlayer.Character then
+        game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = value
+    end
 end)
 
-SettingsTab:Dropdown("Theme", {"Dark", "White", "Purple", "Blue", "Red", "Green"}, function(selected)
-    Library:SetTheme(selected)
+MainTab:Textbox("Enter Name", "Type here...", function(text)
+    print("User typed:", text)
+    Window:Notification("You typed: " .. text)
 end)
 
-SettingsTab:Toggle("Rainbow Edge", false, function(state)
-    Library:ToggleRainbow(state)
+--------------------------------------------------------------------------------
+--// 4. TAB 2: ADVANCED & LISTS
+--------------------------------------------------------------------------------
+local ListTab = Window:Tab("Advanced")
+
+ListTab:Section("Dropdowns")
+
+ListTab:Dropdown("Select Weapon", {"Sword", "Bow", "Gun", "Knife"}, function(selected)
+    print("Weapon Selected:", selected)
+    Window:Notification("Equipped: " .. selected)
 end)
+
+ListTab:Dropdown("Select Theme", {"Dark", "White", "Purple", "Blue", "Red", "Yellow", "Green"}, function(theme)
+    Library:SetTheme(theme) -- V15 Native Theme Changer
+end)
+
+ListTab:Section("Misc Features")
+
+ListTab:Toggle("Rainbow UI Mode", false, function(state)
+    Library:ToggleRainbow(state) -- V15 Native Rainbow Mode
+end)
+
+ListTab:Button("Test Notification", function()
+    Window:Notification("This is a test notification!")
+end)
+
+--------------------------------------------------------------------------------
+--// 5. TAB 3: SETTINGS
+--------------------------------------------------------------------------------
+local SettingsTab = Window:Tab("Settings")
+
+SettingsTab:Section("Credits")
+SettingsTab:Button("Credit: m0dzn", function() end)
+SettingsTab:Button("Library: V15", function() end)
+
+SettingsTab:Section("Configuration")
+
+SettingsTab:Textbox("Background Image ID", "rbxassetid://...", function(id)
+    Window:SetBg(id)
+end)
+
+SettingsTab:Button("Destroy Interface", function()
+    Window:Destroy()
+end)
+
+Window:Notification("Example Script Loaded!")
