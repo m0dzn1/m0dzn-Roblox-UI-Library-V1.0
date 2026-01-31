@@ -2,27 +2,18 @@ local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/m0dzn
 
 if not Library then return end
 
+-- You only need to define Title and Default Keybind now
 local Window = Library:CreateWindow({
-    Title = "TEST",
-    Keybind = Enum.KeyCode.M --This is Clickgui Keybind
+    Title = "M0dzn Hub Premium",
+    Keybind = Enum.KeyCode.M -- You can change Clickgui keybind
 })
 
-local MainTab = Window:Tab("Main")
-local SettingsTab = Window:Tab("Settings")
+-- Just add your MAIN features. Settings is auto-added.
+local Main = Window:Tab("Main")
 
-MainTab:Section("Example")
-MainTab:Button("Click Me", function()
-    Window:Notification("I don't freeze the script anymore!")
+Main:Section("Player")
+Main:Button("WalkSpeed", function()
+    game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = 50
 end)
 
-SettingsTab:Section("Interface")
-
--- NEW KEYBIND ELEMENT
-SettingsTab:Keybind("Clickgui Keybind", Enum.KeyCode.M, function(newKey)
-    Window:SetKeybind(newKey)
-    Window:Notification("Keybind set to: " .. newKey.Name)
-end)
-
-SettingsTab:Button("Destroy UI", function()
-    Window:Destroy()
-end)
+Window:Notification("Script Loaded!")
