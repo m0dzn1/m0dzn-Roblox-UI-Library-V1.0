@@ -6,9 +6,9 @@ local SoundService = game:GetService("SoundService")
 
 local Library = {}
 local RainbowEnabled = false
+local SFXEnabled = true -- Default SFX On
 local Registry = {} 
 
---SFX
 local Sounds = {
     Hover = "rbxassetid://6895076327",
     Click = "rbxassetid://4510085601",
@@ -17,6 +17,7 @@ local Sounds = {
 }
 
 local function PlaySound(id)
+    if not SFXEnabled then return end -- Check if SFX is enabled
     task.spawn(function()
         local s = Instance.new("Sound")
         s.SoundId = id
@@ -27,7 +28,6 @@ local function PlaySound(id)
     end)
 end
 
---Theme: Dark ,White ,Purple ,Blue, Red, ,Yellow, Green
 local Themes = {
     Dark   = {Main = Color3.fromRGB(25, 25, 25), Top = Color3.fromRGB(35, 35, 35), Text = Color3.fromRGB(255, 255, 255), Accent = Color3.fromRGB(114, 137, 218), Stroke = Color3.fromRGB(60, 60, 60)},
     White  = {Main = Color3.fromRGB(240, 240, 240), Top = Color3.fromRGB(255, 255, 255), Text = Color3.fromRGB(25, 25, 25), Accent = Color3.fromRGB(0, 120, 215), Stroke = Color3.fromRGB(200, 200, 200)},
@@ -44,7 +44,6 @@ local function AddToRegistry(obj, prop, themeIndex)
     obj[prop] = CurrentTheme[themeIndex]
 end
 
---animation of gui
 local function Tween(obj, props, time)
     TweenService:Create(obj, TweenInfo.new(time or 0.3, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), props):Play()
 end
@@ -60,7 +59,6 @@ function Library:SetTheme(themeName)
     end
 end
 
---Rainbow Edge
 function Library:ToggleRainbow(bool)
     RainbowEnabled = bool
 end
@@ -68,8 +66,7 @@ end
 function Library:CreateWindow(Config)
     local Window = {}
     local Title = Config.Title or "M0dzn UI"
-    --// 4. Clickgui keybind: none
-    local Keybind = Config.Keybind 
+    local Keybind = Config.Keybind -- Can be nil, defaults in settings
 
     local ScreenGui = Instance.new("ScreenGui")
     ScreenGui.Name = "M0dznLib_V3"
@@ -85,7 +82,6 @@ function Library:CreateWindow(Config)
     Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 10)
     AddToRegistry(MainFrame, "BackgroundColor3", "Main")
 
-    --// 3. Background; image ID
     local BgImage = Instance.new("ImageLabel")
     BgImage.Size = UDim2.new(1, 0, 1, 0)
     BgImage.BackgroundTransparency = 1
@@ -99,7 +95,6 @@ function Library:CreateWindow(Config)
     Stroke.Parent = MainFrame
     AddToRegistry(Stroke, "Color", "Stroke")
 
-    --Rainbow Logic
     task.spawn(function()
         while ScreenGui.Parent do
             if RainbowEnabled then
@@ -166,7 +161,6 @@ function Library:CreateWindow(Config)
 
     Tween(MainFrame, {Size = UDim2.new(0, 600, 0, 375)}, 0.6)
 
-    --smooth drag
     local dragging, dragInput, dragStart, startPos
     Topbar.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 then
@@ -223,7 +217,6 @@ function Library:CreateWindow(Config)
         if tonumber(id) then BgImage.Image = "rbxassetid://"..id else BgImage.Image = id end
     end
     function Window:SetKeybind(key) Keybind = key end
-    --Destroy Gui
     function Window:Destroy() ScreenGui:Destroy() end
 
     local firstTab = true
@@ -442,6 +435,43 @@ function Library:CreateWindow(Config)
         end
         return Elements
     end
+
+    --force to have setting tab if you done want this delete it (not recommend)
+    -- This runs automatically for every script using this library.
+    local Settings = Window:Tab("Settings")
+    
+    Settings:Section("Customization")
+    
+    -- 1. Rainbow Edge
+    Settings:Toggle("Rainbow Edge", false, function(v) 
+        Library:ToggleRainbow(v) 
+    end)
+    
+    -- 2. Theme
+    Settings:Dropdown("Theme", {"Dark", "White", "Purple", "Blue", "Red", "Yellow", "Green"}, function(v) 
+        Library:SetTheme(v) 
+    end)
+    
+    -- 3. Background
+    Settings:Textbox("Background ID", "Paste Image ID...", function(v) 
+        Window:SetBg(v) 
+    end)
+    
+    -- 4. Keybind
+    Settings:Keybind("Menu Keybind", Keybind or Enum.KeyCode.M, function(v) 
+        Window:SetKeybind(v) 
+    end)
+    
+    -- 5. SFX
+    Settings:Toggle("UI SFX", true, function(v) 
+        SFXEnabled = v 
+    end)
+    
+    -- 6. Destroy
+    Settings:Button("Destroy UI", function() 
+        Window:Destroy() 
+    end)
+
     return Window
 end
 return Library
