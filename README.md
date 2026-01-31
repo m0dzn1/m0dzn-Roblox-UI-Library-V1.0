@@ -136,7 +136,7 @@ end)
 
 ## 🔔 Notifications
 
-Send alerts to the user at the bottom right corner.
+Send Warning or credit or anything to the user at the bottom right corner.
 
 ```lua
 Window:Notification("Config Saved!")
