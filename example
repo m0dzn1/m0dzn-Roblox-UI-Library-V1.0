@@ -1,4 +1,4 @@
-=local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/m0dzn1/m0dzn-ui-lib-test/refs/heads/main/m0dzn%20ui%20lib"))()
+local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/m0dzn1/m0dzn-ui-lib-test/refs/heads/main/m0dzn%20ui%20lib"))()
 
 -- Security check to make sure it loaded
 if not Library then 
