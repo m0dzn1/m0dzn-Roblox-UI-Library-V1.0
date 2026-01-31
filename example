@@ -5,7 +5,7 @@ if not Library then return end
 
 -- 2. Make Window
 local Window = Library:CreateWindow({
-    Title = "lazy hub", -- short title
+    Title = "test hub", -- short title
     Keybind = Enum.KeyCode.M
 })
 
