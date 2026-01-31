@@ -1,5 +1,5 @@
 -- LOAD THE LIBRARY
-local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/m0dzn1/m0dzn-ui-lib-test/refs/heads/main/m0dzn%20ui%20lib"))()
+local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/m0dzn1/m0dzn-ui-lib-test/refs/heads/main/m0dzn%20ui%20libb"))()
 
 -- CREATE THE WINDOW
 local Window = Library:CreateWindow({
