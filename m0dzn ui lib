@@ -9,14 +9,14 @@
 ]]
 
 print([[
-script l่oaded
-███╗   ███╗ ██████╗ ██████╗ ███████╗███╗   ██╗
-████╗ ████║██╔═████╗██╔══██╗╚══███╔╝████╗  ██║
-██╔████╔██║██║██╔██║██║  ██║  ███╔╝ ██╔██╗ ██║
-██║╚██╔╝██║████╔╝██║██║  ██║ ███╔╝  ██║╚██╗██║
-██║ ╚═╝ ██║╚██████╔╝██████╔╝███████╗██║ ╚████║
-╚═╝     ╚═╝ ╚═════╝ ╚═════╝ ╚══════╝╚═╝  ╚═══╝
-           M0DZN LIBRARY V1.0
+script loaded
+ ███╗   ███╗ ██████╗ ██████╗ ███████╗███╗   ██╗
+ ████╗ ████║██╔═████╗██╔══██╗╚══███╔╝████╗  ██║
+ ██╔████╔██║██║██╔██║██║  ██║  ███╔╝ ██╔██╗ ██║
+ ██║╚██╔╝██║████╔╝██║██║  ██║ ███╔╝  ██║╚██╗██║
+ ██║ ╚═╝ ██║╚██████╔╝██████╔╝███████╗██║ ╚████║
+ ╚═╝     ╚═╝ ╚═════╝ ╚═════╝ ╚══════╝╚═╝  ╚═══╝
+            M0DZN LIBRARY V1.0
 ]])
 
 local TweenService = game:GetService("TweenService")
@@ -35,16 +35,17 @@ local SFXEnabled = true
 local Registry = {} 
 local ConfigObjects = {} 
 
--- SFX
+-- SFX 
 local Sounds = {
-    Hover = "rbxassetid://6895076327",
-    Click = "rbxassetid://4510085601",
-    ToggleOn = "rbxassetid://6895076329",
-    ToggleOff = "rbxassetid://6895076300",
-    Slide = "rbxassetid://6895076290",
-    Notification = "rbxassetid://4590657391",
-    Back = "rbxassetid://6895076277",
-    Error = "rbxassetid://421058948"
+    Hover = "rbxassetid://12221966",
+    Click = "rbxassetid://12221967",
+    ToggleOn = "rbxassetid://12221967",
+    ToggleOff = "rbxassetid://12221967",
+    Slide = "rbxassetid://12221967",
+    Notification = "rbxassetid://12222030",
+    Back = "rbxassetid://12221967",
+    Error = "rbxassetid://12221967",
+    Tab = "rbxassetid://12221967" 
 }
 
 local function PlaySound(id)
@@ -52,7 +53,7 @@ local function PlaySound(id)
     task.spawn(function()
         local s = Instance.new("Sound")
         s.SoundId = id
-        s.Volume = 0.6
+        s.Volume = 1
         s.Parent = SoundService
         s:Play()
         game.Debris:AddItem(s, 2)
@@ -100,14 +101,14 @@ function Library:CreateWindow(Config)
     local Title = Config.Title or "M0dzn UI"
     local Keybind = Config.Keybind 
     
-    -- Config Folder
     Window.RootFolder = Title 
     Window.ConfigFolder = Title.."/Config"
     Window.CurrentConfig = ""
 
     local ScreenGui = Instance.new("ScreenGui")
-    ScreenGui.Name = "M0dznLib_V1.0"
+    ScreenGui.Name = "M0dznLib_V1.1"
     ScreenGui.Parent = CoreGui
+    ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling -- Important for Notifs
     if syn and syn.protect_gui then syn.protect_gui(ScreenGui) elseif gethui then ScreenGui.Parent = gethui() end
 
     local MainFrame = Instance.new("Frame")
@@ -264,9 +265,9 @@ function Library:CreateWindow(Config)
     function Window:Notification(text)
         task.spawn(function()
             PlaySound(Sounds.Notification)
-            local Notif = Instance.new("Frame"); Notif.Size = UDim2.new(0, 250, 0, 45); Notif.Position = UDim2.new(1, 20, 1, -60); Notif.Parent = ScreenGui; AddToRegistry(Notif, "BackgroundColor3", "Top"); Instance.new("UICorner", Notif).CornerRadius = UDim.new(0, 8)
+            local Notif = Instance.new("Frame"); Notif.ZIndex = 100; Notif.Size = UDim2.new(0, 250, 0, 45); Notif.Position = UDim2.new(1, 20, 1, -60); Notif.Parent = ScreenGui; AddToRegistry(Notif, "BackgroundColor3", "Top"); Instance.new("UICorner", Notif).CornerRadius = UDim.new(0, 8)
             local NStroke = Instance.new("UIStroke"); NStroke.Parent = Notif; AddToRegistry(NStroke, "Color", "Accent")
-            local NText = Instance.new("TextLabel"); NText.Text = text; NText.Size = UDim2.new(1,0,1,0); NText.BackgroundTransparency = 1; NText.Parent = Notif; NText.Font = Enum.Font.GothamBold; NText.TextSize = 14; AddToRegistry(NText, "TextColor3", "Text")
+            local NText = Instance.new("TextLabel"); NText.ZIndex = 101; NText.Text = text; NText.Size = UDim2.new(1,0,1,0); NText.BackgroundTransparency = 1; NText.Parent = Notif; NText.Font = Enum.Font.GothamBold; NText.TextSize = 14; AddToRegistry(NText, "TextColor3", "Text")
             Tween(Notif, {Position = UDim2.new(1, -270, 1, -60)}, 0.5); task.wait(3); Tween(Notif, {Position = UDim2.new(1, 20, 1, -60)}, 0.5); task.wait(0.5); Notif:Destroy()
         end)
     end
@@ -301,7 +302,7 @@ function Library:CreateWindow(Config)
         PageList:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function() Page.CanvasSize = UDim2.new(0,0,0, PageList.AbsoluteContentSize.Y + 10) end)
 
         TabBtn.MouseButton1Click:Connect(function()
-            PlaySound(Sounds.Click)
+            PlaySound(Sounds.Tab) -- PLAY TAB SOUND
             for _, v in pairs(PageContainer:GetChildren()) do v.Visible = false end
             for _, v in pairs(TabContainer:GetChildren()) do if v:IsA("TextButton") then Tween(v, {BackgroundTransparency = 1, TextColor3 = Color3.fromRGB(150,150,150)}) end end
             Page.Visible = true; Tween(TabBtn, {BackgroundTransparency = 0.9, TextColor3 = CurrentTheme.Text}); Tween(TabBtn, {BackgroundColor3 = CurrentTheme.Accent})
@@ -316,6 +317,41 @@ function Library:CreateWindow(Config)
 
         function Elements:Section(text)
             local S = Instance.new("TextLabel"); S.Text = text; S.Size = UDim2.new(1, 0, 0, 20); S.BackgroundTransparency = 1; S.Font = Enum.Font.GothamBold; S.TextSize = 12; S.TextXAlignment = Enum.TextXAlignment.Left; S.Parent = Page; AddToRegistry(S, "TextColor3", "Accent")
+        end
+
+        -- VALUE FUNCTION
+        function Elements:Value(text, value)
+            local ValFrame = Instance.new("Frame")
+            ValFrame.Size = UDim2.new(1,0,0,30)
+            ValFrame.BackgroundTransparency = 1
+            ValFrame.Parent = Page
+            
+            local NameLbl = Instance.new("TextLabel")
+            NameLbl.Text = text
+            NameLbl.Size = UDim2.new(0.5, 0, 1, 0)
+            NameLbl.Position = UDim2.new(0, 10, 0, 0)
+            NameLbl.TextXAlignment = Enum.TextXAlignment.Left
+            NameLbl.Font = Enum.Font.Gotham
+            NameLbl.TextSize = 14
+            NameLbl.BackgroundTransparency = 1
+            NameLbl.Parent = ValFrame
+            AddToRegistry(NameLbl, "TextColor3", "Text")
+            
+            local ValLbl = Instance.new("TextLabel")
+            ValLbl.Text = tostring(value)
+            ValLbl.Size = UDim2.new(0.5, -20, 1, 0)
+            ValLbl.Position = UDim2.new(0.5, 10, 0, 0)
+            ValLbl.TextXAlignment = Enum.TextXAlignment.Right
+            ValLbl.Font = Enum.Font.GothamBold
+            ValLbl.TextSize = 14
+            ValLbl.BackgroundTransparency = 1
+            ValLbl.Parent = ValFrame
+            AddToRegistry(ValLbl, "TextColor3", "Accent")
+
+            local function Update(newVal)
+                ValLbl.Text = tostring(newVal)
+            end
+            return {Update = Update}
         end
 
         function Elements:Keybind(text, default, callback)
@@ -434,7 +470,12 @@ function Library:CreateWindow(Config)
         end
         return Elements
     end
-
+    
+    --[[
+    a
+         DO NOT CHANGE CODE UNDER THIS
+    
+    ]]
     local ConfigTab = Window:Tab("Config")
     ConfigTab:Section("Manage Configs")
 
@@ -445,7 +486,6 @@ function Library:CreateWindow(Config)
     local Dropdown = ConfigTab:Dropdown("Select Config", {"None"}, function(val) Window.CurrentConfig = val end)
 
     local function RefreshConfigs()
-        -- Auto-create folders based on TITLE
         if not isfolder(Window.RootFolder) then makefolder(Window.RootFolder) end
         if not isfolder(Window.ConfigFolder) then makefolder(Window.ConfigFolder) end
         
