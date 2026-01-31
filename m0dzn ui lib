@@ -24,7 +24,7 @@ local RunService = game:GetService("RunService")
 local CoreGui = game:GetService("CoreGui")
 local SoundService = game:GetService("SoundService")
 local Players = game:GetService("Players")
-local HttpService = game:GetService("HttpService") -- Needed for JSON
+local HttpService = game:GetService("HttpService") 
 local LocalPlayer = Players.LocalPlayer
 
 local Library = {}
@@ -32,7 +32,7 @@ local RainbowEnabled = false
 local RainbowType = "Animated/Cycling Rainbow" 
 local SFXEnabled = true
 local Registry = {} 
-local ConfigObjects = {} -- Stores elements to update them on Load
+local ConfigObjects = {} 
 
 -- SFX
 local Sounds = {
@@ -99,9 +99,9 @@ function Library:CreateWindow(Config)
     local Title = Config.Title or "M0dzn UI"
     local Keybind = Config.Keybind 
     
-    -- Config System Variables
-    Window.RootFolder = Title -- The Main Folder (e.g. "TEST HUB")
-    Window.ConfigFolder = Title.."/Config" -- The Sub Folder (e.g. "TEST HUB/Config")
+    -- Config Folder
+    Window.RootFolder = Title 
+    Window.ConfigFolder = Title.."/Config"
     Window.CurrentConfig = ""
 
     local ScreenGui = Instance.new("ScreenGui")
@@ -135,7 +135,6 @@ function Library:CreateWindow(Config)
     Gradient.Parent = Stroke
     Gradient.Enabled = false
 
-    -- RAINBOW LOOP
     task.spawn(function()
         local rot = 0
         while ScreenGui.Parent do
@@ -212,7 +211,6 @@ function Library:CreateWindow(Config)
     TabList.SortOrder = Enum.SortOrder.LayoutOrder
     TabList.Parent = TabContainer
 
-    -- PROFILE (Bottom Left)
     local ProfileFrame = Instance.new("Frame")
     ProfileFrame.Size = UDim2.new(0, 140, 0, 35)
     ProfileFrame.Position = UDim2.new(0, 0, 1, -35)
@@ -244,7 +242,6 @@ function Library:CreateWindow(Config)
 
     Tween(MainFrame, {Size = UDim2.new(0, 600, 0, 375)}, 0.6)
 
-    -- DRAGGING & KEYBIND
     local dragging, dragInput, dragStart, startPos
     Topbar.InputBegan:Connect(function(input) if input.UserInputType == Enum.UserInputType.MouseButton1 then dragging = true; dragStart = input.Position; startPos = MainFrame.Position end end)
     Topbar.InputChanged:Connect(function(input) if input.UserInputType == Enum.UserInputType.MouseMovement then dragInput = input end end)
@@ -276,12 +273,6 @@ function Library:CreateWindow(Config)
     function Window:SetBg(id) if tonumber(id) then BgImage.Image = "rbxassetid://"..id else BgImage.Image = id end end
     function Window:SetKeybind(key) Keybind = key end
     function Window:Destroy() ScreenGui:Destroy() end
-    
-    -- CUSTOM SET FOLDER FUNCTION
-    function Window:SetFolder(name) 
-        Window.RootFolder = name
-        Window.ConfigFolder = name.."/Config"
-    end
 
     local firstTab = true
     function Window:Tab(name)
@@ -317,7 +308,6 @@ function Library:CreateWindow(Config)
 
         if firstTab then firstTab = false; Page.Visible = true; TabBtn.TextColor3 = CurrentTheme.Text; TabBtn.BackgroundTransparency = 0.9; TabBtn.BackgroundColor3 = CurrentTheme.Accent end
 
-        -- Force Orders
         if name == "Config" then TabBtn.LayoutOrder = 99998 end
         if name == "Settings" then TabBtn.LayoutOrder = 99999 end
 
@@ -337,8 +327,6 @@ function Library:CreateWindow(Config)
                 PlaySound(Sounds.Click); KeyLabel.Text = "..."; local input = UserInputService.InputBegan:Wait()
                 if input.KeyCode.Name ~= "Unknown" then Key = input.KeyCode; KeyLabel.Text = Key.Name; ConfigObjects[text] = {Type = "Keybind", Value = Key.Name}; callback(Key) else KeyLabel.Text = Key.Name end
             end)
-            
-            -- Save/Set Function
             ConfigObjects[text] = {Type = "Keybind", Value = Key.Name, Set = function(val) Key = Enum.KeyCode[val] or Key; KeyLabel.Text = Key.Name; callback(Key) end}
         end
 
@@ -363,7 +351,6 @@ function Library:CreateWindow(Config)
             end
 
             Btn.MouseButton1Click:Connect(function() Enabled = not Enabled; Update() end)
-            -- Save/Set
             ConfigObjects[text] = {Type = "Toggle", Value = Enabled, Set = function(val) Enabled = val; Tween(Switch, {BackgroundColor3 = Enabled and CurrentTheme.Accent or Color3.fromRGB(60,60,60)}); Tween(Dot, {Position = Enabled and UDim2.new(1,-18,0.5,-8) or UDim2.new(0,2,0.5,-8)}); callback(Enabled) end}
         end
 
@@ -394,8 +381,6 @@ function Library:CreateWindow(Config)
             Bar.InputBegan:Connect(function(i) if i.UserInputType==Enum.UserInputType.MouseButton1 then sliding=true; PlaySound(Sounds.Slide); Drag(i) end end)
             UserInputService.InputEnded:Connect(function(i) if i.UserInputType==Enum.UserInputType.MouseButton1 then sliding=false end end)
             UserInputService.InputChanged:Connect(function(i) if sliding and i.UserInputType==Enum.UserInputType.MouseMovement then Drag(i) end end)
-            
-            -- Save/Set
             ConfigObjects[text] = {Type = "Slider", Value = Val, Set = function(val) Update(val) end}
         end
 
@@ -427,7 +412,6 @@ function Library:CreateWindow(Config)
                 Tween(Container, {Size = UDim2.new(1,0,0,0)}, 0.2); Tween(Icon, {Rotation = 0}, 0.2); task.wait(0.2); Container.Visible = false
             end
             
-            -- Refresh options function (for Config tab mainly)
             local function RefreshOptions(newOpts)
                 for _,v in pairs(Container:GetChildren()) do if v:IsA("TextButton") then v:Destroy() end end
                 for _, opt in pairs(newOpts) do
@@ -445,17 +429,11 @@ function Library:CreateWindow(Config)
             end)
 
             ConfigObjects[text] = {Type = "Dropdown", Value = options[1], Set = function(val) Select(val) end, Refresh = RefreshOptions}
-            return {Refresh = RefreshOptions} -- Return refresh for config dropdown
+            return {Refresh = RefreshOptions} 
         end
         return Elements
     end
-    
-    ==[[
 
-        DO NO CHANGE ANY CODE UNDER THIS
-
-    ]]
-    -- CONFIG TAB
     local ConfigTab = Window:Tab("Config")
     ConfigTab:Section("Manage Configs")
 
@@ -466,6 +444,7 @@ function Library:CreateWindow(Config)
     local Dropdown = ConfigTab:Dropdown("Select Config", {"None"}, function(val) Window.CurrentConfig = val end)
 
     local function RefreshConfigs()
+        -- Auto-create folders based on TITLE
         if not isfolder(Window.RootFolder) then makefolder(Window.RootFolder) end
         if not isfolder(Window.ConfigFolder) then makefolder(Window.ConfigFolder) end
         
@@ -481,7 +460,6 @@ function Library:CreateWindow(Config)
 
     ConfigTab:Button("Save Config", function()
         if ConfigName == "" then Window:Notification("Enter a name!"); return end
-        -- Ensure Folders Exist
         if not isfolder(Window.RootFolder) then makefolder(Window.RootFolder) end
         if not isfolder(Window.ConfigFolder) then makefolder(Window.ConfigFolder) end
         
@@ -503,7 +481,7 @@ function Library:CreateWindow(Config)
             local data = HttpService:JSONDecode(readfile(path))
             for name, val in pairs(data) do
                 if ConfigObjects[name] then
-                    ConfigObjects[name].Set(val) -- Updates visual and runs callback
+                    ConfigObjects[name].Set(val)
                 end
             end
             Window:Notification("Loaded: "..Window.CurrentConfig)
@@ -512,7 +490,6 @@ function Library:CreateWindow(Config)
         end
     end)
 
-    -- SETTINGS TAB
     local Settings = Window:Tab("Settings")
     Settings:Section("Customization")
     Settings:Toggle("Rainbow Edge", false, function(v) Library:ToggleRainbow(v) end)
@@ -523,7 +500,7 @@ function Library:CreateWindow(Config)
     Settings:Toggle("UI SFX", true, function(v) SFXEnabled = v end)
     Settings:Button("Destroy UI", function() Window:Destroy() end)
 
-    RefreshConfigs() -- Auto load config list on start
+    RefreshConfigs()
     return Window
 end
 return Library
