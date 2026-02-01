@@ -12,7 +12,7 @@ A sleek, modern, and fully customizable UI Library for Roblox. Features a built-
 Copy the script below and paste it into your executor or anything
 
 ```lua
-local Library = loadstring(game:HttpGet("[https://raw.githubusercontent.com/m0dzn1/m0dzn-ui-lib-test/refs/heads/main/m0dzn%20ui%20lib](https://raw.githubusercontent.com/m0dzn1/m0dzn-ui-lib-test/refs/heads/main/m0dzn%20ui%20lib)"))()
+local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/m0dzn1/m0dzn-Roblox-UI-Library-V1.0/refs/heads/main/m0dzn%20ui%20lib"))()
 
 ```
 
