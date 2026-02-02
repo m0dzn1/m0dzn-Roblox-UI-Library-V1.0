@@ -5,7 +5,7 @@
 ██║╚██╔╝██║████╔╝██║██║  ██║ ███╔╝  ██║╚██╗██║
 ██║ ╚═╝ ██║╚██████╔╝██████╔╝███████╗██║ ╚████║
 ╚═╝     ╚═╝ ╚═════╝ ╚═════╝ ╚══════╝╚═╝  ╚═══╝
-           M0DZN LIBRARY V1.0
+           M0DZN LIBRARY V1.0 (FIXED)
 ]]
 
 print([[
@@ -32,7 +32,7 @@ local Library = {}
 local RainbowEnabled = false
 local RainbowType = "Animated/Cycling Rainbow" 
 local SFXEnabled = true
-local MenuKeybind = Enum.KeyCode.RightControl -- Default Menu Key
+local MenuKeybind = Enum.KeyCode.RightControl
 local Registry = {} 
 local ConfigObjects = {} 
 
@@ -119,7 +119,7 @@ function Library:SetTheme(themeName)
 end
 
 local function AddToRegistry(obj, prop, themeKey)
-    Registry[obj] = themeKey 
+    Registry[obj] = themeKey
     if CurrentTheme[themeKey] then
         obj[prop] = CurrentTheme[themeKey]
     end
@@ -128,6 +128,7 @@ end
 function Library:CreateWindow(Config)
     local Window = {}
     Window.ConfigFolder = Config.ConfigFolder or "M0DZN_Configs"
+    Window.CurrentConfig = "None"
     
     local MainGui = Instance.new("ScreenGui")
     MainGui.Name = "M0DZN_Lib"
@@ -269,6 +270,135 @@ function Library:CreateWindow(Config)
                 if callback then callback(Enabled) end
             end)
         end
+        
+        function Elements:Slider(text, min, max, default, callback)
+            local dragging = false
+            local SliderFrame = Instance.new("Frame")
+            SliderFrame.Size = UDim2.new(1, 0, 0, 50)
+            SliderFrame.Parent = Page
+            SliderFrame.BackgroundColor3 = CurrentTheme.Top
+            Instance.new("UICorner", SliderFrame).CornerRadius = UDim.new(0, 6)
+            AddToRegistry(SliderFrame, "BackgroundColor3", "Top")
+            
+            local Label = Instance.new("TextLabel")
+            Label.Text = text
+            Label.Size = UDim2.new(0.6, 0, 0, 30)
+            Label.Position = UDim2.new(0, 10, 0, 0)
+            Label.BackgroundTransparency = 1
+            Label.TextXAlignment = Enum.TextXAlignment.Left
+            Label.TextColor3 = CurrentTheme.Text
+            Label.Font = Enum.Font.Gotham
+            Label.TextSize = 14
+            Label.Parent = SliderFrame
+            AddToRegistry(Label, "TextColor3", "Text")
+            
+            local ValLabel = Instance.new("TextLabel")
+            ValLabel.Text = tostring(default)
+            ValLabel.Size = UDim2.new(0.2, 0, 0, 30)
+            ValLabel.Position = UDim2.new(0.8, -10, 0, 0)
+            ValLabel.BackgroundTransparency = 1
+            ValLabel.TextXAlignment = Enum.TextXAlignment.Right
+            ValLabel.TextColor3 = CurrentTheme.Accent
+            ValLabel.Font = Enum.Font.GothamBold
+            ValLabel.TextSize = 14
+            ValLabel.Parent = SliderFrame
+            AddToRegistry(ValLabel, "TextColor3", "Accent")
+            
+            local SlideBar = Instance.new("Frame")
+            SlideBar.Size = UDim2.new(1, -20, 0, 6)
+            SlideBar.Position = UDim2.new(0, 10, 0, 35)
+            SlideBar.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+            SlideBar.Parent = SliderFrame
+            Instance.new("UICorner", SlideBar).CornerRadius = UDim.new(0, 3)
+            
+            local Fill = Instance.new("Frame")
+            Fill.Size = UDim2.new((default - min) / (max - min), 0, 1, 0)
+            Fill.BackgroundColor3 = CurrentTheme.Accent
+            Fill.Parent = SlideBar
+            Instance.new("UICorner", Fill).CornerRadius = UDim.new(0, 3)
+            AddToRegistry(Fill, "BackgroundColor3", "Accent")
+            
+            local Val = default
+            local function Update(val)
+                local percent = (val - min) / (max - min)
+                Val = val
+                ValLabel.Text = tostring(val)
+                Fill.Size = UDim2.new(percent, 0, 1, 0)
+                ConfigObjects[text].Value = Val
+                if callback then callback(Val) end
+            end
+            
+            local function Drag(input)
+                local pos = UDim2.new(math.clamp((input.Position.X - SlideBar.AbsolutePosition.X) / SlideBar.AbsoluteSize.X, 0, 1), 0, 1, 0)
+                local val = math.floor(min + ((max - min) * pos.X.Scale))
+                Update(val)
+            end
+            
+            SlideBar.InputBegan:Connect(function(input)
+                if input.UserInputType == Enum.UserInputType.MouseButton1 then
+                    dragging = true
+                    PlaySound(Sounds.Slide)
+                    Drag(input)
+                end
+            end)
+            
+            SlideBar.InputEnded:Connect(function(input)
+                if input.UserInputType == Enum.UserInputType.MouseButton1 then
+                    dragging = false
+                end
+            end)
+            
+            UserInputService.InputChanged:Connect(function(input)
+                if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+                    Drag(input)
+                end
+            end)
+            
+            ConfigObjects[text] = {Type = "Slider", Value = Val, Set = function(val) Update(val) end}
+        end
+        
+        function Elements:Textbox(text, placeholder, callback)
+            local BoxFrame = Instance.new("Frame")
+            BoxFrame.Size = UDim2.new(1, 0, 0, 35)
+            BoxFrame.Parent = Page
+            BoxFrame.BackgroundColor3 = CurrentTheme.Top
+            Instance.new("UICorner", BoxFrame).CornerRadius = UDim.new(0, 6)
+            AddToRegistry(BoxFrame, "BackgroundColor3", "Top")
+            
+            local Label = Instance.new("TextLabel")
+            Label.Text = text
+            Label.Size = UDim2.new(0.6, 0, 1, 0)
+            Label.Position = UDim2.new(0, 10, 0, 0)
+            Label.BackgroundTransparency = 1
+            Label.TextXAlignment = Enum.TextXAlignment.Left
+            Label.TextColor3 = CurrentTheme.Text
+            Label.Font = Enum.Font.Gotham
+            Label.TextSize = 14
+            Label.Parent = BoxFrame
+            AddToRegistry(Label, "TextColor3", "Text")
+            
+            local Box = Instance.new("TextBox")
+            Box.Size = UDim2.new(0.4, -10, 0, 25)
+            Box.Position = UDim2.new(0.6, 0, 0, 5)
+            Box.BackgroundColor3 = CurrentTheme.Main
+            Box.TextColor3 = CurrentTheme.Accent
+            Box.Text = ""
+            Box.PlaceholderText = placeholder or "Type..."
+            Box.Parent = BoxFrame
+            Instance.new("UICorner", Box).CornerRadius = UDim.new(0, 4)
+            AddToRegistry(Box, "BackgroundColor3", "Main")
+            AddToRegistry(Box, "TextColor3", "Accent")
+            
+            Box.FocusLost:Connect(function() 
+                ConfigObjects[text].Value = Box.Text
+                if callback then callback(Box.Text) end 
+            end)
+            
+            ConfigObjects[text] = {Type = "Textbox", Value = "", Set = function(val) 
+                Box.Text = val; 
+                if callback then callback(val) end
+            end}
+        end
 
         function Elements:Value(text, default, callback)
             local ValFrame = Instance.new("Frame")
@@ -318,7 +448,7 @@ function Library:CreateWindow(Config)
         end
 
         function Elements:Keybind(text, default, callback)
-            local Key = default or Enum.KeyCode.RightControl
+            local Key = default or Enum.KeyCode.M
             local Btn = Instance.new("TextButton")
             Btn.Size = UDim2.new(1, 0, 0, 35)
             Btn.Parent = Page
@@ -476,12 +606,27 @@ function Library:CreateWindow(Config)
         end
     end)
     
-    -- SETTINGS TAB (Combined with Configs)
+    -- CONFIG TAB + SETTINGS
     local Settings = Window:Tab("Settings")
     
     Settings:Section("Configurations")
+    
     local ConfigName = ""
-    Settings:Value("Config Name", "Default", function(v) ConfigName = v end)
+    local Dropdown = nil 
+    local ConfigList = {}
+
+    local function RefreshConfigs()
+        if not isfolder(Window.ConfigFolder) then makefolder(Window.ConfigFolder) end
+        ConfigList = {}
+        for _, file in pairs(listfiles(Window.ConfigFolder)) do
+            if file:sub(-5) == ".json" then
+                table.insert(ConfigList, file:sub(#Window.ConfigFolder + 2, -6))
+            end
+        end
+    end
+    RefreshConfigs()
+
+    Settings:Textbox("Config Name", "Type name...", function(v) ConfigName = v end)
     
     Settings:Button("Save Config", function()
         if not isfolder(Window.ConfigFolder) then makefolder(Window.ConfigFolder) end
@@ -490,27 +635,32 @@ function Library:CreateWindow(Config)
             Data[name] = obj.Value
         end
         writefile(Window.ConfigFolder.."/"..ConfigName..".json", HttpService:JSONEncode(Data))
+        RefreshConfigs()
         Window:Notification("Saved: "..ConfigName)
     end)
-    
+
+    Settings:Dropdown("Select Config", ConfigList, function(val) Window.CurrentConfig = val end)
+
     Settings:Button("Load Config", function()
-        local path = Window.ConfigFolder.."/"..ConfigName..".json"
+        if Window.CurrentConfig == "" or Window.CurrentConfig == "None" then Window:Notification("Select a config!"); return end
+        local path = Window.ConfigFolder.."/"..Window.CurrentConfig..".json"
+        
         if isfile(path) then
-            local Data = HttpService:JSONDecode(readfile(path))
-            for name, val in pairs(Data) do
+            local data = HttpService:JSONDecode(readfile(path))
+            for name, val in pairs(data) do
                 if ConfigObjects[name] then
                     ConfigObjects[name].Set(val)
                 end
             end
-            Window:Notification("Loaded: "..ConfigName)
+            Window:Notification("Loaded: "..Window.CurrentConfig)
         else
             Window:Notification("Config not found!")
         end
     end)
-    
-    Settings:Section("UI Customization")
+
+    Settings:Section("Customization")
     Settings:Toggle("Rainbow Edge", false, function(v) Library:ToggleRainbow(v) end)
-    Settings:Dropdown("Rainbow Type", {"Linear Gradient", "Animated/Cycling Rainbow", "Smooth Fading", "Pulse"}, function(val) Library:SetRainbowType(val) end)
+    Settings:Dropdown("Rainbow Type", {"Linear Gradient (Solid Rainbow)", "Animated/Cycling Rainbow", "Smooth Fading Gradient", "Step/Band Rainbow", "Rainbow Pulse", "Radial Rainbow", "Neon/Glowing Rainbow", "Pastel Rainbow", "Vertical/Horizontal Fade"}, function(val) Library:SetRainbowType(val) end)
     Settings:Dropdown("Theme", {"Dark", "White", "Purple", "Blue", "Red", "Yellow", "Green"}, function(v) Library:SetTheme(v) end)
     Settings:Keybind("Menu Keybind", MenuKeybind, function(v) Window:SetKeybind(v) end)
     Settings:Toggle("UI SFX", true, function(v) SFXEnabled = v end)
