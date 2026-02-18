@@ -37,20 +37,18 @@ local RainbowEnabled = false
 local RainbowType = "Animated/Cycling Rainbow" 
 local SFXEnabled = true
 local GuiTransparency = 0.1 
-local BlurStrength = 15     
-local GlowSizePct = 20 -- 1-100 Slider value
+local BlurStrength = 20     
 
 local Registry = {} 
 local ConfigObjects = {} 
 local BlurInstance = nil
-local ShadowImage = nil 
 local MainStroke = nil
 local Gradient = nil
 
 -- ICONS
 local ResetIconID = "rbxassetid://7185430959"
 
--- CREATE BLUR (Global blur that animates)
+-- CREATE BLUR (Global fade-in blur)
 task.spawn(function()
     local existing = Lighting:FindFirstChild("M0dznBlur")
     if existing then existing:Destroy() end
@@ -119,29 +117,14 @@ function Library:UpdateTransparency(val)
     end
 end
 
-function Library:UpdateGlow(pct)
-    GlowSizePct = pct
-    if ShadowImage then
-        -- 100% slider = 20% larger than GUI
-        -- If Gui is 400px, 20% is 80px.
-        -- Base slice padding is ~20px. 
-        local scale = (pct / 100) * 100 -- max 100px padding
-        ShadowImage.Size = UDim2.new(1, scale, 1, scale)
-        ShadowImage.ImageTransparency = 1 - (pct/100) + 0.1 -- Fade out as it gets smaller/larger appropriately
-        if ShadowImage.ImageTransparency > 0.8 then ShadowImage.ImageTransparency = 0.8 end
-    end
-end
-
 function Library:SetTheme(themeName)
     if Themes[themeName] then
         CurrentTheme = Themes[themeName]
-        -- Update all registered objects
         for _, reg in pairs(Registry) do
             if reg.Object then
                 Tween(reg.Object, {[reg.Property] = CurrentTheme[reg.Type]})
             end
         end
-        -- If Rainbow is disabled, ensure stroke color resets
         if not RainbowEnabled and MainStroke then
             MainStroke.Color = CurrentTheme.Stroke
         end
@@ -151,9 +134,8 @@ end
 -- RAINBOW
 function Library:ToggleRainbow(bool) 
     RainbowEnabled = bool 
-    if not bool then
-        -- Reset to theme color when rainbow is off
-        if MainStroke then MainStroke.Color = CurrentTheme.Stroke end
+    if not bool and MainStroke then
+        MainStroke.Color = CurrentTheme.Stroke
         if Gradient then Gradient.Enabled = false end
     end
 end
@@ -169,10 +151,10 @@ function Library:CreateWindow(Config)
     Window.CurrentConfig = ""
 
     local ScreenGui = Instance.new("ScreenGui")
-    ScreenGui.Name = "M0dznLib_Modern"
+    ScreenGui.Name = "M0dznLib_V5.0"
     ScreenGui.Parent = CoreGui
     ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-    ScreenGui.DisplayOrder = 9999 -- Always On Top
+    ScreenGui.DisplayOrder = 10000 -- Always On Top
     ScreenGui.ResetOnSpawn = false
     ScreenGui.IgnoreGuiInset = true 
     if syn and syn.protect_gui then syn.protect_gui(ScreenGui) elseif gethui then ScreenGui.Parent = gethui() end
@@ -187,22 +169,8 @@ function Library:CreateWindow(Config)
     Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 16) 
     AddToRegistry(MainFrame, "BackgroundColor3", "Main")
 
-    -- MODERN GLOW / SHADOW
-    local Shadow = Instance.new("ImageLabel")
-    Shadow.Name = "Glow"
-    Shadow.AnchorPoint = Vector2.new(0.5, 0.5)
-    Shadow.BackgroundTransparency = 1
-    Shadow.Position = UDim2.new(0.5, 0, 0.5, 0)
-    Shadow.ZIndex = -1
-    Shadow.Image = "rbxassetid://5028857472" -- Modern Clean Fade Shadow
-    Shadow.ImageColor3 = Color3.fromRGB(0,0,0)
-    Shadow.ImageTransparency = 0.4
-    Shadow.ScaleType = Enum.ScaleType.Slice
-    Shadow.SliceCenter = Rect.new(24, 24, 276, 276)
-    Shadow.Parent = MainFrame
-    ShadowImage = Shadow
-    Library:UpdateGlow(GlowSizePct) 
-
+    -- NO SHADOW / GLOW (REMOVED AS REQUESTED)
+    
     local Stroke = Instance.new("UIStroke")
     Stroke.Thickness = 1.5 
     Stroke.Parent = MainFrame
@@ -214,7 +182,7 @@ function Library:CreateWindow(Config)
     Grad.Enabled = false
     Gradient = Grad
 
-    -- 9 RAINBOW MODES LOGIC
+    -- 9 RAINBOW MODES
     task.spawn(function()
         local rot = 0
         while ScreenGui.Parent do
@@ -236,16 +204,11 @@ function Library:CreateWindow(Config)
                 elseif RainbowType == "Radial Rainbow" then
                     Grad.Enabled = true; rot = rot + 1; Grad.Rotation = rot; Grad.Color = ColorSequence.new({ColorSequenceKeypoint.new(0, Color3.fromHSV(t % 3 / 3, 1, 1)), ColorSequenceKeypoint.new(1, Color3.fromHSV((t + 0.5) % 3 / 3, 1, 1))}); Stroke.Color = Color3.new(1,1,1)
                 elseif RainbowType == "Neon/Glowing Rainbow" then
-                    Grad.Enabled = false; Stroke.Color = Color3.fromHSV(t % 2 / 2, 0.6, 1); Shadow.ImageColor3 = Stroke.Color; Shadow.ImageTransparency = 0.1
+                    Grad.Enabled = false; Stroke.Color = Color3.fromHSV(t % 2 / 2, 0.6, 1); 
                 elseif RainbowType == "Pastel Rainbow" then
                      Grad.Enabled = false; Stroke.Color = Color3.fromHSV(t % 10 / 10, 0.4, 1)
                 elseif RainbowType == "Vertical/Horizontal Fade" then
                      Grad.Enabled = true; Grad.Rotation = 90; Grad.Color = ColorSequence.new({ColorSequenceKeypoint.new(0, Color3.fromHSV(t % 5 / 5, 1, 1)), ColorSequenceKeypoint.new(1, Color3.fromHSV((t+0.5) % 5 / 5, 1, 1))}); Stroke.Color = Color3.new(1,1,1)
-                end
-                
-                -- Sync Shadow with Rainbow for some modes
-                if RainbowType ~= "Neon/Glowing Rainbow" then
-                    Shadow.ImageColor3 = Color3.new(0,0,0) -- Keep shadow black normally
                 end
             end
             RunService.RenderStepped:Wait()
@@ -307,7 +270,7 @@ function Library:CreateWindow(Config)
     Instance.new("UICorner", Avatar).CornerRadius = UDim.new(1,0)
     
     local DispName = Instance.new("TextLabel"); DispName.Text = LocalPlayer.DisplayName; DispName.Size = UDim2.new(1, -40, 0, 15); DispName.Position = UDim2.new(0, 40, 0, 2); DispName.BackgroundTransparency = 1; DispName.Font = Enum.Font.GothamBold; DispName.TextSize = 13; DispName.TextXAlignment = Enum.TextXAlignment.Left; DispName.Parent = ProfileFrame; AddToRegistry(DispName, "TextColor3", "Text")
-    local UsrName = Instance.new("TextLabel"); UsrName.Text = "@"..LocalPlayer.Name; UsrName.Size = UDim2.new(1, -40, 0, 15); UsrName.Position = UDim2.new(0, 40, 0, 18); UsrName.BackgroundTransparency = 1; UsrName.Font = Enum.Font.Gotham; UsrName.TextSize = 11; UsrName.TextTransparency = 0.4; UsrName.TextXAlignment = Enum.TextXAlignment.Left; UsrName.Parent = ProfileFrame; AddToRegistry(UsrName, "TextColor3", "Text")
+    local UsrName = Instance.new("TextLabel"); UsrName.Text = "@"..LocalPlayer.Name; UsrName.Size = UDim2.new(1, -40, 0, 15); UsrName.Position = UDim2.new(0, 40, 0, 18); UsrName.BackgroundTransparency = 1; UsrName.Font = Enum.Font.GothamBold; UsrName.TextSize = 11; UsrName.TextTransparency = 0.4; UsrName.TextXAlignment = Enum.TextXAlignment.Left; UsrName.Parent = ProfileFrame; AddToRegistry(UsrName, "TextColor3", "Text")
 
     local Line = Instance.new("Frame")
     Line.Size = UDim2.new(0, 2, 1, 0)
@@ -321,19 +284,19 @@ function Library:CreateWindow(Config)
     PageContainer.BackgroundTransparency = 1
     PageContainer.Parent = Content
 
-    -- NOTIFICATION SYSTEM CONTAINER
+    -- NOTIFICATION CONTAINER (Alignment Bottom)
     local NotifContainer = Instance.new("Frame")
-    NotifContainer.Size = UDim2.new(0, 250, 1, 0)
+    NotifContainer.Size = UDim2.new(0, 250, 1, -20)
     NotifContainer.Position = UDim2.new(1, -270, 0, 0)
     NotifContainer.BackgroundTransparency = 1
     NotifContainer.Parent = ScreenGui
     local NotifList = Instance.new("UIListLayout")
     NotifList.Padding = UDim.new(0, 10)
-    NotifList.VerticalAlignment = Enum.VerticalAlignment.Bottom -- Stack from bottom up
+    NotifList.VerticalAlignment = Enum.VerticalAlignment.Bottom -- Stack upwards from bottom
     NotifList.SortOrder = Enum.SortOrder.LayoutOrder
     NotifList.Parent = NotifContainer
 
-    -- DRAGGING & ANIMATION
+    -- DRAGGING
     local dragging, dragInput, dragStart, startPos
     Topbar.InputBegan:Connect(function(input) if input.UserInputType == Enum.UserInputType.MouseButton1 then dragging = true; dragStart = input.Position; startPos = MainFrame.Position end end)
     Topbar.InputChanged:Connect(function(input) if input.UserInputType == Enum.UserInputType.MouseMovement then dragInput = input end end)
@@ -349,7 +312,6 @@ function Library:CreateWindow(Config)
     local function ToggleUI(bool)
         MainFrame.Visible = bool
         if bool then
-            -- Open Animation
             MainFrame.Size = UDim2.new(0, 0, 0, 0)
             MainFrame.BackgroundTransparency = 1
             Tween(MainFrame, {Size = UDim2.new(0, 650, 0, 400), BackgroundTransparency = GuiTransparency}, 0.35)
@@ -359,7 +321,6 @@ function Library:CreateWindow(Config)
             end
             UserInputService.MouseIconEnabled = true
         else
-            -- Close Animation
             if BlurInstance then Tween(BlurInstance, {Size = 0}, 0.3) end
             local t = TweenService:Create(MainFrame, TweenInfo.new(0.3), {Size = UDim2.new(0,0,0,0), BackgroundTransparency = 1})
             t:Play()
@@ -373,27 +334,21 @@ function Library:CreateWindow(Config)
             ToggleUI(not MainFrame.Visible)
         end
     end)
-    
     ToggleUI(true)
 
-    -- MODERN NOTIFICATION
+    -- MODERN NOTIFICATION WITH TIMER BAR
     function Window:Notification(text)
         task.spawn(function()
             PlaySound(Sounds.Notification)
             local Notif = Instance.new("Frame")
             Notif.Size = UDim2.new(1, 0, 0, 50)
-            Notif.BackgroundTransparency = 1 -- Animate in
+            Notif.BackgroundTransparency = 1 
             Notif.Parent = NotifContainer
-            Notif.LayoutOrder = -os.time() -- Newer time = Smaller number? No. 
-            -- User wants: 1 is Newest. 
-            -- If we sort by LayoutOrder and use -os.time(), newest has smallest number.
-            -- UIListLayout VerticalAlignment Bottom: Smallest indices are at TOP or BOTTOM? 
-            -- Standard: Top to Bottom. We want Newest (1) at Top of stack? "move to above" means stack goes up.
-            -- Actually, let's just use LayoutOrder = 0 for all and Insert at 0.
+            Notif.LayoutOrder = 0 -- Keep newest at bottom (LayoutOrder isn't strict here due to Parent order)
             
             local Visual = Instance.new("Frame")
             Visual.Size = UDim2.new(1, 0, 1, 0)
-            Visual.Position = UDim2.new(1, 0, 0, 0) -- Slide in from right
+            Visual.Position = UDim2.new(1, 0, 0, 0) 
             Visual.Parent = Notif
             Instance.new("UICorner", Visual).CornerRadius = UDim.new(0, 8)
             AddToRegistry(Visual, "BackgroundColor3", "Top")
@@ -401,17 +356,16 @@ function Library:CreateWindow(Config)
             local S = Instance.new("UIStroke"); S.Parent = Visual; S.Thickness = 1.5; AddToRegistry(S, "Color", "Accent")
             local Lbl = Instance.new("TextLabel"); Lbl.Text = text; Lbl.Size = UDim2.new(1,0,1,0); Lbl.BackgroundTransparency = 1; Lbl.Parent = Visual; Lbl.Font = Enum.Font.GothamBold; Lbl.TextSize = 14; AddToRegistry(Lbl, "TextColor3", "Text")
             
-            -- Time Bar
             local Bar = Instance.new("Frame")
             Bar.Size = UDim2.new(1, 0, 0, 3)
-            Bar.Position = UDim2.new(0, 0, 0, 0) -- Top
+            Bar.Position = UDim2.new(0, 0, 0, 0) 
             Bar.BorderSizePixel = 0
             Bar.BackgroundColor3 = Color3.new(1,1,1)
             Bar.Parent = Visual
             AddToRegistry(Bar, "BackgroundColor3", "Accent")
 
             Tween(Visual, {Position = UDim2.new(0, 0, 0, 0)}, 0.4)
-            Tween(Bar, {Size = UDim2.new(0, 0, 0, 3)}, 3) -- 3 seconds timer
+            Tween(Bar, {Size = UDim2.new(0, 0, 0, 3)}, 3) 
 
             task.wait(3)
             Tween(Visual, {Position = UDim2.new(1, 20, 0, 0)}, 0.4)
@@ -429,7 +383,7 @@ function Library:CreateWindow(Config)
         TabBtn.Size = UDim2.new(1, 0, 0, 36)
         TabBtn.BackgroundTransparency = 1
         TabBtn.Text = name
-        TabBtn.Font = Enum.Font.GothamMedium
+        TabBtn.Font = Enum.Font.GothamBold -- Modern Font
         TabBtn.TextColor3 = Color3.fromRGB(150, 150, 150)
         TabBtn.TextSize = 14
         TabBtn.Parent = TabContainer
@@ -473,12 +427,13 @@ function Library:CreateWindow(Config)
             return Card
         end
         
-        -- RESET BUTTON HELPER
-        local function AddReset(parent, callback)
+        -- RESET BUTTON HELPER (Placed before value)
+        local function AddReset(parent, callback, xOffset)
             local Reset = Instance.new("ImageButton")
             Reset.Name = "Reset"
             Reset.Size = UDim2.new(0, 20, 0, 20)
-            Reset.Position = UDim2.new(1, -30, 0.5, -10)
+            -- Positioned slightly left of the right edge (where values usually are)
+            Reset.Position = UDim2.new(1, xOffset or -60, 0.5, -10) 
             Reset.BackgroundTransparency = 1
             Reset.Image = ResetIconID
             Reset.ImageColor3 = Color3.fromRGB(150,150,150)
@@ -498,7 +453,7 @@ function Library:CreateWindow(Config)
             S.Text = text:upper()
             S.Size = UDim2.new(1, 0, 0, 25)
             S.BackgroundTransparency = 1
-            S.Font = Enum.Font.GothamBlack 
+            S.Font = Enum.Font.GothamBold 
             S.TextSize = 13
             S.TextXAlignment = Enum.TextXAlignment.Left
             S.Parent = Page
@@ -507,7 +462,7 @@ function Library:CreateWindow(Config)
 
         function Elements:Value(text, default, callback)
             local Card = CreateCard(40)
-            -- ... (Basic Value implementation)
+            -- ... (Value logic)
         end
 
         function Elements:Keybind(text, default, callback)
@@ -516,7 +471,7 @@ function Library:CreateWindow(Config)
 
             local Title = Instance.new("TextLabel")
             Title.Text = text
-            Title.Size = UDim2.new(0.6, 0, 1, 0)
+            Title.Size = UDim2.new(0.5, 0, 1, 0)
             Title.Position = UDim2.new(0, 12, 0, 0)
             Title.BackgroundTransparency = 1
             Title.Font = Enum.Font.GothamBold
@@ -525,9 +480,9 @@ function Library:CreateWindow(Config)
             Title.Parent = Card
             AddToRegistry(Title, "TextColor3", "Text")
             
-            -- FIX: Button covers the label area but not the reset button
+            -- Interaction Button (Full Card Size for easy clicking)
             local KeyBtn = Instance.new("TextButton")
-            KeyBtn.Size = UDim2.new(1, -40, 1, 0) 
+            KeyBtn.Size = UDim2.new(1, -90, 1, 0) -- Subtract width for Reset and Label
             KeyBtn.BackgroundTransparency = 1
             KeyBtn.Text = ""
             KeyBtn.Parent = Card
@@ -535,7 +490,7 @@ function Library:CreateWindow(Config)
             local KeyLabel = Instance.new("TextLabel")
             KeyLabel.Text = Key.Name
             KeyLabel.Size = UDim2.new(0, 80, 0, 24)
-            KeyLabel.Position = UDim2.new(1, -120, 0.5, -12) -- Left of Reset
+            KeyLabel.Position = UDim2.new(1, -90, 0.5, -12) 
             KeyLabel.Font = Enum.Font.GothamBold
             KeyLabel.TextSize = 13
             KeyLabel.Parent = Card
@@ -557,7 +512,8 @@ function Library:CreateWindow(Config)
                 if input.KeyCode.Name ~= "Unknown" then Update(input.KeyCode) else KeyLabel.Text = Key.Name end
             end)
             
-            AddReset(Card, function() Update(default) end)
+            -- Reset Button to left of KeyLabel (approx -120 offset)
+            AddReset(Card, function() Update(default) end, -120)
 
             ConfigObjects[text] = {Type = "Keybind", Value = Key.Name, Set = function(val) Update(Enum.KeyCode[val] or Key) end}
         end
@@ -584,27 +540,11 @@ function Library:CreateWindow(Config)
         function Elements:Toggle(text, default, callback)
             local Enabled = default or false
             local Card = CreateCard(40)
-            
-            local Btn = Instance.new("TextButton") 
-            Btn.Size = UDim2.new(1,0,1,0)
-            Btn.BackgroundTransparency = 1
-            Btn.Text = ""
-            Btn.Parent = Card
-
+            local Btn = Instance.new("TextButton"); Btn.Size = UDim2.new(1,0,1,0); Btn.BackgroundTransparency = 1; Btn.Text = ""; Btn.Parent = Card
             local Title = Instance.new("TextLabel"); Title.Text = text; Title.Size = UDim2.new(0.7,0,1,0); Title.Position = UDim2.new(0,12,0,0); Title.BackgroundTransparency = 1; Title.Font = Enum.Font.GothamBold; Title.TextSize = 14; Title.TextXAlignment = Enum.TextXAlignment.Left; Title.Parent = Card; AddToRegistry(Title, "TextColor3", "Text")
-            
             local Switch = Instance.new("Frame"); Switch.Size = UDim2.new(0,44,0,22); Switch.Position = UDim2.new(1,-54,0.5,-11); Switch.Parent = Card; Instance.new("UICorner", Switch).CornerRadius = UDim.new(1,0); Switch.BackgroundColor3 = Enabled and CurrentTheme.Accent or Color3.fromRGB(60,60,60)
             local Dot = Instance.new("Frame"); Dot.Size = UDim2.new(0,18,0,18); Dot.Position = Enabled and UDim2.new(1,-20,0.5,-9) or UDim2.new(0,2,0.5,-9); Dot.BackgroundColor3 = Color3.new(1,1,1); Dot.Parent = Switch; Instance.new("UICorner", Dot).CornerRadius = UDim.new(1,0)
-
-            local function Update(val)
-                Enabled = val
-                if Enabled then PlaySound(Sounds.ToggleOn) else PlaySound(Sounds.ToggleOff) end
-                Tween(Switch, {BackgroundColor3 = Enabled and CurrentTheme.Accent or Color3.fromRGB(60,60,60)})
-                Tween(Dot, {Position = Enabled and UDim2.new(1,-20,0.5,-9) or UDim2.new(0,2,0.5,-9)})
-                ConfigObjects[text].Value = Enabled
-                callback(Enabled)
-            end
-
+            local function Update(val) Enabled = val; if Enabled then PlaySound(Sounds.ToggleOn) else PlaySound(Sounds.ToggleOff) end; Tween(Switch, {BackgroundColor3 = Enabled and CurrentTheme.Accent or Color3.fromRGB(60,60,60)}); Tween(Dot, {Position = Enabled and UDim2.new(1,-20,0.5,-9) or UDim2.new(0,2,0.5,-9)}); ConfigObjects[text].Value = Enabled; callback(Enabled) end
             Btn.MouseButton1Click:Connect(function() Update(not Enabled) end)
             ConfigObjects[text] = {Type = "Toggle", Value = Enabled, Set = function(val) Update(val) end}
         end
@@ -627,10 +567,10 @@ function Library:CreateWindow(Config)
             local Num = Instance.new("TextLabel")
             Num.Text = tostring(Val)
             Num.Size = UDim2.new(0,40,0,20)
-            Num.Position = UDim2.new(1,-60,0,8) 
+            Num.Position = UDim2.new(1,-50,0,8) 
             Num.BackgroundTransparency = 1
             Num.TextColor3 = Color3.fromRGB(150,150,150)
-            Num.Font = Enum.Font.Gotham
+            Num.Font = Enum.Font.GothamBold
             Num.TextSize = 12
             Num.Parent = Card
             
@@ -669,33 +609,29 @@ function Library:CreateWindow(Config)
             UserInputService.InputEnded:Connect(function(i) if i.UserInputType==Enum.UserInputType.MouseButton1 then sliding=false end end)
             UserInputService.InputChanged:Connect(function(i) if sliding and i.UserInputType==Enum.UserInputType.MouseMovement then Drag(i) end end)
             
-            AddReset(Card, function() Update(default) end)
+            -- Reset Button Positioned at top right, left of the Number
+            AddReset(Card, function() Update(default) end, -90)
             
             ConfigObjects[text] = {Type = "Slider", Value = Val, Set = function(val) Update(val) end}
         end
 
         function Elements:Textbox(text, placeholder, callback)
             local Card = CreateCard(65)
-            -- Basic textbox logic + Reset if needed, but omitted for space unless requested
             local Lbl = Instance.new("TextLabel"); Lbl.Text = text; Lbl.Size = UDim2.new(1,0,0,20); Lbl.Position = UDim2.new(0,12,0,8); Lbl.BackgroundTransparency = 1; Lbl.Font = Enum.Font.GothamBold; Lbl.TextSize = 14; Lbl.TextXAlignment = Enum.TextXAlignment.Left; Lbl.Parent = Card; AddToRegistry(Lbl, "TextColor3", "Text")
-            local Box = Instance.new("TextBox"); Box.Size = UDim2.new(1,-60,0,28); Box.Position = UDim2.new(0,12,0,30); Box.Text = ""; Box.PlaceholderText = placeholder; Box.Font = Enum.Font.Gotham; Box.TextSize = 13; Box.Parent = Card; Instance.new("UICorner", Box).CornerRadius = UDim.new(0,6); AddToRegistry(Box, "BackgroundColor3", "Main", 0.1); AddToRegistry(Box, "TextColor3", "Text")
+            local Box = Instance.new("TextBox"); Box.Size = UDim2.new(1,-60,0,28); Box.Position = UDim2.new(0,12,0,30); Box.Text = ""; Box.PlaceholderText = placeholder; Box.Font = Enum.Font.GothamBold; Box.TextSize = 13; Box.Parent = Card; Instance.new("UICorner", Box).CornerRadius = UDim.new(0,6); AddToRegistry(Box, "BackgroundColor3", "Main", 0.1); AddToRegistry(Box, "TextColor3", "Text")
             Box.FocusLost:Connect(function() ConfigObjects[text].Value = Box.Text; callback(Box.Text) end)
-            
-            AddReset(Card, function() Box.Text = ""; callback("") end)
-            
+            AddReset(Card, function() Box.Text = ""; callback("") end, -30)
             ConfigObjects[text] = {Type = "Textbox", Value = "", Set = function(val) Box.Text = val; callback(val) end}
         end
 
         function Elements:Dropdown(text, options, callback)
-             -- Copied logic from V2/V3, condensed
             local Dropped, Card = false, CreateCard(40)
             local Btn = Instance.new("TextButton"); Btn.Size = UDim2.new(1,0,1,0); Btn.Text = ""; Btn.BackgroundTransparency = 1; Btn.Parent = Card
             local Lbl = Instance.new("TextLabel"); Lbl.Text = text; Lbl.Size = UDim2.new(1,-30,1,0); Lbl.Position = UDim2.new(0,12,0,0); Lbl.BackgroundTransparency = 1; Lbl.Font = Enum.Font.GothamBold; Lbl.TextSize = 14; Lbl.TextXAlignment = Enum.TextXAlignment.Left; Lbl.Parent = Card; AddToRegistry(Lbl, "TextColor3", "Text")
             local Icon = Instance.new("ImageLabel"); Icon.Image = "rbxassetid://6031091004"; Icon.Size = UDim2.new(0,20,0,20); Icon.Position = UDim2.new(1,-30,0.5,-10); Icon.BackgroundTransparency = 1; Icon.Parent = Card
             local Container = Instance.new("Frame"); Container.Size = UDim2.new(1,-5,0,0); Container.Visible = false; Container.ClipsDescendants = true; Container.Parent = Page; Instance.new("UICorner", Container).CornerRadius = UDim.new(0,8); AddToRegistry(Container, "BackgroundColor3", "Top", 0.05); local List = Instance.new("UIListLayout"); List.SortOrder = Enum.SortOrder.LayoutOrder; List.Parent = Container
-            
             local function Select(opt) Dropped = false; Lbl.Text = text..": "..opt; ConfigObjects[text].Value = opt; callback(opt); Tween(Container, {Size = UDim2.new(1,-5,0,0)}, 0.2); Tween(Icon, {Rotation = 0}, 0.2); task.wait(0.2); Container.Visible = false end
-            local function Refresh(opts) for _,v in pairs(Container:GetChildren()) do if v:IsA("TextButton") then v:Destroy() end end for _,o in pairs(opts) do local B=Instance.new("TextButton"); B.Size=UDim2.new(1,0,0,30); B.Text=o; B.TextColor3=Color3.fromRGB(150,150,150); B.BackgroundTransparency=1; B.Parent=Container; B.MouseButton1Click:Connect(function() Select(o) end) end end
+            local function Refresh(opts) for _,v in pairs(Container:GetChildren()) do if v:IsA("TextButton") then v:Destroy() end end for _,o in pairs(opts) do local B=Instance.new("TextButton"); B.Size=UDim2.new(1,0,0,30); B.Text=o; B.TextColor3=Color3.fromRGB(150,150,150); B.BackgroundTransparency=1; B.Font = Enum.Font.GothamBold; B.Parent=Container; B.MouseButton1Click:Connect(function() Select(o) end) end end
             Refresh(options)
             Btn.MouseButton1Click:Connect(function() Dropped = not Dropped; PlaySound(Sounds.Click); if Dropped then Container.Visible=true; Tween(Container, {Size=UDim2.new(1,-5,0,#Container:GetChildren()*30)}, 0.3); Tween(Icon, {Rotation=180}, 0.3) else Tween(Container, {Size=UDim2.new(1,-5,0,0)}, 0.2); Tween(Icon, {Rotation=0}, 0.2); task.wait(0.2); Container.Visible=false end end)
             ConfigObjects[text] = {Type = "Dropdown", Value = options[1], Set = Select, Refresh = Refresh}
@@ -728,8 +664,7 @@ function Library:CreateWindow(Config)
     local Settings = Window:Tab("Settings")
     Settings:Section("Visuals")
     Settings:Slider("Gui Transparency", 0, 100, 10, function(v) Library:UpdateTransparency(v / 100) end)
-    Settings:Slider("Blur Strength", 0, 50, 15, function(v) BlurStrength = v; if BlurInstance then BlurInstance.Size = BlurStrength end end)
-    Settings:Slider("Shadow Size", 1, 100, 20, function(v) Library:UpdateGlow(v) end)
+    Settings:Slider("Blur Strength", 0, 50, 20, function(v) BlurStrength = v; if BlurInstance then BlurInstance.Size = BlurStrength end end)
 
     Settings:Section("Rainbow & Theme")
     Settings:Toggle("Rainbow Edge", false, function(v) Library:ToggleRainbow(v) end)
