@@ -62,9 +62,9 @@ local function PlaySound(id)
     end)
 end
 
--- THEMES
+-- THEMES (UPDATED for Lunar/Feather Minimalist Dark Aesthetic)
 local Themes = {
-    Dark   = {Main = Color3.fromRGB(25, 25, 25), Top = Color3.fromRGB(35, 35, 35), Text = Color3.fromRGB(255, 255, 255), Accent = Color3.fromRGB(114, 137, 218), Stroke = Color3.fromRGB(60, 60, 60)},
+    Dark   = {Main = Color3.fromRGB(18, 18, 18), Top = Color3.fromRGB(24, 24, 24), Text = Color3.fromRGB(240, 240, 240), Accent = Color3.fromRGB(0, 170, 255), Stroke = Color3.fromRGB(45, 45, 45)},
     White  = {Main = Color3.fromRGB(240, 240, 240), Top = Color3.fromRGB(255, 255, 255), Text = Color3.fromRGB(25, 25, 25), Accent = Color3.fromRGB(0, 120, 215), Stroke = Color3.fromRGB(200, 200, 200)},
     Purple = {Main = Color3.fromRGB(30, 25, 35), Top = Color3.fromRGB(40, 30, 45), Text = Color3.fromRGB(255, 255, 255), Accent = Color3.fromRGB(170, 0, 255), Stroke = Color3.fromRGB(80, 40, 80)},
     Blue   = {Main = Color3.fromRGB(20, 25, 40), Top = Color3.fromRGB(30, 35, 50), Text = Color3.fromRGB(255, 255, 255), Accent = Color3.fromRGB(50, 100, 255), Stroke = Color3.fromRGB(40, 50, 80)},
@@ -118,6 +118,7 @@ function Library:CreateWindow(Config)
     MainFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
     MainFrame.AnchorPoint = Vector2.new(0.5, 0.5)
     MainFrame.ClipsDescendants = true
+    MainFrame.BackgroundTransparency = 0.15 -- Glassmorphism transparency
     MainFrame.Parent = ScreenGui
     Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 10)
     AddToRegistry(MainFrame, "BackgroundColor3", "Main")
@@ -125,7 +126,7 @@ function Library:CreateWindow(Config)
     -- BACKGROUND REMOVED
 
     local Stroke = Instance.new("UIStroke")
-    Stroke.Thickness = 2
+    Stroke.Thickness = 1 -- Changed to 1px for cleaner minimalist edge
     Stroke.Parent = MainFrame
     AddToRegistry(Stroke, "Color", "Stroke")
 
@@ -171,6 +172,7 @@ function Library:CreateWindow(Config)
 
     local Topbar = Instance.new("Frame")
     Topbar.Size = UDim2.new(1, 0, 0, 40)
+    Topbar.BackgroundTransparency = 0.15 -- Glassmorphism transparency
     Topbar.Parent = MainFrame
     Instance.new("UICorner", Topbar).CornerRadius = UDim.new(0, 10)
     AddToRegistry(Topbar, "BackgroundColor3", "Top")
@@ -179,6 +181,7 @@ function Library:CreateWindow(Config)
     Fix.Size = UDim2.new(1, 0, 0, 10)
     Fix.Position = UDim2.new(0, 0, 1, -10)
     Fix.BorderSizePixel = 0
+    Fix.BackgroundTransparency = 0.15 -- Glassmorphism transparency
     Fix.Parent = Topbar
     AddToRegistry(Fix, "BackgroundColor3", "Top")
 
@@ -262,7 +265,7 @@ function Library:CreateWindow(Config)
         task.spawn(function()
             PlaySound(Sounds.Notification)
             local Notif = Instance.new("Frame"); Notif.ZIndex = 100; Notif.Size = UDim2.new(0, 250, 0, 45); Notif.Position = UDim2.new(1, 20, 1, -60); Notif.Parent = ScreenGui; AddToRegistry(Notif, "BackgroundColor3", "Top"); Instance.new("UICorner", Notif).CornerRadius = UDim.new(0, 8)
-            local NStroke = Instance.new("UIStroke"); NStroke.Parent = Notif; AddToRegistry(NStroke, "Color", "Accent")
+            local NStroke = Instance.new("UIStroke"); NStroke.Thickness = 1; NStroke.Parent = Notif; AddToRegistry(NStroke, "Color", "Accent")
             local NText = Instance.new("TextLabel"); NText.ZIndex = 101; NText.Text = text; NText.Size = UDim2.new(1,0,1,0); NText.BackgroundTransparency = 1; NText.Parent = Notif; NText.Font = Enum.Font.GothamBold; NText.TextSize = 14; AddToRegistry(NText, "TextColor3", "Text")
             Tween(Notif, {Position = UDim2.new(1, -270, 1, -60)}, 0.5); task.wait(3); Tween(Notif, {Position = UDim2.new(1, 20, 1, -60)}, 0.5); task.wait(0.5); Notif:Destroy()
         end)
@@ -319,7 +322,8 @@ function Library:CreateWindow(Config)
             ValFrame.Size = UDim2.new(1,0,0,35)
             ValFrame.Parent = Page
             Instance.new("UICorner", ValFrame).CornerRadius = UDim.new(0, 6)
-            AddToRegistry(ValFrame, "BackgroundColor3", "Top") -- Added background color
+            ValFrame.BackgroundTransparency = 0.3 -- Subtle transparency for nested elements
+            AddToRegistry(ValFrame, "BackgroundColor3", "Top") 
             
             local NameLbl = Instance.new("TextLabel")
             NameLbl.Text = text
@@ -348,7 +352,7 @@ function Library:CreateWindow(Config)
                 PlaySound(Sounds.Click)
                 ConfigObjects[text] = {Type = "Value", Value = ValBox.Text}
                 if callback then callback(ValBox.Text) end
-                Window:Notification(text..": "..ValBox.Text) -- Added Notification
+                Window:Notification(text..": "..ValBox.Text)
             end)
 
             ConfigObjects[text] = {Type = "Value", Value = default, Set = function(val) ValBox.Text = val end}
@@ -356,7 +360,7 @@ function Library:CreateWindow(Config)
 
         function Elements:Keybind(text, default, callback)
             local Key = default or Enum.KeyCode.M
-            local Btn = Instance.new("TextButton"); Btn.Size = UDim2.new(1, 0, 0, 40); Btn.Text = ""; Btn.Parent = Page; Instance.new("UICorner", Btn).CornerRadius = UDim.new(0, 6); AddToRegistry(Btn, "BackgroundColor3", "Top")
+            local Btn = Instance.new("TextButton"); Btn.Size = UDim2.new(1, 0, 0, 40); Btn.Text = ""; Btn.Parent = Page; Instance.new("UICorner", Btn).CornerRadius = UDim.new(0, 6); Btn.BackgroundTransparency = 0.3; AddToRegistry(Btn, "BackgroundColor3", "Top")
             local Title = Instance.new("TextLabel"); Title.Text = text; Title.Size = UDim2.new(0.6, 0, 1, 0); Title.Position = UDim2.new(0, 10, 0, 0); Title.BackgroundTransparency = 1; Title.Font = Enum.Font.Gotham; Title.TextSize = 14; Title.TextXAlignment = Enum.TextXAlignment.Left; Title.Parent = Btn; AddToRegistry(Title, "TextColor3", "Text")
             local KeyLabel = Instance.new("TextLabel"); KeyLabel.Text = Key.Name; KeyLabel.Size = UDim2.new(0, 80, 0, 24); KeyLabel.Position = UDim2.new(1, -90, 0.5, -12); KeyLabel.Font = Enum.Font.GothamBold; KeyLabel.TextSize = 13; KeyLabel.Parent = Btn; Instance.new("UICorner", KeyLabel).CornerRadius = UDim.new(0, 5); AddToRegistry(KeyLabel, "BackgroundColor3", "Main"); AddToRegistry(KeyLabel, "TextColor3", "Accent")
 
@@ -367,7 +371,7 @@ function Library:CreateWindow(Config)
                     KeyLabel.Text = Key.Name; 
                     ConfigObjects[text] = {Type = "Keybind", Value = Key.Name}; 
                     callback(Key)
-                    Window:Notification("Keybind: "..Key.Name) -- Added Notification
+                    Window:Notification("Keybind: "..Key.Name) 
                 else 
                     KeyLabel.Text = Key.Name 
                 end
@@ -376,13 +380,13 @@ function Library:CreateWindow(Config)
         end
 
         function Elements:Button(text, callback)
-            local Btn = Instance.new("TextButton"); Btn.Size = UDim2.new(1, 0, 0, 35); Btn.Text = text; Btn.Font = Enum.Font.Gotham; Btn.TextSize = 14; Btn.Parent = Page; Instance.new("UICorner", Btn).CornerRadius = UDim.new(0, 6); AddToRegistry(Btn, "BackgroundColor3", "Top"); AddToRegistry(Btn, "TextColor3", "Text")
+            local Btn = Instance.new("TextButton"); Btn.Size = UDim2.new(1, 0, 0, 35); Btn.Text = text; Btn.Font = Enum.Font.Gotham; Btn.TextSize = 14; Btn.Parent = Page; Instance.new("UICorner", Btn).CornerRadius = UDim.new(0, 6); Btn.BackgroundTransparency = 0.3; AddToRegistry(Btn, "BackgroundColor3", "Top"); AddToRegistry(Btn, "TextColor3", "Text")
             Btn.MouseButton1Click:Connect(function() PlaySound(Sounds.Click); Tween(Btn, {Size = UDim2.new(0.95, 0, 0, 32)}, 0.1); task.wait(0.1); Tween(Btn, {Size = UDim2.new(1, 0, 0, 35)}, 0.1); callback() end)
         end
 
         function Elements:Toggle(text, default, callback)
             local Enabled = default or false
-            local Btn = Instance.new("TextButton"); Btn.Size = UDim2.new(1, 0, 0, 35); Btn.Text = ""; Btn.Parent = Page; Instance.new("UICorner", Btn).CornerRadius = UDim.new(0, 6); AddToRegistry(Btn, "BackgroundColor3", "Top")
+            local Btn = Instance.new("TextButton"); Btn.Size = UDim2.new(1, 0, 0, 35); Btn.Text = ""; Btn.Parent = Page; Instance.new("UICorner", Btn).CornerRadius = UDim.new(0, 6); Btn.BackgroundTransparency = 0.3; AddToRegistry(Btn, "BackgroundColor3", "Top")
             local Title = Instance.new("TextLabel"); Title.Text = text; Title.Size = UDim2.new(0.7,0,1,0); Title.Position = UDim2.new(0,10,0,0); Title.BackgroundTransparency = 1; Title.Font = Enum.Font.Gotham; Title.TextSize = 14; Title.TextXAlignment = Enum.TextXAlignment.Left; Title.Parent = Btn; AddToRegistry(Title, "TextColor3", "Text")
             local Switch = Instance.new("Frame"); Switch.Size = UDim2.new(0,40,0,20); Switch.Position = UDim2.new(1,-50,0.5,-10); Switch.Parent = Btn; Instance.new("UICorner", Switch).CornerRadius = UDim.new(1,0); Switch.BackgroundColor3 = Enabled and CurrentTheme.Accent or Color3.fromRGB(60,60,60)
             local Dot = Instance.new("Frame"); Dot.Size = UDim2.new(0,16,0,16); Dot.Position = Enabled and UDim2.new(1,-18,0.5,-8) or UDim2.new(0,2,0.5,-8); Dot.BackgroundColor3 = Color3.new(1,1,1); Dot.Parent = Switch; Instance.new("UICorner", Dot).CornerRadius = UDim.new(1,0)
@@ -393,7 +397,7 @@ function Library:CreateWindow(Config)
                 Tween(Dot, {Position = Enabled and UDim2.new(1,-18,0.5,-8) or UDim2.new(0,2,0.5,-8)})
                 ConfigObjects[text].Value = Enabled
                 callback(Enabled)
-                Window:Notification(text..": "..tostring(Enabled)) -- Added Notification
+                Window:Notification(text..": "..tostring(Enabled)) 
             end
 
             Btn.MouseButton1Click:Connect(function() Enabled = not Enabled; Update() end)
@@ -402,7 +406,7 @@ function Library:CreateWindow(Config)
 
         function Elements:Slider(text, min, max, default, callback)
             local Val = default or min
-            local Frame = Instance.new("Frame"); Frame.Size = UDim2.new(1,0,0,50); Frame.Parent = Page; Instance.new("UICorner", Frame).CornerRadius = UDim.new(0,6); AddToRegistry(Frame, "BackgroundColor3", "Top")
+            local Frame = Instance.new("Frame"); Frame.Size = UDim2.new(1,0,0,50); Frame.Parent = Page; Instance.new("UICorner", Frame).CornerRadius = UDim.new(0,6); Frame.BackgroundTransparency = 0.3; AddToRegistry(Frame, "BackgroundColor3", "Top")
             local Lbl = Instance.new("TextLabel"); Lbl.Text = text; Lbl.Size = UDim2.new(1,-20,0,20); Lbl.Position = UDim2.new(0,10,0,5); Lbl.BackgroundTransparency = 1; Lbl.Font = Enum.Font.Gotham; Lbl.TextSize = 14; Lbl.TextXAlignment = Enum.TextXAlignment.Left; Lbl.Parent = Frame; AddToRegistry(Lbl, "TextColor3", "Text")
             local Num = Instance.new("TextLabel"); Num.Text = tostring(Val); Num.Size = UDim2.new(0,40,0,20); Num.Position = UDim2.new(1,-50,0,5); Num.BackgroundTransparency = 1; Num.TextColor3 = Color3.fromRGB(150,150,150); Num.Font = Enum.Font.Gotham; Num.TextSize = 12; Num.Parent = Frame
             local Bar = Instance.new("TextButton"); Bar.Text = ""; Bar.Size = UDim2.new(1,-20,0,6); Bar.Position = UDim2.new(0,10,0,35); Bar.BackgroundColor3 = Color3.fromRGB(60,60,60); Bar.AutoButtonColor = false; Bar.Parent = Frame; Instance.new("UICorner", Bar).CornerRadius = UDim.new(1,0)
@@ -431,7 +435,7 @@ function Library:CreateWindow(Config)
         end
 
         function Elements:Textbox(text, placeholder, callback)
-            local Frame = Instance.new("Frame"); Frame.Size = UDim2.new(1,0,0,60); Frame.Parent = Page; Instance.new("UICorner", Frame).CornerRadius = UDim.new(0,6); AddToRegistry(Frame, "BackgroundColor3", "Top")
+            local Frame = Instance.new("Frame"); Frame.Size = UDim2.new(1,0,0,60); Frame.Parent = Page; Instance.new("UICorner", Frame).CornerRadius = UDim.new(0,6); Frame.BackgroundTransparency = 0.3; AddToRegistry(Frame, "BackgroundColor3", "Top")
             local Lbl = Instance.new("TextLabel"); Lbl.Text = text; Lbl.Size = UDim2.new(1,0,0,20); Lbl.Position = UDim2.new(0,10,0,5); Lbl.BackgroundTransparency = 1; Lbl.Font = Enum.Font.Gotham; Lbl.TextSize = 14; Lbl.TextXAlignment = Enum.TextXAlignment.Left; Lbl.Parent = Frame; AddToRegistry(Lbl, "TextColor3", "Text")
             local Box = Instance.new("TextBox"); Box.Size = UDim2.new(1,-20,0,25); Box.Position = UDim2.new(0,10,0,28); Box.Text = ""; Box.PlaceholderText = placeholder; Box.Font = Enum.Font.Gotham; Box.TextSize = 13; Box.Parent = Frame; Instance.new("UICorner", Box).CornerRadius = UDim.new(0,4); AddToRegistry(Box, "BackgroundColor3", "Main"); AddToRegistry(Box, "TextColor3", "Text")
             
@@ -444,11 +448,11 @@ function Library:CreateWindow(Config)
 
         function Elements:Dropdown(text, options, callback)
             local Dropped = false
-            local Btn = Instance.new("TextButton"); Btn.Size = UDim2.new(1,0,0,35); Btn.Text = ""; Btn.Parent = Page; Instance.new("UICorner", Btn).CornerRadius = UDim.new(0,6); AddToRegistry(Btn, "BackgroundColor3", "Top")
+            local Btn = Instance.new("TextButton"); Btn.Size = UDim2.new(1,0,0,35); Btn.Text = ""; Btn.Parent = Page; Instance.new("UICorner", Btn).CornerRadius = UDim.new(0,6); Btn.BackgroundTransparency = 0.3; AddToRegistry(Btn, "BackgroundColor3", "Top")
             local Lbl = Instance.new("TextLabel"); Lbl.Text = text; Lbl.Size = UDim2.new(1,-30,1,0); Lbl.Position = UDim2.new(0,10,0,0); Lbl.BackgroundTransparency = 1; Lbl.Font = Enum.Font.Gotham; Lbl.TextSize = 14; Lbl.TextXAlignment = Enum.TextXAlignment.Left; Lbl.Parent = Btn; AddToRegistry(Lbl, "TextColor3", "Text")
             local Icon = Instance.new("ImageLabel"); Icon.Image = "rbxassetid://6031091004"; Icon.Size = UDim2.new(0,20,0,20); Icon.Position = UDim2.new(1,-30,0.5,-10); Icon.BackgroundTransparency = 1; Icon.Parent = Btn
             
-            local Container = Instance.new("Frame"); Container.Size = UDim2.new(1,0,0,0); Container.Visible = false; Container.ClipsDescendants = true; Container.Parent = Page; Instance.new("UICorner", Container).CornerRadius = UDim.new(0,6); AddToRegistry(Container, "BackgroundColor3", "Top")
+            local Container = Instance.new("Frame"); Container.Size = UDim2.new(1,0,0,0); Container.Visible = false; Container.ClipsDescendants = true; Container.Parent = Page; Instance.new("UICorner", Container).CornerRadius = UDim.new(0,6); Container.BackgroundTransparency = 0.3; AddToRegistry(Container, "BackgroundColor3", "Top")
             local List = Instance.new("UIListLayout"); List.SortOrder = Enum.SortOrder.LayoutOrder; List.Parent = Container
 
             local function Select(opt)
