@@ -6,6 +6,7 @@
 ██║ ╚═╝ ██║╚██████╔╝██████╔╝███████╗██║ ╚████║
 ╚═╝     ╚═╝ ╚═════╝ ╚═════╝ ╚══════╝╚═╝  ╚═══╝
            M0DZN LIBRARY V1.0
+        (CONFIG SYSTEM NOT WORK)
 ]]
 
 print([[
@@ -17,6 +18,7 @@ script loaded
  ██║ ╚═╝ ██║ ╚██████╔╝ ██████╔╝ ███████╗ ██║ ╚████║
  ╚═╝     ╚═╝  ╚═════╝  ╚═════╝  ╚══════╝ ╚═╝  ╚═══╝
                M0DZN LIBRARY V1.0
+            (CONFIG SYSTEM NOT WORK)
 ]])
 
 local TweenService = game:GetService("TweenService")
@@ -60,17 +62,17 @@ local function PlaySound(id)
     end)
 end
 
--- THEMES (GLASSMORPHISM ADJUSTED)
+-- THEMES (FLUENT/BENTO DARK AESTHETIC)
 local Themes = {
-    Dark   = {Main = Color3.fromRGB(10, 10, 10), Top = Color3.fromRGB(30, 30, 35), Text = Color3.fromRGB(240, 240, 245), Accent = Color3.fromRGB(80, 140, 255), Stroke = Color3.fromRGB(60, 60, 65)},
+    Dark   = {Main = Color3.fromRGB(13, 13, 13), Top = Color3.fromRGB(28, 28, 30), Text = Color3.fromRGB(240, 240, 245), Accent = Color3.fromRGB(80, 140, 255), Stroke = Color3.fromRGB(45, 45, 48)},
     White  = {Main = Color3.fromRGB(243, 243, 243), Top = Color3.fromRGB(255, 255, 255), Text = Color3.fromRGB(20, 20, 20), Accent = Color3.fromRGB(0, 100, 210), Stroke = Color3.fromRGB(220, 220, 225)},
-    Purple = {Main = Color3.fromRGB(15, 12, 18), Top = Color3.fromRGB(30, 25, 35), Text = Color3.fromRGB(245, 240, 255), Accent = Color3.fromRGB(160, 90, 255), Stroke = Color3.fromRGB(70, 60, 80)},
-    Blue   = {Main = Color3.fromRGB(10, 15, 25), Top = Color3.fromRGB(25, 32, 45), Text = Color3.fromRGB(240, 245, 255), Accent = Color3.fromRGB(70, 130, 255), Stroke = Color3.fromRGB(60, 70, 90)},
-    Red    = {Main = Color3.fromRGB(20, 10, 10), Top = Color3.fromRGB(35, 20, 20), Text = Color3.fromRGB(255, 240, 240), Accent = Color3.fromRGB(255, 80, 80), Stroke = Color3.fromRGB(80, 50, 50)},
-    Yellow = {Main = Color3.fromRGB(20, 20, 10), Top = Color3.fromRGB(35, 35, 20), Text = Color3.fromRGB(255, 255, 240), Accent = Color3.fromRGB(255, 200, 80), Stroke = Color3.fromRGB(80, 80, 50)},
-    Green  = {Main = Color3.fromRGB(10, 20, 12), Top = Color3.fromRGB(20, 35, 25), Text = Color3.fromRGB(240, 255, 245), Accent = Color3.fromRGB(60, 220, 130), Stroke = Color3.fromRGB(50, 80, 60)},
+    Purple = {Main = Color3.fromRGB(18, 15, 22), Top = Color3.fromRGB(30, 25, 35), Text = Color3.fromRGB(245, 240, 255), Accent = Color3.fromRGB(160, 90, 255), Stroke = Color3.fromRGB(50, 45, 60)},
+    Blue   = {Main = Color3.fromRGB(12, 18, 28), Top = Color3.fromRGB(25, 32, 45), Text = Color3.fromRGB(240, 245, 255), Accent = Color3.fromRGB(70, 130, 255), Stroke = Color3.fromRGB(45, 55, 75)},
+    Red    = {Main = Color3.fromRGB(22, 12, 12), Top = Color3.fromRGB(35, 20, 20), Text = Color3.fromRGB(255, 240, 240), Accent = Color3.fromRGB(255, 80, 80), Stroke = Color3.fromRGB(60, 40, 40)},
+    Yellow = {Main = Color3.fromRGB(22, 22, 12), Top = Color3.fromRGB(35, 35, 20), Text = Color3.fromRGB(255, 255, 240), Accent = Color3.fromRGB(255, 200, 80), Stroke = Color3.fromRGB(60, 60, 40)},
+    Green  = {Main = Color3.fromRGB(12, 22, 15), Top = Color3.fromRGB(20, 35, 25), Text = Color3.fromRGB(240, 255, 245), Accent = Color3.fromRGB(60, 220, 130), Stroke = Color3.fromRGB(40, 60, 50)},
 }
-local CurrentTheme = Themes.Dark -- Default is Dark
+local CurrentTheme = Themes.Dark
 
 local function AddToRegistry(obj, prop, themeIndex)
     table.insert(Registry, {Object = obj, Property = prop, Type = themeIndex})
@@ -106,7 +108,7 @@ function Library:CreateWindow(Config)
     Window.CurrentConfig = ""
 
     local ScreenGui = Instance.new("ScreenGui")
-    ScreenGui.Name = "M0dznLib_Glass"
+    ScreenGui.Name = "M0dznLib_V1.2"
     ScreenGui.Parent = CoreGui
     ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling 
     if syn and syn.protect_gui then syn.protect_gui(ScreenGui) elseif gethui then ScreenGui.Parent = gethui() end
@@ -116,14 +118,14 @@ function Library:CreateWindow(Config)
     MainFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
     MainFrame.AnchorPoint = Vector2.new(0.5, 0.5)
     MainFrame.ClipsDescendants = true
-    MainFrame.BackgroundTransparency = 0.25 -- Glass Effect (More Transparent)
+    MainFrame.BackgroundTransparency = 0.05 -- More solid background to let Bento cards pop
     MainFrame.Parent = ScreenGui
-    Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 14) 
+    Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 14) -- Large Bento Corner
     AddToRegistry(MainFrame, "BackgroundColor3", "Main")
 
     local Stroke = Instance.new("UIStroke")
-    Stroke.Thickness = 1.5 
-    Stroke.Transparency = 0.3 
+    Stroke.Thickness = 1 
+    Stroke.Transparency = 0.4 
     Stroke.Parent = MainFrame
     AddToRegistry(Stroke, "Color", "Stroke")
 
@@ -169,7 +171,7 @@ function Library:CreateWindow(Config)
 
     local Topbar = Instance.new("Frame")
     Topbar.Size = UDim2.new(1, 0, 0, 50) 
-    Topbar.BackgroundTransparency = 1 
+    Topbar.BackgroundTransparency = 1 -- Hide topbar box, make title float freely
     Topbar.Parent = MainFrame
 
     local TitleLabel = Instance.new("TextLabel")
@@ -202,13 +204,10 @@ function Library:CreateWindow(Config)
     local ProfileFrame = Instance.new("Frame")
     ProfileFrame.Size = UDim2.new(0, 140, 0, 40)
     ProfileFrame.Position = UDim2.new(0, 0, 1, -40)
-    ProfileFrame.BackgroundTransparency = 0.4 -- Glass
+    ProfileFrame.BackgroundTransparency = 0.05
     ProfileFrame.Parent = Content
     Instance.new("UICorner", ProfileFrame).CornerRadius = UDim.new(0, 10)
-    AddToRegistry(ProfileFrame, "BackgroundColor3", "Top")
-    
-    -- Profile Stroke
-    local PStroke = Instance.new("UIStroke"); PStroke.Thickness = 1; PStroke.Transparency = 0.5; PStroke.Parent = ProfileFrame; AddToRegistry(PStroke, "Color", "Stroke")
+    AddToRegistry(ProfileFrame, "BackgroundColor3", "Top") -- User profile is its own Bento Tile
     
     local Avatar = Instance.new("ImageLabel")
     Avatar.Size = UDim2.new(0, 26, 0, 26)
@@ -224,7 +223,7 @@ function Library:CreateWindow(Config)
     local Line = Instance.new("Frame")
     Line.Size = UDim2.new(0, 1, 1, 0)
     Line.Position = UDim2.new(0, 150, 0, 0)
-    Line.BackgroundTransparency = 0.8 
+    Line.BackgroundTransparency = 0.8 -- Faint line just to structure the grid
     Line.Parent = Content
     AddToRegistry(Line, "BackgroundColor3", "Stroke")
 
@@ -257,7 +256,7 @@ function Library:CreateWindow(Config)
     function Window:Notification(text)
         task.spawn(function()
             PlaySound(Sounds.Notification)
-            local Notif = Instance.new("Frame"); Notif.ZIndex = 100; Notif.Size = UDim2.new(0, 250, 0, 45); Notif.Position = UDim2.new(1, 20, 1, -60); Notif.Parent = ScreenGui; AddToRegistry(Notif, "BackgroundColor3", "Top"); Instance.new("UICorner", Notif).CornerRadius = UDim.new(0, 12); Notif.BackgroundTransparency = 0.3
+            local Notif = Instance.new("Frame"); Notif.ZIndex = 100; Notif.Size = UDim2.new(0, 250, 0, 45); Notif.Position = UDim2.new(1, 20, 1, -60); Notif.Parent = ScreenGui; AddToRegistry(Notif, "BackgroundColor3", "Top"); Instance.new("UICorner", Notif).CornerRadius = UDim.new(0, 12); Notif.BackgroundTransparency = 0.05
             local NStroke = Instance.new("UIStroke"); NStroke.Thickness = 1; NStroke.Parent = Notif; AddToRegistry(NStroke, "Color", "Stroke"); NStroke.Transparency = 0.5
             local NText = Instance.new("TextLabel"); NText.ZIndex = 101; NText.Text = text; NText.Size = UDim2.new(1,0,1,0); NText.BackgroundTransparency = 1; NText.Parent = Notif; NText.Font = Enum.Font.GothamMedium; NText.TextSize = 13; AddToRegistry(NText, "TextColor3", "Text")
             Tween(Notif, {Position = UDim2.new(1, -270, 1, -60)}, 0.6); task.wait(3); Tween(Notif, {Position = UDim2.new(1, 20, 1, -60)}, 0.6); task.wait(0.6); Notif:Destroy()
@@ -289,7 +288,7 @@ function Library:CreateWindow(Config)
         Page.Parent = PageContainer
         
         local PageList = Instance.new("UIListLayout")
-        PageList.Padding = UDim.new(0, 10) 
+        PageList.Padding = UDim.new(0, 10) -- BENTO GRID SPACING
         PageList.SortOrder = Enum.SortOrder.LayoutOrder
         PageList.Parent = Page
         PageList:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function() Page.CanvasSize = UDim2.new(0,0,0, PageList.AbsoluteContentSize.Y + 15) end)
@@ -298,10 +297,10 @@ function Library:CreateWindow(Config)
             PlaySound(Sounds.Tab) 
             for _, v in pairs(PageContainer:GetChildren()) do v.Visible = false end
             for _, v in pairs(TabContainer:GetChildren()) do if v:IsA("TextButton") then Tween(v, {BackgroundTransparency = 1, TextColor3 = Color3.fromRGB(130,130,135)}) end end
-            Page.Visible = true; Tween(TabBtn, {BackgroundTransparency = 0.4, TextColor3 = CurrentTheme.Accent}); Tween(TabBtn, {BackgroundColor3 = CurrentTheme.Top})
+            Page.Visible = true; Tween(TabBtn, {BackgroundTransparency = 0.05, TextColor3 = CurrentTheme.Accent}); Tween(TabBtn, {BackgroundColor3 = CurrentTheme.Top})
         end)
 
-        if firstTab then firstTab = false; Page.Visible = true; TabBtn.TextColor3 = CurrentTheme.Accent; TabBtn.BackgroundTransparency = 0.4; TabBtn.BackgroundColor3 = CurrentTheme.Top end
+        if firstTab then firstTab = false; Page.Visible = true; TabBtn.TextColor3 = CurrentTheme.Accent; TabBtn.BackgroundTransparency = 0.05; TabBtn.BackgroundColor3 = CurrentTheme.Top end
 
         if name == "Config" then TabBtn.LayoutOrder = 99998 end
         if name == "Settings" then TabBtn.LayoutOrder = 99999 end
@@ -316,12 +315,9 @@ function Library:CreateWindow(Config)
             local ValFrame = Instance.new("Frame")
             ValFrame.Size = UDim2.new(1,0,0,42)
             ValFrame.Parent = Page
-            Instance.new("UICorner", ValFrame).CornerRadius = UDim.new(0, 12) 
-            ValFrame.BackgroundTransparency = 0.4 -- Glass
+            Instance.new("UICorner", ValFrame).CornerRadius = UDim.new(0, 12) -- Bento Shape
+            ValFrame.BackgroundTransparency = 0.05 -- Solid Tile
             AddToRegistry(ValFrame, "BackgroundColor3", "Top") 
-            
-            -- Element Stroke
-            local EStroke = Instance.new("UIStroke"); EStroke.Thickness = 1; EStroke.Transparency = 0.6; EStroke.Parent = ValFrame; AddToRegistry(EStroke, "Color", "Stroke")
             
             local NameLbl = Instance.new("TextLabel")
             NameLbl.Text = text
@@ -342,7 +338,7 @@ function Library:CreateWindow(Config)
             ValBox.TextSize = 12
             ValBox.TextXAlignment = Enum.TextXAlignment.Center
             ValBox.Parent = ValFrame
-            ValBox.BackgroundTransparency = 0.5
+            ValBox.BackgroundTransparency = 0.1
             Instance.new("UICorner", ValBox).CornerRadius = UDim.new(0, 6)
             AddToRegistry(ValBox, "BackgroundColor3", "Main")
             AddToRegistry(ValBox, "TextColor3", "Accent")
@@ -354,17 +350,14 @@ function Library:CreateWindow(Config)
                 Window:Notification(text..": "..ValBox.Text)
             end)
 
-            -- FIX: Update ConfigObjects in Set
-            ConfigObjects[text] = {Type = "Value", Value = default, Set = function(val) ValBox.Text = val; ConfigObjects[text].Value = val end}
+            ConfigObjects[text] = {Type = "Value", Value = default, Set = function(val) ValBox.Text = val end}
         end
 
         function Elements:Keybind(text, default, callback)
             local Key = default or Enum.KeyCode.M
-            local Btn = Instance.new("TextButton"); Btn.Size = UDim2.new(1, 0, 0, 42); Btn.Text = ""; Btn.Parent = Page; Instance.new("UICorner", Btn).CornerRadius = UDim.new(0, 12); Btn.BackgroundTransparency = 0.4; AddToRegistry(Btn, "BackgroundColor3", "Top")
-            local EStroke = Instance.new("UIStroke"); EStroke.Thickness = 1; EStroke.Transparency = 0.6; EStroke.Parent = Btn; AddToRegistry(EStroke, "Color", "Stroke")
-            
+            local Btn = Instance.new("TextButton"); Btn.Size = UDim2.new(1, 0, 0, 42); Btn.Text = ""; Btn.Parent = Page; Instance.new("UICorner", Btn).CornerRadius = UDim.new(0, 12); Btn.BackgroundTransparency = 0.05; AddToRegistry(Btn, "BackgroundColor3", "Top")
             local Title = Instance.new("TextLabel"); Title.Text = text; Title.Size = UDim2.new(0.6, 0, 1, 0); Title.Position = UDim2.new(0, 15, 0, 0); Title.BackgroundTransparency = 1; Title.Font = Enum.Font.GothamMedium; Title.TextSize = 13; Title.TextXAlignment = Enum.TextXAlignment.Left; Title.Parent = Btn; AddToRegistry(Title, "TextColor3", "Text")
-            local KeyLabel = Instance.new("TextLabel"); KeyLabel.Text = Key.Name; KeyLabel.Size = UDim2.new(0, 80, 0, 26); KeyLabel.Position = UDim2.new(1, -95, 0.5, -13); KeyLabel.Font = Enum.Font.GothamMedium; KeyLabel.TextSize = 12; KeyLabel.Parent = Btn; KeyLabel.BackgroundTransparency = 0.5; Instance.new("UICorner", KeyLabel).CornerRadius = UDim.new(0, 6); AddToRegistry(KeyLabel, "BackgroundColor3", "Main"); AddToRegistry(KeyLabel, "TextColor3", "Accent")
+            local KeyLabel = Instance.new("TextLabel"); KeyLabel.Text = Key.Name; KeyLabel.Size = UDim2.new(0, 80, 0, 26); KeyLabel.Position = UDim2.new(1, -95, 0.5, -13); KeyLabel.Font = Enum.Font.GothamMedium; KeyLabel.TextSize = 12; KeyLabel.Parent = Btn; KeyLabel.BackgroundTransparency = 0.1; Instance.new("UICorner", KeyLabel).CornerRadius = UDim.new(0, 6); AddToRegistry(KeyLabel, "BackgroundColor3", "Main"); AddToRegistry(KeyLabel, "TextColor3", "Accent")
 
             Btn.MouseButton1Click:Connect(function()
                 PlaySound(Sounds.Click); KeyLabel.Text = "..."; local input = UserInputService.InputBegan:Wait()
@@ -378,21 +371,17 @@ function Library:CreateWindow(Config)
                     KeyLabel.Text = Key.Name 
                 end
             end)
-            -- FIX: Update ConfigObjects in Set
-            ConfigObjects[text] = {Type = "Keybind", Value = Key.Name, Set = function(val) Key = Enum.KeyCode[val] or Key; KeyLabel.Text = Key.Name; ConfigObjects[text].Value = Key.Name; callback(Key) end}
+            ConfigObjects[text] = {Type = "Keybind", Value = Key.Name, Set = function(val) Key = Enum.KeyCode[val] or Key; KeyLabel.Text = Key.Name; callback(Key) end}
         end
 
         function Elements:Button(text, callback)
-            local Btn = Instance.new("TextButton"); Btn.Size = UDim2.new(1, 0, 0, 42); Btn.Text = text; Btn.Font = Enum.Font.GothamMedium; Btn.TextSize = 13; Btn.Parent = Page; Instance.new("UICorner", Btn).CornerRadius = UDim.new(0, 12); Btn.BackgroundTransparency = 0.4; AddToRegistry(Btn, "BackgroundColor3", "Top"); AddToRegistry(Btn, "TextColor3", "Text")
-            local EStroke = Instance.new("UIStroke"); EStroke.Thickness = 1; EStroke.Transparency = 0.6; EStroke.Parent = Btn; AddToRegistry(EStroke, "Color", "Stroke")
+            local Btn = Instance.new("TextButton"); Btn.Size = UDim2.new(1, 0, 0, 42); Btn.Text = text; Btn.Font = Enum.Font.GothamMedium; Btn.TextSize = 13; Btn.Parent = Page; Instance.new("UICorner", Btn).CornerRadius = UDim.new(0, 12); Btn.BackgroundTransparency = 0.05; AddToRegistry(Btn, "BackgroundColor3", "Top"); AddToRegistry(Btn, "TextColor3", "Text")
             Btn.MouseButton1Click:Connect(function() PlaySound(Sounds.Click); Tween(Btn, {Size = UDim2.new(0.97, 0, 0, 38)}, 0.15); task.wait(0.15); Tween(Btn, {Size = UDim2.new(1, 0, 0, 42)}, 0.15); callback() end)
         end
 
         function Elements:Toggle(text, default, callback)
             local Enabled = default or false
-            local Btn = Instance.new("TextButton"); Btn.Size = UDim2.new(1, 0, 0, 42); Btn.Text = ""; Btn.Parent = Page; Instance.new("UICorner", Btn).CornerRadius = UDim.new(0, 12); Btn.BackgroundTransparency = 0.4; AddToRegistry(Btn, "BackgroundColor3", "Top")
-            local EStroke = Instance.new("UIStroke"); EStroke.Thickness = 1; EStroke.Transparency = 0.6; EStroke.Parent = Btn; AddToRegistry(EStroke, "Color", "Stroke")
-            
+            local Btn = Instance.new("TextButton"); Btn.Size = UDim2.new(1, 0, 0, 42); Btn.Text = ""; Btn.Parent = Page; Instance.new("UICorner", Btn).CornerRadius = UDim.new(0, 12); Btn.BackgroundTransparency = 0.05; AddToRegistry(Btn, "BackgroundColor3", "Top")
             local Title = Instance.new("TextLabel"); Title.Text = text; Title.Size = UDim2.new(0.7,0,1,0); Title.Position = UDim2.new(0,15,0,0); Title.BackgroundTransparency = 1; Title.Font = Enum.Font.GothamMedium; Title.TextSize = 13; Title.TextXAlignment = Enum.TextXAlignment.Left; Title.Parent = Btn; AddToRegistry(Title, "TextColor3", "Text")
             local Switch = Instance.new("Frame"); Switch.Size = UDim2.new(0,40,0,20); Switch.Position = UDim2.new(1,-55,0.5,-10); Switch.Parent = Btn; Instance.new("UICorner", Switch).CornerRadius = UDim.new(1,0); Switch.BackgroundColor3 = Enabled and CurrentTheme.Accent or Color3.fromRGB(50,50,55)
             local Dot = Instance.new("Frame"); Dot.Size = UDim2.new(0,16,0,16); Dot.Position = Enabled and UDim2.new(1,-18,0.5,-8) or UDim2.new(0,2,0.5,-8); Dot.BackgroundColor3 = Color3.new(1,1,1); Dot.Parent = Switch; Instance.new("UICorner", Dot).CornerRadius = UDim.new(1,0)
@@ -407,15 +396,12 @@ function Library:CreateWindow(Config)
             end
 
             Btn.MouseButton1Click:Connect(function() Enabled = not Enabled; Update() end)
-            -- FIX: Update ConfigObjects in Set
-            ConfigObjects[text] = {Type = "Toggle", Value = Enabled, Set = function(val) Enabled = val; ConfigObjects[text].Value = val; Tween(Switch, {BackgroundColor3 = Enabled and CurrentTheme.Accent or Color3.fromRGB(50,50,55)}); Tween(Dot, {Position = Enabled and UDim2.new(1,-18,0.5,-8) or UDim2.new(0,2,0.5,-8)}); callback(Enabled) end}
+            ConfigObjects[text] = {Type = "Toggle", Value = Enabled, Set = function(val) Enabled = val; Tween(Switch, {BackgroundColor3 = Enabled and CurrentTheme.Accent or Color3.fromRGB(50,50,55)}); Tween(Dot, {Position = Enabled and UDim2.new(1,-18,0.5,-8) or UDim2.new(0,2,0.5,-8)}); callback(Enabled) end}
         end
 
         function Elements:Slider(text, min, max, default, callback)
             local Val = default or min
-            local Frame = Instance.new("Frame"); Frame.Size = UDim2.new(1,0,0,60); Frame.Parent = Page; Instance.new("UICorner", Frame).CornerRadius = UDim.new(0,12); Frame.BackgroundTransparency = 0.4; AddToRegistry(Frame, "BackgroundColor3", "Top")
-            local EStroke = Instance.new("UIStroke"); EStroke.Thickness = 1; EStroke.Transparency = 0.6; EStroke.Parent = Frame; AddToRegistry(EStroke, "Color", "Stroke")
-            
+            local Frame = Instance.new("Frame"); Frame.Size = UDim2.new(1,0,0,60); Frame.Parent = Page; Instance.new("UICorner", Frame).CornerRadius = UDim.new(0,12); Frame.BackgroundTransparency = 0.05; AddToRegistry(Frame, "BackgroundColor3", "Top")
             local Lbl = Instance.new("TextLabel"); Lbl.Text = text; Lbl.Size = UDim2.new(1,-30,0,20); Lbl.Position = UDim2.new(0,15,0,10); Lbl.BackgroundTransparency = 1; Lbl.Font = Enum.Font.GothamMedium; Lbl.TextSize = 13; Lbl.TextXAlignment = Enum.TextXAlignment.Left; Lbl.Parent = Frame; AddToRegistry(Lbl, "TextColor3", "Text")
             local Num = Instance.new("TextLabel"); Num.Text = tostring(Val); Num.Size = UDim2.new(0,40,0,20); Num.Position = UDim2.new(1,-55,0,10); Num.BackgroundTransparency = 1; Num.TextColor3 = Color3.fromRGB(150,150,155); Num.Font = Enum.Font.GothamMedium; Num.TextSize = 12; Num.TextXAlignment = Enum.TextXAlignment.Right; Num.Parent = Frame
             local Bar = Instance.new("TextButton"); Bar.Text = ""; Bar.Size = UDim2.new(1,-30,0,6); Bar.Position = UDim2.new(0,15,0,40); Bar.BackgroundColor3 = Color3.fromRGB(50,50,55); Bar.AutoButtonColor = false; Bar.Parent = Frame; Instance.new("UICorner", Bar).CornerRadius = UDim.new(1,0)
@@ -444,30 +430,24 @@ function Library:CreateWindow(Config)
         end
 
         function Elements:Textbox(text, placeholder, callback)
-            local Frame = Instance.new("Frame"); Frame.Size = UDim2.new(1,0,0,70); Frame.Parent = Page; Instance.new("UICorner", Frame).CornerRadius = UDim.new(0,12); Frame.BackgroundTransparency = 0.4; AddToRegistry(Frame, "BackgroundColor3", "Top")
-            local EStroke = Instance.new("UIStroke"); EStroke.Thickness = 1; EStroke.Transparency = 0.6; EStroke.Parent = Frame; AddToRegistry(EStroke, "Color", "Stroke")
-            
+            local Frame = Instance.new("Frame"); Frame.Size = UDim2.new(1,0,0,70); Frame.Parent = Page; Instance.new("UICorner", Frame).CornerRadius = UDim.new(0,12); Frame.BackgroundTransparency = 0.05; AddToRegistry(Frame, "BackgroundColor3", "Top")
             local Lbl = Instance.new("TextLabel"); Lbl.Text = text; Lbl.Size = UDim2.new(1,0,0,20); Lbl.Position = UDim2.new(0,15,0,10); Lbl.BackgroundTransparency = 1; Lbl.Font = Enum.Font.GothamMedium; Lbl.TextSize = 13; Lbl.TextXAlignment = Enum.TextXAlignment.Left; Lbl.Parent = Frame; AddToRegistry(Lbl, "TextColor3", "Text")
-            local Box = Instance.new("TextBox"); Box.Size = UDim2.new(1,-30,0,28); Box.Position = UDim2.new(0,15,0,32); Box.Text = ""; Box.PlaceholderText = placeholder; Box.Font = Enum.Font.GothamMedium; Box.TextSize = 12; Box.Parent = Frame; Box.BackgroundTransparency = 0.5; Instance.new("UICorner", Box).CornerRadius = UDim.new(0,6); AddToRegistry(Box, "BackgroundColor3", "Main"); AddToRegistry(Box, "TextColor3", "Text")
+            local Box = Instance.new("TextBox"); Box.Size = UDim2.new(1,-30,0,28); Box.Position = UDim2.new(0,15,0,32); Box.Text = ""; Box.PlaceholderText = placeholder; Box.Font = Enum.Font.GothamMedium; Box.TextSize = 12; Box.Parent = Frame; Box.BackgroundTransparency = 0.1; Instance.new("UICorner", Box).CornerRadius = UDim.new(0,6); AddToRegistry(Box, "BackgroundColor3", "Main"); AddToRegistry(Box, "TextColor3", "Text")
             
             Box.FocusLost:Connect(function() 
                 ConfigObjects[text].Value = Box.Text
                 callback(Box.Text) 
             end)
-            -- FIX: Update ConfigObjects in Set
-            ConfigObjects[text] = {Type = "Textbox", Value = "", Set = function(val) Box.Text = val; ConfigObjects[text].Value = val; callback(val) end}
+            ConfigObjects[text] = {Type = "Textbox", Value = "", Set = function(val) Box.Text = val; callback(val) end}
         end
 
         function Elements:Dropdown(text, options, callback)
             local Dropped = false
-            local Btn = Instance.new("TextButton"); Btn.Size = UDim2.new(1,0,0,42); Btn.Text = ""; Btn.Parent = Page; Instance.new("UICorner", Btn).CornerRadius = UDim.new(0,12); Btn.BackgroundTransparency = 0.4; AddToRegistry(Btn, "BackgroundColor3", "Top")
-            local EStroke = Instance.new("UIStroke"); EStroke.Thickness = 1; EStroke.Transparency = 0.6; EStroke.Parent = Btn; AddToRegistry(EStroke, "Color", "Stroke")
-            
+            local Btn = Instance.new("TextButton"); Btn.Size = UDim2.new(1,0,0,42); Btn.Text = ""; Btn.Parent = Page; Instance.new("UICorner", Btn).CornerRadius = UDim.new(0,12); Btn.BackgroundTransparency = 0.05; AddToRegistry(Btn, "BackgroundColor3", "Top")
             local Lbl = Instance.new("TextLabel"); Lbl.Text = text; Lbl.Size = UDim2.new(1,-30,1,0); Lbl.Position = UDim2.new(0,15,0,0); Lbl.BackgroundTransparency = 1; Lbl.Font = Enum.Font.GothamMedium; Lbl.TextSize = 13; Lbl.TextXAlignment = Enum.TextXAlignment.Left; Lbl.Parent = Btn; AddToRegistry(Lbl, "TextColor3", "Text")
             local Icon = Instance.new("ImageLabel"); Icon.Image = "rbxassetid://6031091004"; Icon.Size = UDim2.new(0,18,0,18); Icon.Position = UDim2.new(1,-33,0.5,-9); Icon.BackgroundTransparency = 1; Icon.Parent = Btn; Icon.ImageColor3 = Color3.fromRGB(150,150,155)
             
-            local Container = Instance.new("Frame"); Container.Size = UDim2.new(1,0,0,0); Container.Visible = false; Container.ClipsDescendants = true; Container.Parent = Page; Instance.new("UICorner", Container).CornerRadius = UDim.new(0,12); Container.BackgroundTransparency = 0.4; AddToRegistry(Container, "BackgroundColor3", "Top")
-            local CStroke = Instance.new("UIStroke"); CStroke.Thickness = 1; CStroke.Transparency = 0.6; CStroke.Parent = Container; AddToRegistry(CStroke, "Color", "Stroke")
+            local Container = Instance.new("Frame"); Container.Size = UDim2.new(1,0,0,0); Container.Visible = false; Container.ClipsDescendants = true; Container.Parent = Page; Instance.new("UICorner", Container).CornerRadius = UDim.new(0,12); Container.BackgroundTransparency = 0.05; AddToRegistry(Container, "BackgroundColor3", "Top")
             local List = Instance.new("UIListLayout"); List.SortOrder = Enum.SortOrder.LayoutOrder; List.Parent = Container
 
             local function Select(opt)
@@ -514,8 +494,7 @@ function Library:CreateWindow(Config)
         
         ConfigList = {}
         for _, file in pairs(listfiles(Window.ConfigFolder)) do
-            -- Improved path parsing
-            local name = file:match("([^/\\]+)$"):gsub("%.json$", "")
+            local name = file:gsub(Window.ConfigFolder.."\\", ""):gsub(Window.ConfigFolder.."/", ""):gsub(".json", "")
             table.insert(ConfigList, name)
         end
         Dropdown.Refresh(ConfigList)
