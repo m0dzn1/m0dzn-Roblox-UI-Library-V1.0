@@ -4,7 +4,7 @@ A sleek, modern, and fully customizable UI Library for Roblox. Features a built-
 
 ## EXAMPLE
 
-![image alt](https://github.com/m0dzn1/m0dzn-ui-lib-test/blob/cb57b9e9de684354d7d270b10a3b514a315e638f/Example%20Image.png)
+![image alt](https://raw.githubusercontent.com/m0dzn1/m0dzn-Roblox-UI-Library-V1.0/refs/heads/main/Example.png)
 ##
 
 ## 🚀 Loading the Library
