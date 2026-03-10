@@ -13,7 +13,7 @@ A sleek, modern, and fully customizable UI Library for Roblox. Features a built-
 Copy the script below and paste it into your executor.
 
 ```lua
-local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/m0dzn1/m0dzn-Roblox-UI-Library-V1.0/refs/heads/main/m0dzn-ui-lib.lua"))()
+local m0dznV1 = loadstring(game:HttpGet("https://raw.githubusercontent.com/m0dzn1/m0dzn-Roblox-UI-Library-V1.0/refs/heads/main/m0dzn-ui-lib.lua"))()
 ```
 
 ---
@@ -23,7 +23,7 @@ local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/m0dzn
 This sets up the main GUI window. The folder name for configs will match your Title.
 
 ```lua
-local Window = Library:CreateWindow({
+local Window = m0dznV1:CreateWindow({
     Title = "TEST HUB",                  -- Title shown at top
     Keybind = Enum.KeyCode.RightControl  -- Key to hide/show UI
 })
