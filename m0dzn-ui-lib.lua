@@ -38,18 +38,17 @@ local SFXEnabled = true
 local Registry = {}
 local ConfigObjects = {}
 
--- modern UI sounds used by popular Roblox UI libraries
--- swap any ID here with your own from the Roblox toolbox if you want something different
+-- all sounds below are uploaded by Roblox so they are always public and will never get blocked
 local Sounds = {
-    Hover        = "rbxassetid://3868133279",  -- clean subtle hover tick
-    Click        = "rbxassetid://3868133279",  -- same clean click
-    ToggleOn     = "rbxassetid://8292507512",  -- soft toggle on pop
-    ToggleOff    = "rbxassetid://8292507812",  -- soft toggle off pop
-    Slide        = "rbxassetid://3868133279",  -- light tick for slider drag
-    Notification = "rbxassetid://6647898215",  -- notification chime
-    Back         = "rbxassetid://3868133279",  -- back tick
-    Error        = "rbxassetid://9125402735",  -- short error tone
-    Tab          = "rbxassetid://3868133279"   -- tab click
+    Hover        = "rbxassetid://6042053626",  -- soft button hover tick
+    Click        = "rbxassetid://6042054037",  -- clean button click release
+    ToggleOn     = "rbxassetid://6979299092",  -- checkpoint ding for toggle on
+    ToggleOff    = "rbxassetid://6324790483",  -- soft click for toggle off
+    Slide        = "rbxassetid://6324790483",  -- same soft click for slider
+    Notification = "rbxassetid://6647898215",  -- modern notification chime
+    Back         = "rbxassetid://6042053626",  -- reuse hover for back
+    Error        = "rbxassetid://6737582037",  -- glass break for errors
+    Tab          = "rbxassetid://6042054037"   -- clean click for tab switch
 }
 
 local function PlaySound(id)
@@ -179,7 +178,7 @@ function Library:CreateWindow(Config)
     AddToRegistry(MainFrame, "BackgroundColor3", "Main")
 
     local Stroke = Instance.new("UIStroke")
-    Stroke.Thickness = 3
+    Stroke.Thickness = 6
     Stroke.Transparency = 0.5
     Stroke.Parent = MainFrame
     AddToRegistry(Stroke, "Color", "Stroke")
