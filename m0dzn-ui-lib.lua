@@ -1,4 +1,4 @@
--- m0dzn ui library v1.0
+-- m0dzn ui library v2.0
 -- dark grey theme by default smooth edges full module set
 
 local TweenService = game:GetService("TweenService")
@@ -159,7 +159,7 @@ function Library:CreateWindow(Config)
     AddToRegistry(MainFrame, "BackgroundColor3", "Main")
 
     local Stroke = Instance.new("UIStroke")
-    Stroke.Thickness = 1
+    Stroke.Thickness = 6
     Stroke.Transparency = 0.5
     Stroke.Parent = MainFrame
     AddToRegistry(Stroke, "Color", "Stroke")
