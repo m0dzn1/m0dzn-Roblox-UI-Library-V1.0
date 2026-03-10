@@ -1,119 +1,94 @@
--- 1. LOAD THE LIBRARY
+-- 1. load the library
 local m0dznV1 = loadstring(game:HttpGet("https://raw.githubusercontent.com/m0dzn1/m0dzn-Roblox-UI-Library-V1.0/refs/heads/main/m0dzn-ui-lib.lua"))()
 
--- 2. CREATE THE WINDOW
+-- 2. create the window
 local Window = m0dznV1:CreateWindow({
-    Title = "TEST HUB",                      -- Change the name of your hub here
-    Keybind = Enum.KeyCode.RightControl      -- The key to Open/Close the menu
+    Title = "TEST HUB",
+    Keybind = Enum.KeyCode.M  -- press M to open and close the menu
 })
 
--- 3. CREATE TABS
--- You can name these whatever you want (e.g., "Farming", "Combat", "Misc")
-local MainTab = Window:Tab("Main Features")
-local PlayerTab = Window:Tab("Player Stats")
-local MiscTab = Window:Tab("Misc & Text")
+-- 3. create tabs
+local TestTab = Window:Tab("TEST")
 
---[[ ----------------------------------------------
-TAB 1: MAIN FEATURES (Button, Toggle, Notification)
----------------------------------------------------]]
+-- section header
+TestTab:Section("test all modules")
 
-MainTab:Section("Basic Interactions") -- Creates a section title
+-- label: static text, good for info
+TestTab:Label("this is a label element")
 
--- BUTTON
--- Buttons run code once when clicked.
-MainTab:Button("Test Notification", function()
-    -- PUT YOUR CODE HERE
-    -- This triggers a notification at the bottom right
-    Window:Notification("Success! Button works.")
+-- paragraph: longer block of text
+TestTab:Paragraph("about this hub", "this ui library was made by m0dzn. it supports toggles, sliders, dropdowns, color pickers, keybinds, and more. all settings are saved through the config tab.")
+
+-- button: runs code once when clicked
+TestTab:Button("Test Button", function()
+    Window:Notification("button works!")
 end)
 
--- TOGGLE
--- Toggles turn things ON and OFF (good for loops).
-MainTab:Toggle("Auto Print Loop", false, function(State)
-    -- 'State' is true (ON) or false (OFF)
-    getgenv().TestingLoop = State -- Set a global variable
-
-    -- Example loop:
+-- toggle: on/off switch
+TestTab:Toggle("Test Toggle", false, function(State)
+    -- State is true when on, false when off
+    getgenv().TestLoop = State
     task.spawn(function()
-        while getgenv().TestingLoop do
-            print("Loop is running...") -- PUT CODE TO REPEAT HERE
-            task.wait(1)               -- How fast the loop runs
+        while getgenv().TestLoop do
+            print("loop running")
+            task.wait(1)
         end
     end)
-
-    if State then
-        Window:Notification("Loop Started!")
-    else
-        Window:Notification("Loop Stopped!")
-    end
 end)
 
--- DROPDOWN
--- Allows selecting one item from a list.
-MainTab:Dropdown("Select Weapon", {"Sword", "Gun", "Knife", "Bow"}, function(Option)
-    -- 'Option' is the text they picked
-    print("User selected: " .. Option)
-    Window:Notification("Equipped: " .. Option)
-    -- Put code to equip item here
+-- slider: picks a number in a range
+TestTab:Slider("Test Slider", 0, 100, 50, function(Value)
+    print("slider value:", Value)
 end)
 
---[[-------------------------------------
-TAB 2: PLAYER STATS (Slider, Value/Input)
------------------------------------------]]
-
-PlayerTab:Section("Character Modifiers")
-
--- SLIDER
--- Used for Speed, Jump, FOV, etc. (Range of numbers).
--- Format: "Name", Min, Max, Default, Callback
-PlayerTab:Slider("WalkSpeed", 16, 200, 16, function(Value)
-    -- 'Value' is the number on the slider
-    game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = Value
+-- dropdown: pick one option from a list
+TestTab:Dropdown("Test Dropdown", {"Option A", "Option B", "Option C"}, function(Option)
+    print("selected:", Option)
+    Window:Notification("picked " .. Option)
 end)
 
-PlayerTab:Slider("JumpPower", 50, 300, 50, function(Value)
-    game.Players.LocalPlayer.Character.Humanoid.JumpPower = Value
+-- textbox: user types something in
+TestTab:Textbox("Test Textbox", "type something here...", function(Text)
+    print("typed:", Text)
 end)
 
--- VALUE (INPUT)
--- Used for specific numbers like Hitbox Size or TP coordinates.
-PlayerTab:Value("Hitbox Size", "10", function(Value)
-    -- 'Value' is what the user typed in the box
-    print("Hitbox size changed to: " .. Value)
-
-    Window:Notification("Hitbox set to " .. Value)
-
-    -- REAL USAGE EXAMPLE:
-    -- _G.HeadSize = tonumber(Value)
+-- keybind: user sets a key
+TestTab:Keybind("Test Keybind", Enum.KeyCode.E, function(Key)
+    print("keybind set to:", Key.Name)
 end)
 
---[[--------------------------
-TAB 3: MISC (Keybind, Textbox)
-------------------------------]]
-
-MiscTab:Section("Text & Binds")
-
--- KEYBIND
--- Lets the user choose a key to do something.
-MiscTab:Keybind("Fly Toggle Key", Enum.KeyCode.F, function(Key)
-    -- This runs when they CHANGE the key, not when they press it.
-    print("Keybind changed to: " .. Key.Name)
-    Window:Notification("Keybind is now: " .. Key.Name)
+-- value: small inline input box, good for numbers
+TestTab:Value("Test Value", "10", function(Value)
+    print("value changed to:", Value)
 end)
 
--- TEXTBOX
--- Used for typing names, messages, or scripts.
-MiscTab:Textbox("Print Message", "Type here...", function(Text)
-    -- 'Text' is what they typed
-    print("User typed: " .. Text)
-    Window:Notification("You typed: " .. Text)
+-- color picker: pick an RGB color
+TestTab:ColorPicker("Test Color", Color3.fromRGB(100, 180, 255), function(Color)
+    print("color picked:", Color)
 end)
 
-MiscTab:Section("Credits")
-MiscTab:Button("Copy Discord Link", function()
-    setclipboard("discord.gg/your-link") -- Copies text to their clipboard
-    Window:Notification("Link copied to clipboard!")
+-- section: groups things together
+TestTab:Section("notification types")
+
+-- all 5 notification types
+TestTab:Button("Default Notif", function()
+    Window:Notification("this is a default notification")
 end)
 
--- End of script
-Window:Notification("Test Script Loaded!")
+TestTab:Button("Success Notif", function()
+    Window:Notification("action completed successfully", "success")
+end)
+
+TestTab:Button("Warning Notif", function()
+    Window:Notification("be careful with this setting", "warning")
+end)
+
+TestTab:Button("Error Notif", function()
+    Window:Notification("something went wrong", "error")
+end)
+
+TestTab:Button("Info Notif", function()
+    Window:Notification("here is some useful info", "info")
+end)
+
+Window:Notification("test script loaded", "success")
