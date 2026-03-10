@@ -1,6 +1,6 @@
 # M0DZN UI LIBRARY V1.0
 
-A sleek, modern, and fully customizable UI Library for Roblox. Features a built-in config system, modern animations, custom themes, and 9 different rainbow modes.
+A clean, modern, and fully customizable UI library for Roblox. Light grey theme by default, smooth rounded corners, full config system, and 9 rainbow modes.
 
 ## EXAMPLE
 
@@ -8,9 +8,7 @@ A sleek, modern, and fully customizable UI Library for Roblox. Features a built-
 
 ---
 
-## 🚀 Loading the Library
-
-Copy the script below and paste it into your executor.
+## loading the library
 
 ```lua
 local m0dznV1 = loadstring(game:HttpGet("https://raw.githubusercontent.com/m0dzn1/m0dzn-Roblox-UI-Library-V1.0/refs/heads/main/m0dzn-ui-lib.lua"))()
@@ -18,176 +16,202 @@ local m0dznV1 = loadstring(game:HttpGet("https://raw.githubusercontent.com/m0dzn
 
 ---
 
-## 🛠️ Creating a Window
-
-This sets up the main GUI window. The folder name for configs will match your Title.
+## creating a window
 
 ```lua
 local Window = m0dznV1:CreateWindow({
-    Title = "TEST HUB",                  -- Title shown at top
-    Keybind = Enum.KeyCode.RightControl  -- Key to hide/show UI
+    Title = "TEST HUB",
+    Keybind = Enum.KeyCode.M  -- default is M, press to show/hide with animation
 })
 
--- Create a Tab
 local MainTab = Window:Tab("Main")
 ```
 
 ---
 
-## 📜 Functions & Documentation
-
-Here are all the elements you can add to your UI.
+## functions and documentation
 
 ### 1. Section
 
-Used to organize features into categories.
+Groups related elements together with a small label above them.
 
 ```lua
-MainTab:Section("Main Features")
+MainTab:Section("Combat Features")
 ```
 
-### 2. Button
+### 2. Label
 
-A simple clickable button.
+A single static line of text. Good for info or sub-titles.
 
 ```lua
--- Text, Callback
+MainTab:Label("speed is currently modified")
+```
+
+### 3. Paragraph
+
+A block of longer text with a title and a body. Auto-resizes to fit.
+
+```lua
+MainTab:Paragraph("about this script", "this hub was made by m0dzn. use the config tab to save your settings.")
+```
+
+### 4. Button
+
+Runs a function once when clicked.
+
+```lua
 MainTab:Button("Click Me", function()
-    print("Button clicked!")
+    print("clicked!")
 end)
 ```
 
-### 3. Toggle
+### 5. Toggle
 
-A switch for looping scripts (Auto Farm, Auto Heal, etc).
+An on/off switch. Good for loops and features you want to enable or disable.
 
 ```lua
--- Text, Default (true/false), Callback
-MainTab:Toggle("Auto Farm", false, function(Value)
-    getgenv().AutoFarm = Value
-
+MainTab:Toggle("Auto Farm", false, function(State)
+    getgenv().AutoFarm = State
     while getgenv().AutoFarm do
-        print("Farming...")
+        print("farming...")
         task.wait(1)
     end
 end)
 ```
 
-### 4. Slider
+### 6. Slider
 
-Allows selecting a number within a range.
+Lets the user pick a number within a range.
 
 ```lua
--- Text, Min, Max, Default, Callback
+-- text, min, max, default, callback
 MainTab:Slider("WalkSpeed", 16, 200, 16, function(Value)
     game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = Value
 end)
 ```
 
-### 5. Value (Input Box)
+### 7. Dropdown
 
-A text box that allows users to type a specific number or text. Great for Hitbox sizes.
-
-```lua
--- Text, Default Input, Callback
-MainTab:Value("Hitbox Size", "10", function(Value)
-    print("Hitbox changed to: " .. Value)
-end)
-```
-
-### 6. Dropdown
-
-A list of options for the user to select.
+A list of options to choose one from.
 
 ```lua
--- Text, Options Table, Callback
 MainTab:Dropdown("Select Weapon", {"Sword", "Gun", "Knife"}, function(Option)
-    print("User selected: " .. Option)
-end)
-```
-
-### 7. Keybind
-
-Allows the user to set a custom key for an action.
-
-```lua
--- Text, Default Key, Callback
-MainTab:Keybind("Fly Key", Enum.KeyCode.F, function(Key)
-    print("Keybind set to: " .. Key.Name)
+    print("selected:", Option)
 end)
 ```
 
 ### 8. Textbox
 
-An input box for typing messages or IDs.
+An input box where the user can type text or numbers.
 
 ```lua
--- Text, Placeholder, Callback
-MainTab:Textbox("Enter Message", "Type here...", function(Text)
-    print("Typed: " .. Text)
+MainTab:Textbox("Enter Message", "type here...", function(Text)
+    print("typed:", Text)
+end)
+```
+
+### 9. Keybind
+
+Lets the user assign a key to something.
+
+```lua
+MainTab:Keybind("Fly Key", Enum.KeyCode.F, function(Key)
+    print("keybind set to:", Key.Name)
+end)
+```
+
+### 10. Value
+
+A small inline input box, good for specific numbers like hitbox size.
+
+```lua
+MainTab:Value("Hitbox Size", "10", function(Value)
+    _G.HeadSize = tonumber(Value)
+end)
+```
+
+### 11. Color Picker
+
+An HSV color picker with a saturation/value square, hue bar, and hex preview.
+
+```lua
+MainTab:ColorPicker("ESP Color", Color3.fromRGB(255, 100, 100), function(Color)
+    _G.ESPColor = Color
 end)
 ```
 
 ---
 
-## 🔔 Notifications
+## notifications
 
-Send a warning, credit, or any message to the user at the bottom right corner.
+Notifications appear in the bottom right corner and slide in with a progress bar. There are 5 types.
 
 ```lua
-Window:Notification("Config Saved!")
-Window:Notification("⚠️ Warning: Dangerous Feature")
-Window:Notification("Script by M0dzn")
+Window:Notification("something happened")                  -- default
+Window:Notification("saved successfully", "success")       -- green
+Window:Notification("check your settings", "warning")      -- yellow
+Window:Notification("something went wrong", "error")       -- red
+Window:Notification("here is some info", "info")           -- blue
 ```
 
 ---
 
-## ⚙️ Settings & Customization
+## keybind behavior
 
-The **Settings Tab** is built-in automatically. It allows the user to customize how the UI looks and feels without needing to change the script.
-
-1. **Rainbow Edge** (Toggle) — Turns on/off the animated RGB gradient stroke (border) around the UI window.
-2. **Rainbow Type** (Dropdown) — Changes the animation style of the rainbow. Options: Linear Gradient, Animated/Cycling, Smooth Fading, Step/Band, Pulse, Radial, Neon/Glowing, Pastel, Vertical Fade.
-3. **Theme** (Dropdown) — Instantly changes the entire color scheme of the UI. Options: Dark (Default), White, Purple, Blue, Red, Yellow, Green.
-4. **Menu Keybind** (Keybind) — Allows the user to change the key used to Open/Close the UI.
-5. **UI SFX** (Toggle) — Turns the sound effects (Clicks, Hover, Toggle sounds) ON or OFF.
-6. **Destroy UI** (Button) — Completely removes the UI from the game screen.
-
-### 🌈 Rainbow Modes (9 Types)
-
-1. **Linear Gradient** (Solid Rainbow)
-2. **Animated/Cycling** (Moving Colors)
-3. **Smooth Fading Gradient**
-4. **Step/Band Rainbow**
-5. **Rainbow Pulse**
-6. **Radial Rainbow**
-7. **Neon/Glowing Rainbow**
-8. **Pastel Rainbow**
-9. **Vertical/Horizontal Fade**
-
-### 🎨 Themes (7 Presets)
-
-1. **Dark** (Default)
-2. **White** (Light Mode)
-3. **Purple**
-4. **Blue**
-5. **Red**
-6. **Yellow**
-7. **Green**
+Press the keybind (default `M`) to open or close the UI. Both directions have a smooth animation — the window shrinks down when hiding and expands when showing.
 
 ---
 
-## 💾 Config System
+## unloading
 
-The **Config Tab** is the save system. It allows users to save their settings (like Auto Farm toggle state, WalkSpeed value, etc.) so they don't have to set them up again every time they execute the script.
+`Window:Unload()` plays the close animation first, then destroys the UI completely.
 
-**How it works:**
-The script automatically creates a folder in the workspace named after your `Window.Title`, and inside that creates a `Config` folder.
+```lua
+Window:Unload()
+```
 
-**Functions:**
+`Window:Destroy()` does the same thing (kept for compatibility).
 
-1. **Config Name** (Textbox) — Type the name you want to give your save file (e.g., `"LegitSettings"` or `"RageMode"`).
-2. **Select Config** (Dropdown) — Shows a list of all saved config files found in the folder.
-3. **Refresh List** (Button) — Updates the dropdown list (useful if you manually deleted or added a file).
-4. **Save Config** (Button) — Saves the current state of all Toggles, Sliders, Keybinds, and Values to the file named in the Textbox.
-5. **Load Config** (Button) — Reads the selected file from the Dropdown and automatically updates all elements to match the saved settings.
+---
+
+## settings and customization
+
+The **Settings tab** is added automatically. Options:
+
+1. **Rainbow Edge** — animated RGB border around the window
+2. **Rainbow Type** — style of the rainbow animation (9 options)
+3. **Theme** — full color scheme change (Light, Dark, White, Purple, Blue, Red, Yellow, Green)
+4. **Menu Keybind** — change the open/close key
+5. **UI SFX** — toggle sound effects on or off
+6. **Unload UI** — removes the UI with an animation
+
+### rainbow modes
+
+1. Linear Gradient
+2. Animated/Cycling
+3. Smooth Fading Gradient
+4. Step/Band
+5. Rainbow Pulse
+6. Radial
+7. Neon/Glowing
+8. Pastel
+9. Vertical/Horizontal Fade
+
+### themes
+
+Light (default), Dark, White, Purple, Blue, Red, Yellow, Green
+
+---
+
+## config system
+
+The **Config tab** is added automatically. It saves and loads the state of all toggles, sliders, dropdowns, keybinds, and value inputs.
+
+1. **Config Name** — type the name for your save file
+2. **Select Config** — pick a saved config from the list
+3. **Refresh List** — updates the dropdown with the latest saved files
+4. **Save Config** — saves all current settings to a file
+5. **Load Config** — loads a saved file and updates all elements
+6. **Delete Config** — deletes the selected config file
+
+Files are stored in a folder named after your `Window.Title`.
