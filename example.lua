@@ -1,5 +1,5 @@
 -- 1. load the library
-local m0dznV1 = loadstring(game:HttpGet("https://raw.githubusercontent.com/m0dzn1/m0dzn-Roblox-UI-Library-V1.0/refs/heads/main/m0dzn-ui-libary.lua"))()
+local m0dznV1 = loadstring(game:HttpGet("https://raw.githubusercontent.com/m0dzn1/m0dzn-Roblox-UI-Library-V1.0/refs/heads/main/m0dzn-ui-libary-V1.lua"))()
 
 -- 2. create the window
 local Window = m0dznV1:CreateWindow({
