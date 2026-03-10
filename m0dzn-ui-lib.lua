@@ -1,6 +1,5 @@
 -- m0dzn ui library v1.0
--- modern ui maybe
--- config system
+-- light grey theme by default, smooth edges, full module set
 
 local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
@@ -13,8 +12,6 @@ local LocalPlayer = Players.LocalPlayer
 
 local Library = {}
 
--- every interactive element registers its value here automatically
--- this is what the config system reads when saving
 Library.Flags = {}
 
 local RainbowEnabled = false
@@ -47,17 +44,18 @@ local function PlaySound(id)
     end)
 end
 
--- dark is the default theme, obsidian black + crimson red
+-- light grey is the default, grey accent
 local Themes = {
-    Dark   = {Main = Color3.fromRGB(6, 6, 8),      Top = Color3.fromRGB(14, 14, 18),   Text = Color3.fromRGB(220, 220, 230), Accent = Color3.fromRGB(210, 30, 45),  Stroke = Color3.fromRGB(35, 12, 15)},
-    White  = {Main = Color3.fromRGB(243, 243, 243), Top = Color3.fromRGB(255, 255, 255), Text = Color3.fromRGB(20, 20, 20),   Accent = Color3.fromRGB(0, 100, 210),  Stroke = Color3.fromRGB(220, 220, 225)},
-    Purple = {Main = Color3.fromRGB(18, 15, 22),    Top = Color3.fromRGB(30, 25, 35),   Text = Color3.fromRGB(245, 240, 255), Accent = Color3.fromRGB(160, 90, 255), Stroke = Color3.fromRGB(50, 45, 60)},
-    Blue   = {Main = Color3.fromRGB(12, 18, 28),    Top = Color3.fromRGB(25, 32, 45),   Text = Color3.fromRGB(240, 245, 255), Accent = Color3.fromRGB(70, 130, 255), Stroke = Color3.fromRGB(45, 55, 75)},
-    Red    = {Main = Color3.fromRGB(6, 6, 8),       Top = Color3.fromRGB(14, 14, 18),   Text = Color3.fromRGB(220, 220, 230), Accent = Color3.fromRGB(210, 30, 45),  Stroke = Color3.fromRGB(35, 12, 15)},
-    Yellow = {Main = Color3.fromRGB(22, 22, 12),    Top = Color3.fromRGB(35, 35, 20),   Text = Color3.fromRGB(255, 255, 240), Accent = Color3.fromRGB(255, 200, 80), Stroke = Color3.fromRGB(60, 60, 40)},
-    Green  = {Main = Color3.fromRGB(12, 22, 15),    Top = Color3.fromRGB(20, 35, 25),   Text = Color3.fromRGB(240, 255, 245), Accent = Color3.fromRGB(60, 220, 130), Stroke = Color3.fromRGB(40, 60, 50)},
+    Dark   = {Main = Color3.fromRGB(6, 6, 8),       Top = Color3.fromRGB(14, 14, 18),    Text = Color3.fromRGB(220, 220, 230), Accent = Color3.fromRGB(210, 30, 45),   Stroke = Color3.fromRGB(35, 12, 15)},
+    Light  = {Main = Color3.fromRGB(235, 235, 238),  Top = Color3.fromRGB(245, 245, 248),  Text = Color3.fromRGB(30, 30, 35),    Accent = Color3.fromRGB(110, 110, 120), Stroke = Color3.fromRGB(200, 200, 205)},
+    White  = {Main = Color3.fromRGB(243, 243, 243),  Top = Color3.fromRGB(255, 255, 255),  Text = Color3.fromRGB(20, 20, 20),    Accent = Color3.fromRGB(0, 100, 210),   Stroke = Color3.fromRGB(220, 220, 225)},
+    Purple = {Main = Color3.fromRGB(18, 15, 22),     Top = Color3.fromRGB(30, 25, 35),     Text = Color3.fromRGB(245, 240, 255), Accent = Color3.fromRGB(160, 90, 255),  Stroke = Color3.fromRGB(50, 45, 60)},
+    Blue   = {Main = Color3.fromRGB(12, 18, 28),     Top = Color3.fromRGB(25, 32, 45),     Text = Color3.fromRGB(240, 245, 255), Accent = Color3.fromRGB(70, 130, 255),  Stroke = Color3.fromRGB(45, 55, 75)},
+    Red    = {Main = Color3.fromRGB(6, 6, 8),        Top = Color3.fromRGB(14, 14, 18),     Text = Color3.fromRGB(220, 220, 230), Accent = Color3.fromRGB(210, 30, 45),   Stroke = Color3.fromRGB(35, 12, 15)},
+    Yellow = {Main = Color3.fromRGB(22, 22, 12),     Top = Color3.fromRGB(35, 35, 20),     Text = Color3.fromRGB(255, 255, 240), Accent = Color3.fromRGB(255, 200, 80),  Stroke = Color3.fromRGB(60, 60, 40)},
+    Green  = {Main = Color3.fromRGB(12, 22, 15),     Top = Color3.fromRGB(20, 35, 25),     Text = Color3.fromRGB(240, 255, 245), Accent = Color3.fromRGB(60, 220, 130),  Stroke = Color3.fromRGB(40, 60, 50)},
 }
-local CurrentTheme = Themes.Dark
+local CurrentTheme = Themes.Light  -- default is now light grey
 
 local function AddToRegistry(obj, prop, themeKey)
     table.insert(Registry, {Object = obj, Property = prop, Type = themeKey})
@@ -82,7 +80,6 @@ end
 function Library:ToggleRainbow(bool) RainbowEnabled = bool end
 function Library:SetRainbowType(val) RainbowType = val end
 
--- saves all flag values to a json file
 function Library:SaveConfig(configName, configFolder)
     if not isfolder(configFolder) then makefolder(configFolder) end
     local data = {}
@@ -92,7 +89,6 @@ function Library:SaveConfig(configName, configFolder)
     writefile(configFolder .. "/" .. configName .. ".json", HttpService:JSONEncode(data))
 end
 
--- reads a config file and updates all ui elements to match what was saved
 function Library:LoadConfig(path)
     if not isfile(path) then return false end
     local ok, data = pcall(function()
@@ -111,7 +107,7 @@ end
 function Library:CreateWindow(Config)
     local Window = {}
     local Title = Config.Title or "m0dzn ui"
-    local Keybind = Config.Keybind
+    local Keybind = Config.Keybind or Enum.KeyCode.M  -- default keybind is M
 
     Window.RootFolder = Title
     Window.ConfigFolder = Title .. "/Config"
@@ -127,7 +123,6 @@ function Library:CreateWindow(Config)
         ScreenGui.Parent = gethui()
     end
 
-    -- main window, starts invisible and tweens open
     local MainFrame = Instance.new("Frame")
     MainFrame.Size = UDim2.new(0, 0, 0, 0)
     MainFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
@@ -135,29 +130,18 @@ function Library:CreateWindow(Config)
     MainFrame.ClipsDescendants = true
     MainFrame.BackgroundTransparency = 0
     MainFrame.Parent = ScreenGui
-    Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 14)
+    Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 16)
     AddToRegistry(MainFrame, "BackgroundColor3", "Main")
 
-    -- outer border, crimson by default
     local Stroke = Instance.new("UIStroke")
     Stroke.Thickness = 1
-    Stroke.Transparency = 0.35
+    Stroke.Transparency = 0.5
     Stroke.Parent = MainFrame
-    AddToRegistry(Stroke, "Color", "Accent")
+    AddToRegistry(Stroke, "Color", "Stroke")
 
     local Gradient = Instance.new("UIGradient")
     Gradient.Parent = Stroke
     Gradient.Enabled = false
-
-    -- thin crimson line at the top of the window
-    local TopLine = Instance.new("Frame")
-    TopLine.Size = UDim2.new(1, 0, 0, 2)
-    TopLine.Position = UDim2.new(0, 0, 0, 0)
-    TopLine.BorderSizePixel = 0
-    TopLine.ZIndex = 6
-    TopLine.Parent = MainFrame
-    Instance.new("UICorner", TopLine).CornerRadius = UDim.new(0, 14)
-    AddToRegistry(TopLine, "BackgroundColor3", "Accent")
 
     -- rainbow border loop
     task.spawn(function()
@@ -218,20 +202,18 @@ function Library:CreateWindow(Config)
                 end
             else
                 Gradient.Enabled = false
-                Stroke.Color = CurrentTheme.Accent
+                Stroke.Color = CurrentTheme.Stroke
             end
             RunService.RenderStepped:Wait()
         end
     end)
 
-    -- topbar is invisible, just used for dragging
     local Topbar = Instance.new("Frame")
     Topbar.Size = UDim2.new(1, 0, 0, 52)
     Topbar.BackgroundTransparency = 1
     Topbar.ZIndex = 4
     Topbar.Parent = MainFrame
 
-    -- small red square icon before the title
     local TitleIcon = Instance.new("Frame")
     TitleIcon.Size = UDim2.new(0, 8, 0, 8)
     TitleIcon.Position = UDim2.new(0, 18, 0.5, -4)
@@ -270,7 +252,6 @@ function Library:CreateWindow(Config)
     TabList.SortOrder = Enum.SortOrder.LayoutOrder
     TabList.Parent = TabContainer
 
-    -- player info card pinned to the bottom of the sidebar
     local ProfileFrame = Instance.new("Frame")
     ProfileFrame.Size = UDim2.new(0, 138, 0, 44)
     ProfileFrame.Position = UDim2.new(0, 0, 1, -44)
@@ -279,7 +260,6 @@ function Library:CreateWindow(Config)
     Instance.new("UICorner", ProfileFrame).CornerRadius = UDim.new(0, 12)
     AddToRegistry(ProfileFrame, "BackgroundColor3", "Top")
 
-    -- left accent bar on the profile card
     local ProfileAccent = Instance.new("Frame")
     ProfileAccent.Size = UDim2.new(0, 3, 0.6, 0)
     ProfileAccent.Position = UDim2.new(0, 0, 0.2, 0)
@@ -292,12 +272,12 @@ function Library:CreateWindow(Config)
     PStroke.Thickness = 1
     PStroke.Transparency = 0.75
     PStroke.Parent = ProfileFrame
-    AddToRegistry(PStroke, "Color", "Accent")
+    AddToRegistry(PStroke, "Color", "Stroke")
 
     local Avatar = Instance.new("ImageLabel")
     Avatar.Size = UDim2.new(0, 28, 0, 28)
     Avatar.Position = UDim2.new(0, 11, 0.5, -14)
-    Avatar.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+    Avatar.BackgroundColor3 = Color3.fromRGB(200, 200, 205)
     Avatar.Image = Players:GetUserThumbnailAsync(LocalPlayer.UserId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size48x48)
     Avatar.Parent = ProfileFrame
     Instance.new("UICorner", Avatar).CornerRadius = UDim.new(1, 0)
@@ -320,18 +300,17 @@ function Library:CreateWindow(Config)
     UsrName.BackgroundTransparency = 1
     UsrName.Font = Enum.Font.Gotham
     UsrName.TextSize = 10
-    UsrName.TextTransparency = 0.5
+    UsrName.TextTransparency = 0.4
     UsrName.TextXAlignment = Enum.TextXAlignment.Left
     UsrName.Parent = ProfileFrame
     AddToRegistry(UsrName, "TextColor3", "Text")
 
-    -- thin vertical line between the sidebar and the page content
     local Divider = Instance.new("Frame")
     Divider.Size = UDim2.new(0, 1, 1, 0)
     Divider.Position = UDim2.new(0, 148, 0, 0)
-    Divider.BackgroundTransparency = 0.7
+    Divider.BackgroundTransparency = 0.75
     Divider.Parent = Content
-    AddToRegistry(Divider, "BackgroundColor3", "Accent")
+    AddToRegistry(Divider, "BackgroundColor3", "Stroke")
 
     local PageContainer = Instance.new("Frame")
     PageContainer.Size = UDim2.new(1, -162, 1, 0)
@@ -339,7 +318,7 @@ function Library:CreateWindow(Config)
     PageContainer.BackgroundTransparency = 1
     PageContainer.Parent = Content
 
-    -- open animation
+    -- open animation on spawn
     Tween(MainFrame, {Size = UDim2.new(0, 650, 0, 430)}, 0.65)
 
     -- drag logic
@@ -363,60 +342,68 @@ function Library:CreateWindow(Config)
         end
     end)
 
-    -- keybind to show or hide the window
+    -- keybind to show/hide with animation both ways
+    local isOpen = true
+    local openSize = UDim2.new(0, 650, 0, 430)
+
     UserInputService.InputBegan:Connect(function(input, gpe)
         if not gpe and Keybind and input.KeyCode == Keybind then
-            MainFrame.Visible = not MainFrame.Visible
-            if MainFrame.Visible then
-                MainFrame.Size = UDim2.new(0, 0, 0, 0)
-                Tween(MainFrame, {Size = UDim2.new(0, 650, 0, 430)}, 0.5)
+            if isOpen then
+                -- hide animation: shrink down then invisible
+                Tween(MainFrame, {Size = UDim2.new(0, 650, 0, 0)}, 0.45)
+                task.wait(0.45)
+                MainFrame.Visible = false
+            else
+                -- show animation: pop open from nothing
+                MainFrame.Visible = true
+                MainFrame.Size = UDim2.new(0, 650, 0, 0)
+                Tween(MainFrame, {Size = openSize}, 0.5)
             end
+            isOpen = not isOpen
         end
     end)
 
-    -- notification toast that slides in from the bottom right
-    function Window:Notification(text)
+    -- notification toast, slides in from the bottom right
+    function Window:Notification(text, notifType)
         task.spawn(function()
             PlaySound(Sounds.Notification)
+
+            -- pick accent color based on type
+            local typeColor = CurrentTheme.Accent
+            if notifType == "success" then typeColor = Color3.fromRGB(60, 200, 100)
+            elseif notifType == "warning" then typeColor = Color3.fromRGB(240, 180, 40)
+            elseif notifType == "error"   then typeColor = Color3.fromRGB(220, 60, 60)
+            elseif notifType == "info"    then typeColor = Color3.fromRGB(80, 150, 255)
+            end
+
             local Notif = Instance.new("Frame")
             Notif.ZIndex = 100
-            Notif.Size = UDim2.new(0, 268, 0, 48)
-            Notif.Position = UDim2.new(1, 20, 1, -68)
+            Notif.Size = UDim2.new(0, 272, 0, 50)
+            Notif.Position = UDim2.new(1, 20, 1, -70)
             Notif.Parent = ScreenGui
             Notif.BackgroundTransparency = 0.04
-            Instance.new("UICorner", Notif).CornerRadius = UDim.new(0, 12)
+            Instance.new("UICorner", Notif).CornerRadius = UDim.new(0, 14)
             AddToRegistry(Notif, "BackgroundColor3", "Top")
 
             local NAccentBar = Instance.new("Frame")
             NAccentBar.Size = UDim2.new(0, 3, 0.6, 0)
             NAccentBar.Position = UDim2.new(0, 0, 0.2, 0)
-            NAccentBar.BackgroundTransparency = 0
+            NAccentBar.BackgroundColor3 = typeColor
             NAccentBar.ZIndex = 101
             NAccentBar.Parent = Notif
             Instance.new("UICorner", NAccentBar).CornerRadius = UDim.new(1, 0)
-            AddToRegistry(NAccentBar, "BackgroundColor3", "Accent")
 
             local NStroke = Instance.new("UIStroke")
             NStroke.Thickness = 1
             NStroke.Parent = Notif
-            NStroke.Transparency = 0.4
-            AddToRegistry(NStroke, "Color", "Accent")
-
-            -- small icon dot inside notification
-            local NIcon = Instance.new("Frame")
-            NIcon.Size = UDim2.new(0, 6, 0, 6)
-            NIcon.Position = UDim2.new(0, 14, 0.5, -3)
-            NIcon.ZIndex = 102
-            NIcon.BorderSizePixel = 0
-            NIcon.Parent = Notif
-            Instance.new("UICorner", NIcon).CornerRadius = UDim.new(1, 0)
-            AddToRegistry(NIcon, "BackgroundColor3", "Accent")
+            NStroke.Transparency = 0.6
+            NStroke.Color = typeColor
 
             local NText = Instance.new("TextLabel")
             NText.ZIndex = 101
             NText.Text = text
-            NText.Size = UDim2.new(1, -30, 1, 0)
-            NText.Position = UDim2.new(0, 26, 0, 0)
+            NText.Size = UDim2.new(1, -22, 1, 0)
+            NText.Position = UDim2.new(0, 16, 0, 0)
             NText.BackgroundTransparency = 1
             NText.Parent = Notif
             NText.Font = Enum.Font.GothamMedium
@@ -424,27 +411,37 @@ function Library:CreateWindow(Config)
             NText.TextXAlignment = Enum.TextXAlignment.Left
             AddToRegistry(NText, "TextColor3", "Text")
 
-            -- progress bar that drains while the notification is visible
             local NBar = Instance.new("Frame")
             NBar.Size = UDim2.new(1, 0, 0, 2)
             NBar.Position = UDim2.new(0, 0, 1, -2)
             NBar.ZIndex = 101
             NBar.BorderSizePixel = 0
+            NBar.BackgroundColor3 = typeColor
             NBar.Parent = Notif
             Instance.new("UICorner", NBar).CornerRadius = UDim.new(1, 0)
-            AddToRegistry(NBar, "BackgroundColor3", "Accent")
             Tween(NBar, {Size = UDim2.new(0, 0, 0, 2)}, 3)
 
-            Tween(Notif, {Position = UDim2.new(1, -288, 1, -68)}, 0.5)
+            Tween(Notif, {Position = UDim2.new(1, -292, 1, -70)}, 0.5)
             task.wait(3)
-            Tween(Notif, {Position = UDim2.new(1, 20, 1, -68)}, 0.5)
+            Tween(Notif, {Position = UDim2.new(1, 20, 1, -70)}, 0.5)
             task.wait(0.55)
             Notif:Destroy()
         end)
     end
 
     function Window:SetKeybind(key) Keybind = key end
-    function Window:Destroy() ScreenGui:Destroy() end
+
+    -- Unload: animate close first, then destroy
+    function Window:Unload()
+        Tween(MainFrame, {Size = UDim2.new(0, 650, 0, 0)}, 0.45)
+        task.wait(0.48)
+        ScreenGui:Destroy()
+    end
+
+    -- kept for backwards compat, same as Unload
+    function Window:Destroy()
+        Window:Unload()
+    end
 
     local firstTab = true
 
@@ -455,12 +452,11 @@ function Library:CreateWindow(Config)
         TabBtn.Text = "    " .. name
         TabBtn.TextXAlignment = Enum.TextXAlignment.Left
         TabBtn.Font = Enum.Font.GothamMedium
-        TabBtn.TextColor3 = Color3.fromRGB(85, 85, 92)
+        TabBtn.TextColor3 = Color3.fromRGB(150, 150, 158)
         TabBtn.TextSize = 12
         TabBtn.Parent = TabContainer
         Instance.new("UICorner", TabBtn).CornerRadius = UDim.new(0, 10)
 
-        -- red indicator bar that appears on the active tab
         local TabBar = Instance.new("Frame")
         TabBar.Size = UDim2.new(0, 3, 0.65, 0)
         TabBar.Position = UDim2.new(0, 0, 0.175, 0)
@@ -474,7 +470,7 @@ function Library:CreateWindow(Config)
         Page.Size = UDim2.new(1, 0, 1, 0)
         Page.BackgroundTransparency = 1
         Page.ScrollBarThickness = 2
-        Page.ScrollBarImageColor3 = Color3.fromRGB(210, 30, 45)
+        Page.ScrollBarImageColor3 = CurrentTheme.Accent
         Page.Visible = false
         Page.Parent = PageContainer
 
@@ -488,12 +484,10 @@ function Library:CreateWindow(Config)
 
         TabBtn.MouseButton1Click:Connect(function()
             PlaySound(Sounds.Tab)
-            for _, v in pairs(PageContainer:GetChildren()) do
-                v.Visible = false
-            end
+            for _, v in pairs(PageContainer:GetChildren()) do v.Visible = false end
             for _, v in pairs(TabContainer:GetChildren()) do
                 if v:IsA("TextButton") then
-                    Tween(v, {BackgroundTransparency = 1, TextColor3 = Color3.fromRGB(85, 85, 92)})
+                    Tween(v, {BackgroundTransparency = 1, TextColor3 = Color3.fromRGB(150, 150, 158)})
                     local bar = v:FindFirstChildOfClass("Frame")
                     if bar then Tween(bar, {BackgroundTransparency = 1}) end
                 end
@@ -503,15 +497,14 @@ function Library:CreateWindow(Config)
             Tween(TabBar, {BackgroundTransparency = 0})
         end)
 
-        -- hover effect on inactive tabs
         TabBtn.MouseEnter:Connect(function()
             if TabBar.BackgroundTransparency ~= 0 then
-                Tween(TabBtn, {TextColor3 = Color3.fromRGB(140, 140, 148)}, 0.15)
+                Tween(TabBtn, {TextColor3 = Color3.fromRGB(180, 180, 188)}, 0.15)
             end
         end)
         TabBtn.MouseLeave:Connect(function()
             if TabBar.BackgroundTransparency ~= 0 then
-                Tween(TabBtn, {TextColor3 = Color3.fromRGB(85, 85, 92)}, 0.15)
+                Tween(TabBtn, {TextColor3 = Color3.fromRGB(150, 150, 158)}, 0.15)
             end
         end)
 
@@ -529,7 +522,7 @@ function Library:CreateWindow(Config)
 
         local Elements = {}
 
-        -- section label above a group of elements
+        -- section header
         function Elements:Section(text)
             local S = Instance.new("TextLabel")
             S.Text = string.upper(text)
@@ -543,7 +536,68 @@ function Library:CreateWindow(Config)
             AddToRegistry(S, "TextColor3", "Accent")
         end
 
-        -- shared helper that builds a styled dark tile for each element
+        -- label: static single line of text
+        function Elements:Label(text)
+            local L = Instance.new("TextLabel")
+            L.Text = text
+            L.Size = UDim2.new(1, 0, 0, 26)
+            L.BackgroundTransparency = 1
+            L.Font = Enum.Font.GothamMedium
+            L.TextSize = 13
+            L.TextXAlignment = Enum.TextXAlignment.Left
+            L.Parent = Page
+            L.TextTransparency = 0.2
+            AddToRegistry(L, "TextColor3", "Text")
+        end
+
+        -- paragraph: multi-line block of info text
+        function Elements:Paragraph(title, body)
+            local F = Instance.new("Frame")
+            F.Size = UDim2.new(1, 0, 0, 0)
+            F.BackgroundTransparency = 0.04
+            F.Parent = Page
+            Instance.new("UICorner", F).CornerRadius = UDim.new(0, 12)
+            AddToRegistry(F, "BackgroundColor3", "Top")
+
+            local St = Instance.new("UIStroke")
+            St.Thickness = 1; St.Transparency = 0.82; St.Parent = F
+            AddToRegistry(St, "Color", "Stroke")
+
+            local TLbl = Instance.new("TextLabel")
+            TLbl.Text = title
+            TLbl.Size = UDim2.new(1, -24, 0, 20)
+            TLbl.Position = UDim2.new(0, 12, 0, 8)
+            TLbl.BackgroundTransparency = 1
+            TLbl.Font = Enum.Font.GothamBold
+            TLbl.TextSize = 13
+            TLbl.TextXAlignment = Enum.TextXAlignment.Left
+            TLbl.Parent = F
+            AddToRegistry(TLbl, "TextColor3", "Text")
+
+            local BLbl = Instance.new("TextLabel")
+            BLbl.Text = body
+            BLbl.Size = UDim2.new(1, -24, 0, 0)
+            BLbl.Position = UDim2.new(0, 12, 0, 30)
+            BLbl.BackgroundTransparency = 1
+            BLbl.Font = Enum.Font.Gotham
+            BLbl.TextSize = 12
+            BLbl.TextXAlignment = Enum.TextXAlignment.Left
+            BLbl.TextWrapped = true
+            BLbl.AutomaticSize = Enum.AutomaticSize.Y
+            BLbl.Parent = F
+            BLbl.TextTransparency = 0.25
+            AddToRegistry(BLbl, "TextColor3", "Text")
+
+            -- auto resize the frame to fit the text
+            task.defer(function()
+                local pad = 12
+                F.Size = UDim2.new(1, 0, 0, 30 + BLbl.AbsoluteSize.Y + pad)
+            end)
+            BLbl:GetPropertyChangedSignal("AbsoluteSize"):Connect(function()
+                F.Size = UDim2.new(1, 0, 0, 30 + BLbl.AbsoluteSize.Y + 12)
+            end)
+        end
+
         local function MakeTile(h)
             local F = Instance.new("Frame")
             F.Size = UDim2.new(1, 0, 0, h)
@@ -561,113 +615,9 @@ function Library:CreateWindow(Config)
             AddToRegistry(A, "BackgroundColor3", "Accent")
 
             local St = Instance.new("UIStroke")
-            St.Thickness = 1
-            St.Transparency = 0.82
-            St.Parent = F
+            St.Thickness = 1; St.Transparency = 0.82; St.Parent = F
             AddToRegistry(St, "Color", "Stroke")
-
             return F
-        end
-
-        function Elements:Value(text, default, callback)
-            local ValFrame = MakeTile(44)
-
-            local NameLbl = Instance.new("TextLabel")
-            NameLbl.Text = text
-            NameLbl.Size = UDim2.new(0.6, 0, 1, 0)
-            NameLbl.Position = UDim2.new(0, 16, 0, 0)
-            NameLbl.TextXAlignment = Enum.TextXAlignment.Left
-            NameLbl.Font = Enum.Font.GothamMedium
-            NameLbl.TextSize = 13
-            NameLbl.BackgroundTransparency = 1
-            NameLbl.Parent = ValFrame
-            AddToRegistry(NameLbl, "TextColor3", "Text")
-
-            local ValBox = Instance.new("TextBox")
-            ValBox.Text = tostring(default)
-            ValBox.Size = UDim2.new(0.28, 0, 0, 28)
-            ValBox.Position = UDim2.new(0.72, -14, 0.5, -14)
-            ValBox.Font = Enum.Font.GothamMedium
-            ValBox.TextSize = 12
-            ValBox.TextXAlignment = Enum.TextXAlignment.Center
-            ValBox.Parent = ValFrame
-            ValBox.BackgroundTransparency = 0.1
-            Instance.new("UICorner", ValBox).CornerRadius = UDim.new(0, 8)
-            AddToRegistry(ValBox, "BackgroundColor3", "Main")
-            AddToRegistry(ValBox, "TextColor3", "Accent")
-
-            Library.Flags[text] = default
-
-            ValBox.FocusLost:Connect(function()
-                PlaySound(Sounds.Click)
-                Library.Flags[text] = ValBox.Text
-                ConfigObjects[text].Value = ValBox.Text
-                if callback then callback(ValBox.Text) end
-                Window:Notification(text .. " set to " .. ValBox.Text)
-            end)
-
-            ConfigObjects[text] = {Type = "Value", Value = default, Set = function(val)
-                ValBox.Text = tostring(val)
-                Library.Flags[text] = val
-            end}
-        end
-
-        function Elements:Keybind(text, default, callback)
-            local Key = default or Enum.KeyCode.M
-            local Tile = MakeTile(44)
-            local ClickBtn = Instance.new("TextButton")
-            ClickBtn.Size = UDim2.new(1, 0, 1, 0)
-            ClickBtn.BackgroundTransparency = 1
-            ClickBtn.Text = ""
-            ClickBtn.Parent = Tile
-
-            local TitleLbl = Instance.new("TextLabel")
-            TitleLbl.Text = text
-            TitleLbl.Size = UDim2.new(0.6, 0, 1, 0)
-            TitleLbl.Position = UDim2.new(0, 16, 0, 0)
-            TitleLbl.BackgroundTransparency = 1
-            TitleLbl.Font = Enum.Font.GothamMedium
-            TitleLbl.TextSize = 13
-            TitleLbl.TextXAlignment = Enum.TextXAlignment.Left
-            TitleLbl.Parent = Tile
-            AddToRegistry(TitleLbl, "TextColor3", "Text")
-
-            local KeyLabel = Instance.new("TextLabel")
-            KeyLabel.Text = Key.Name
-            KeyLabel.Size = UDim2.new(0, 86, 0, 28)
-            KeyLabel.Position = UDim2.new(1, -100, 0.5, -14)
-            KeyLabel.Font = Enum.Font.GothamMedium
-            KeyLabel.TextSize = 11
-            KeyLabel.Parent = Tile
-            KeyLabel.BackgroundTransparency = 0.1
-            Instance.new("UICorner", KeyLabel).CornerRadius = UDim.new(0, 8)
-            AddToRegistry(KeyLabel, "BackgroundColor3", "Main")
-            AddToRegistry(KeyLabel, "TextColor3", "Accent")
-
-            Library.Flags[text] = Key.Name
-
-            ClickBtn.MouseButton1Click:Connect(function()
-                PlaySound(Sounds.Click)
-                KeyLabel.Text = "..."
-                local input = UserInputService.InputBegan:Wait()
-                if input.KeyCode.Name ~= "Unknown" then
-                    Key = input.KeyCode
-                    KeyLabel.Text = Key.Name
-                    Library.Flags[text] = Key.Name
-                    ConfigObjects[text].Value = Key.Name
-                    callback(Key)
-                    Window:Notification("keybind changed to " .. Key.Name)
-                else
-                    KeyLabel.Text = Key.Name
-                end
-            end)
-
-            ConfigObjects[text] = {Type = "Keybind", Value = Key.Name, Set = function(val)
-                Key = Enum.KeyCode[val] or Key
-                KeyLabel.Text = Key.Name
-                Library.Flags[text] = Key.Name
-                callback(Key)
-            end}
         end
 
         function Elements:Button(text, callback)
@@ -684,16 +634,13 @@ function Library:CreateWindow(Config)
             AddToRegistry(Btn, "TextColor3", "Text")
 
             local St = Instance.new("UIStroke")
-            St.Thickness = 1
-            St.Transparency = 0.82
-            St.Parent = Btn
+            St.Thickness = 1; St.Transparency = 0.82; St.Parent = Btn
             AddToRegistry(St, "Color", "Stroke")
 
             local Bar = Instance.new("Frame")
             Bar.Size = UDim2.new(0, 3, 0.55, 0)
             Bar.Position = UDim2.new(0, 0, 0.225, 0)
-            Bar.BorderSizePixel = 0
-            Bar.Parent = Btn
+            Bar.BorderSizePixel = 0; Bar.Parent = Btn
             Instance.new("UICorner", Bar).CornerRadius = UDim.new(1, 0)
             AddToRegistry(Bar, "BackgroundColor3", "Accent")
 
@@ -704,7 +651,6 @@ function Library:CreateWindow(Config)
                 Tween(Btn, {Size = UDim2.new(1, 0, 0, 44)}, 0.15)
                 callback()
             end)
-
             Btn.MouseEnter:Connect(function() Tween(Btn, {BackgroundTransparency = 0.0}, 0.18) end)
             Btn.MouseLeave:Connect(function() Tween(Btn, {BackgroundTransparency = 0.04}, 0.18) end)
         end
@@ -713,61 +659,46 @@ function Library:CreateWindow(Config)
             local Enabled = default or false
             local Tile = MakeTile(44)
             local ClickBtn = Instance.new("TextButton")
-            ClickBtn.Size = UDim2.new(1, 0, 1, 0)
-            ClickBtn.BackgroundTransparency = 1
-            ClickBtn.Text = ""
-            ClickBtn.Parent = Tile
+            ClickBtn.Size = UDim2.new(1, 0, 1, 0); ClickBtn.BackgroundTransparency = 1
+            ClickBtn.Text = ""; ClickBtn.Parent = Tile
 
             local TitleLbl = Instance.new("TextLabel")
-            TitleLbl.Text = text
-            TitleLbl.Size = UDim2.new(0.7, 0, 1, 0)
-            TitleLbl.Position = UDim2.new(0, 16, 0, 0)
-            TitleLbl.BackgroundTransparency = 1
-            TitleLbl.Font = Enum.Font.GothamMedium
-            TitleLbl.TextSize = 13
-            TitleLbl.TextXAlignment = Enum.TextXAlignment.Left
-            TitleLbl.Parent = Tile
+            TitleLbl.Text = text; TitleLbl.Size = UDim2.new(0.7, 0, 1, 0)
+            TitleLbl.Position = UDim2.new(0, 16, 0, 0); TitleLbl.BackgroundTransparency = 1
+            TitleLbl.Font = Enum.Font.GothamMedium; TitleLbl.TextSize = 13
+            TitleLbl.TextXAlignment = Enum.TextXAlignment.Left; TitleLbl.Parent = Tile
             AddToRegistry(TitleLbl, "TextColor3", "Text")
 
             local Switch = Instance.new("Frame")
-            Switch.Size = UDim2.new(0, 42, 0, 22)
-            Switch.Position = UDim2.new(1, -56, 0.5, -11)
-            Switch.Parent = Tile
-            Instance.new("UICorner", Switch).CornerRadius = UDim.new(1, 0)
-            Switch.BackgroundColor3 = Enabled and CurrentTheme.Accent or Color3.fromRGB(26, 26, 32)
+            Switch.Size = UDim2.new(0, 42, 0, 22); Switch.Position = UDim2.new(1, -56, 0.5, -11)
+            Switch.Parent = Tile; Instance.new("UICorner", Switch).CornerRadius = UDim.new(1, 0)
+            Switch.BackgroundColor3 = Enabled and CurrentTheme.Accent or Color3.fromRGB(200, 200, 205)
 
-            -- switch track stroke
             local SwStroke = Instance.new("UIStroke")
-            SwStroke.Thickness = 1
-            SwStroke.Transparency = 0.6
-            SwStroke.Parent = Switch
+            SwStroke.Thickness = 1; SwStroke.Transparency = 0.6; SwStroke.Parent = Switch
             AddToRegistry(SwStroke, "Color", "Stroke")
 
             local Dot = Instance.new("Frame")
             Dot.Size = UDim2.new(0, 16, 0, 16)
             Dot.Position = Enabled and UDim2.new(1, -19, 0.5, -8) or UDim2.new(0, 3, 0.5, -8)
-            Dot.BackgroundColor3 = Color3.new(1, 1, 1)
-            Dot.Parent = Switch
+            Dot.BackgroundColor3 = Color3.new(1, 1, 1); Dot.Parent = Switch
             Instance.new("UICorner", Dot).CornerRadius = UDim.new(1, 0)
 
             Library.Flags[text] = Enabled
 
             local function Update()
                 if Enabled then PlaySound(Sounds.ToggleOn) else PlaySound(Sounds.ToggleOff) end
-                Tween(Switch, {BackgroundColor3 = Enabled and CurrentTheme.Accent or Color3.fromRGB(26, 26, 32)})
+                Tween(Switch, {BackgroundColor3 = Enabled and CurrentTheme.Accent or Color3.fromRGB(200, 200, 205)})
                 Tween(Dot, {Position = Enabled and UDim2.new(1, -19, 0.5, -8) or UDim2.new(0, 3, 0.5, -8)})
                 Library.Flags[text] = Enabled
                 ConfigObjects[text].Value = Enabled
                 callback(Enabled)
-                Window:Notification(text .. " is now " .. tostring(Enabled))
             end
 
             ClickBtn.MouseButton1Click:Connect(function() Enabled = not Enabled; Update() end)
-
             ConfigObjects[text] = {Type = "Toggle", Value = Enabled, Set = function(val)
-                Enabled = val
-                Library.Flags[text] = val
-                Tween(Switch, {BackgroundColor3 = Enabled and CurrentTheme.Accent or Color3.fromRGB(26, 26, 32)})
+                Enabled = val; Library.Flags[text] = val
+                Tween(Switch, {BackgroundColor3 = Enabled and CurrentTheme.Accent or Color3.fromRGB(200, 200, 205)})
                 Tween(Dot, {Position = Enabled and UDim2.new(1, -19, 0.5, -8) or UDim2.new(0, 3, 0.5, -8)})
                 callback(Enabled)
             end}
@@ -778,60 +709,39 @@ function Library:CreateWindow(Config)
             local Frame = MakeTile(64)
 
             local Lbl = Instance.new("TextLabel")
-            Lbl.Text = text
-            Lbl.Size = UDim2.new(1, -30, 0, 20)
-            Lbl.Position = UDim2.new(0, 16, 0, 10)
-            Lbl.BackgroundTransparency = 1
-            Lbl.Font = Enum.Font.GothamMedium
-            Lbl.TextSize = 13
-            Lbl.TextXAlignment = Enum.TextXAlignment.Left
-            Lbl.Parent = Frame
+            Lbl.Text = text; Lbl.Size = UDim2.new(1, -30, 0, 20)
+            Lbl.Position = UDim2.new(0, 16, 0, 10); Lbl.BackgroundTransparency = 1
+            Lbl.Font = Enum.Font.GothamMedium; Lbl.TextSize = 13
+            Lbl.TextXAlignment = Enum.TextXAlignment.Left; Lbl.Parent = Frame
             AddToRegistry(Lbl, "TextColor3", "Text")
 
             local Num = Instance.new("TextLabel")
-            Num.Text = tostring(Val)
-            Num.Size = UDim2.new(0, 44, 0, 20)
-            Num.Position = UDim2.new(1, -56, 0, 10)
-            Num.BackgroundTransparency = 1
-            Num.TextColor3 = Color3.fromRGB(210, 30, 45)
-            Num.Font = Enum.Font.GothamBold
-            Num.TextSize = 12
-            Num.TextXAlignment = Enum.TextXAlignment.Right
-            Num.Parent = Frame
+            Num.Text = tostring(Val); Num.Size = UDim2.new(0, 44, 0, 20)
+            Num.Position = UDim2.new(1, -56, 0, 10); Num.BackgroundTransparency = 1
+            Num.Font = Enum.Font.GothamBold; Num.TextSize = 12
+            Num.TextXAlignment = Enum.TextXAlignment.Right; Num.Parent = Frame
+            AddToRegistry(Num, "TextColor3", "Accent")
 
-            -- track background
             local Track = Instance.new("Frame")
-            Track.Size = UDim2.new(1, -30, 0, 5)
-            Track.Position = UDim2.new(0, 16, 0, 46)
-            Track.BackgroundColor3 = Color3.fromRGB(26, 26, 32)
-            Track.BorderSizePixel = 0
-            Track.Parent = Frame
+            Track.Size = UDim2.new(1, -30, 0, 5); Track.Position = UDim2.new(0, 16, 0, 46)
+            Track.BorderSizePixel = 0; Track.Parent = Frame
             Instance.new("UICorner", Track).CornerRadius = UDim.new(1, 0)
+            AddToRegistry(Track, "BackgroundColor3", "Stroke")
 
             local Fill = Instance.new("Frame")
-            Fill.Size = UDim2.new((Val - min) / (max - min), 0, 1, 0)
-            Fill.Parent = Track
+            Fill.Size = UDim2.new((Val - min) / (max - min), 0, 1, 0); Fill.Parent = Track
             Instance.new("UICorner", Fill).CornerRadius = UDim.new(1, 0)
             AddToRegistry(Fill, "BackgroundColor3", "Accent")
 
-            -- small draggable knob at the end of the fill
             local Knob = Instance.new("Frame")
-            Knob.Size = UDim2.new(0, 12, 0, 12)
-            Knob.AnchorPoint = Vector2.new(0.5, 0.5)
+            Knob.Size = UDim2.new(0, 12, 0, 12); Knob.AnchorPoint = Vector2.new(0.5, 0.5)
             Knob.Position = UDim2.new((Val - min) / (max - min), 0, 0.5, 0)
-            Knob.BackgroundColor3 = Color3.new(1, 1, 1)
-            Knob.ZIndex = 2
-            Knob.Parent = Track
+            Knob.BackgroundColor3 = Color3.new(1, 1, 1); Knob.ZIndex = 2; Knob.Parent = Track
             Instance.new("UICorner", Knob).CornerRadius = UDim.new(1, 0)
 
-            -- invisible click target over the whole track
             local Bar = Instance.new("TextButton")
-            Bar.Size = UDim2.new(1, 0, 0, 18)
-            Bar.Position = UDim2.new(0, 0, 0.5, -9)
-            Bar.BackgroundTransparency = 1
-            Bar.Text = ""
-            Bar.ZIndex = 3
-            Bar.Parent = Track
+            Bar.Size = UDim2.new(1, 0, 0, 18); Bar.Position = UDim2.new(0, 0, 0.5, -9)
+            Bar.BackgroundTransparency = 1; Bar.Text = ""; Bar.ZIndex = 3; Bar.Parent = Track
 
             Library.Flags[text] = Val
 
@@ -853,9 +763,7 @@ function Library:CreateWindow(Config)
 
             local sliding = false
             Bar.InputBegan:Connect(function(i)
-                if i.UserInputType == Enum.UserInputType.MouseButton1 then
-                    sliding = true; PlaySound(Sounds.Slide); Drag(i)
-                end
+                if i.UserInputType == Enum.UserInputType.MouseButton1 then sliding = true; PlaySound(Sounds.Slide); Drag(i) end
             end)
             UserInputService.InputEnded:Connect(function(i)
                 if i.UserInputType == Enum.UserInputType.MouseButton1 then sliding = false end
@@ -863,60 +771,7 @@ function Library:CreateWindow(Config)
             UserInputService.InputChanged:Connect(function(i)
                 if sliding and i.UserInputType == Enum.UserInputType.MouseMovement then Drag(i) end
             end)
-
             ConfigObjects[text] = {Type = "Slider", Value = Val, Set = function(val) Update(val) end}
-        end
-
-        function Elements:Textbox(text, placeholder, callback)
-            local Frame = MakeTile(74)
-
-            local Lbl = Instance.new("TextLabel")
-            Lbl.Text = text
-            Lbl.Size = UDim2.new(1, 0, 0, 20)
-            Lbl.Position = UDim2.new(0, 16, 0, 10)
-            Lbl.BackgroundTransparency = 1
-            Lbl.Font = Enum.Font.GothamMedium
-            Lbl.TextSize = 13
-            Lbl.TextXAlignment = Enum.TextXAlignment.Left
-            Lbl.Parent = Frame
-            AddToRegistry(Lbl, "TextColor3", "Text")
-
-            local Box = Instance.new("TextBox")
-            Box.Size = UDim2.new(1, -32, 0, 28)
-            Box.Position = UDim2.new(0, 16, 0, 36)
-            Box.Text = ""
-            Box.PlaceholderText = placeholder
-            Box.Font = Enum.Font.GothamMedium
-            Box.TextSize = 12
-            Box.Parent = Frame
-            Box.BackgroundTransparency = 0.08
-            Instance.new("UICorner", Box).CornerRadius = UDim.new(0, 8)
-            AddToRegistry(Box, "BackgroundColor3", "Main")
-            AddToRegistry(Box, "TextColor3", "Text")
-
-            local BoxStroke = Instance.new("UIStroke")
-            BoxStroke.Thickness = 1
-            BoxStroke.Transparency = 0.75
-            BoxStroke.Parent = Box
-            AddToRegistry(BoxStroke, "Color", "Accent")
-
-            Library.Flags[text] = ""
-
-            Box.Focused:Connect(function()
-                Tween(BoxStroke, {Transparency = 0.2}, 0.2)
-            end)
-            Box.FocusLost:Connect(function()
-                Tween(BoxStroke, {Transparency = 0.75}, 0.2)
-                Library.Flags[text] = Box.Text
-                ConfigObjects[text].Value = Box.Text
-                callback(Box.Text)
-            end)
-
-            ConfigObjects[text] = {Type = "Textbox", Value = "", Set = function(val)
-                Box.Text = val
-                Library.Flags[text] = val
-                callback(val)
-            end}
         end
 
         function Elements:Dropdown(text, options, callback)
@@ -924,78 +779,57 @@ function Library:CreateWindow(Config)
             local Selected = options[1] or ""
 
             local Btn = Instance.new("TextButton")
-            Btn.Size = UDim2.new(1, 0, 0, 44)
-            Btn.Text = ""
-            Btn.Parent = Page
+            Btn.Size = UDim2.new(1, 0, 0, 44); Btn.Text = ""; Btn.Parent = Page
             Instance.new("UICorner", Btn).CornerRadius = UDim.new(0, 12)
             Btn.BackgroundTransparency = 0.04
             AddToRegistry(Btn, "BackgroundColor3", "Top")
 
             local St = Instance.new("UIStroke")
-            St.Thickness = 1
-            St.Transparency = 0.82
-            St.Parent = Btn
+            St.Thickness = 1; St.Transparency = 0.82; St.Parent = Btn
             AddToRegistry(St, "Color", "Stroke")
 
             local AccBar = Instance.new("Frame")
-            AccBar.Size = UDim2.new(0, 3, 0.55, 0)
-            AccBar.Position = UDim2.new(0, 0, 0.225, 0)
-            AccBar.BorderSizePixel = 0
-            AccBar.Parent = Btn
+            AccBar.Size = UDim2.new(0, 3, 0.55, 0); AccBar.Position = UDim2.new(0, 0, 0.225, 0)
+            AccBar.BorderSizePixel = 0; AccBar.Parent = Btn
             Instance.new("UICorner", AccBar).CornerRadius = UDim.new(1, 0)
             AddToRegistry(AccBar, "BackgroundColor3", "Accent")
 
             local Lbl = Instance.new("TextLabel")
-            Lbl.Text = text
-            Lbl.Size = UDim2.new(1, -32, 1, 0)
-            Lbl.Position = UDim2.new(0, 16, 0, 0)
-            Lbl.BackgroundTransparency = 1
-            Lbl.Font = Enum.Font.GothamMedium
-            Lbl.TextSize = 13
-            Lbl.TextXAlignment = Enum.TextXAlignment.Left
-            Lbl.Parent = Btn
+            Lbl.Text = text; Lbl.Size = UDim2.new(1, -32, 1, 0)
+            Lbl.Position = UDim2.new(0, 16, 0, 0); Lbl.BackgroundTransparency = 1
+            Lbl.Font = Enum.Font.GothamMedium; Lbl.TextSize = 13
+            Lbl.TextXAlignment = Enum.TextXAlignment.Left; Lbl.Parent = Btn
             AddToRegistry(Lbl, "TextColor3", "Text")
 
             local Icon = Instance.new("ImageLabel")
-            Icon.Image = "rbxassetid://6031091004"
-            Icon.Size = UDim2.new(0, 16, 0, 16)
-            Icon.Position = UDim2.new(1, -28, 0.5, -8)
-            Icon.BackgroundTransparency = 1
-            Icon.Parent = Btn
-            Icon.ImageColor3 = Color3.fromRGB(210, 30, 45)
+            Icon.Image = "rbxassetid://6031091004"; Icon.Size = UDim2.new(0, 16, 0, 16)
+            Icon.Position = UDim2.new(1, -28, 0.5, -8); Icon.BackgroundTransparency = 1; Icon.Parent = Btn
+            AddToRegistry(Icon, "ImageColor3", "Accent")
 
             local Container = Instance.new("Frame")
-            Container.Size = UDim2.new(1, 0, 0, 0)
-            Container.Visible = false
-            Container.ClipsDescendants = true
-            Container.Parent = Page
+            Container.Size = UDim2.new(1, 0, 0, 0); Container.Visible = false
+            Container.ClipsDescendants = true; Container.Parent = Page
             Instance.new("UICorner", Container).CornerRadius = UDim.new(0, 12)
             Container.BackgroundTransparency = 0.04
             AddToRegistry(Container, "BackgroundColor3", "Top")
 
             local CSt = Instance.new("UIStroke")
-            CSt.Thickness = 1
-            CSt.Transparency = 0.55
-            CSt.Parent = Container
+            CSt.Thickness = 1; CSt.Transparency = 0.65; CSt.Parent = Container
             AddToRegistry(CSt, "Color", "Accent")
 
             local List = Instance.new("UIListLayout")
-            List.SortOrder = Enum.SortOrder.LayoutOrder
-            List.Parent = Container
+            List.SortOrder = Enum.SortOrder.LayoutOrder; List.Parent = Container
 
             Library.Flags[text] = Selected
 
             local function Select(opt)
-                Dropped = false
-                Selected = opt
+                Dropped = false; Selected = opt
                 Lbl.Text = text .. "   —   " .. opt
-                Library.Flags[text] = opt
-                ConfigObjects[text].Value = opt
+                Library.Flags[text] = opt; ConfigObjects[text].Value = opt
                 callback(opt)
                 Tween(Container, {Size = UDim2.new(1, 0, 0, 0)}, 0.28)
                 Tween(Icon, {Rotation = 0}, 0.28)
-                task.wait(0.3)
-                Container.Visible = false
+                task.wait(0.3); Container.Visible = false
             end
 
             local function RefreshOptions(newOpts)
@@ -1004,24 +838,20 @@ function Library:CreateWindow(Config)
                 end
                 for _, opt in pairs(newOpts) do
                     local O = Instance.new("TextButton")
-                    O.Size = UDim2.new(1, 0, 0, 34)
-                    O.Text = "   " .. opt
+                    O.Size = UDim2.new(1, 0, 0, 34); O.Text = "   " .. opt
                     O.TextXAlignment = Enum.TextXAlignment.Left
-                    O.TextColor3 = Color3.fromRGB(145, 145, 152)
-                    O.Font = Enum.Font.GothamMedium
-                    O.TextSize = 12
-                    O.BackgroundTransparency = 1
-                    O.Parent = Container
+                    O.Font = Enum.Font.GothamMedium; O.TextSize = 12
+                    O.BackgroundTransparency = 1; O.Parent = Container
+                    AddToRegistry(O, "TextColor3", "Text")
                     O.MouseButton1Click:Connect(function() Select(opt) end)
                     O.MouseEnter:Connect(function() Tween(O, {TextColor3 = CurrentTheme.Accent}, 0.15) end)
-                    O.MouseLeave:Connect(function() Tween(O, {TextColor3 = Color3.fromRGB(145, 145, 152)}, 0.15) end)
+                    O.MouseLeave:Connect(function() Tween(O, {TextColor3 = CurrentTheme.Text}, 0.15) end)
                 end
             end
             RefreshOptions(options)
 
             Btn.MouseButton1Click:Connect(function()
-                Dropped = not Dropped
-                PlaySound(Sounds.Click)
+                Dropped = not Dropped; PlaySound(Sounds.Click)
                 if Dropped then
                     Container.Visible = true
                     Tween(Container, {Size = UDim2.new(1, 0, 0, #Container:GetChildren() * 34)}, 0.32)
@@ -1029,13 +859,267 @@ function Library:CreateWindow(Config)
                 else
                     Tween(Container, {Size = UDim2.new(1, 0, 0, 0)}, 0.28)
                     Tween(Icon, {Rotation = 0}, 0.28)
-                    task.wait(0.3)
-                    Container.Visible = false
+                    task.wait(0.3); Container.Visible = false
                 end
             end)
 
             ConfigObjects[text] = {Type = "Dropdown", Value = Selected, Set = function(val) Select(val) end, Refresh = RefreshOptions}
             return {Refresh = RefreshOptions}
+        end
+
+        function Elements:Textbox(text, placeholder, callback)
+            local Frame = MakeTile(74)
+
+            local Lbl = Instance.new("TextLabel")
+            Lbl.Text = text; Lbl.Size = UDim2.new(1, 0, 0, 20)
+            Lbl.Position = UDim2.new(0, 16, 0, 10); Lbl.BackgroundTransparency = 1
+            Lbl.Font = Enum.Font.GothamMedium; Lbl.TextSize = 13
+            Lbl.TextXAlignment = Enum.TextXAlignment.Left; Lbl.Parent = Frame
+            AddToRegistry(Lbl, "TextColor3", "Text")
+
+            local Box = Instance.new("TextBox")
+            Box.Size = UDim2.new(1, -32, 0, 28); Box.Position = UDim2.new(0, 16, 0, 36)
+            Box.Text = ""; Box.PlaceholderText = placeholder
+            Box.Font = Enum.Font.GothamMedium; Box.TextSize = 12; Box.Parent = Frame
+            Box.BackgroundTransparency = 0.08
+            Instance.new("UICorner", Box).CornerRadius = UDim.new(0, 8)
+            AddToRegistry(Box, "BackgroundColor3", "Main"); AddToRegistry(Box, "TextColor3", "Text")
+
+            local BoxStroke = Instance.new("UIStroke")
+            BoxStroke.Thickness = 1; BoxStroke.Transparency = 0.75; BoxStroke.Parent = Box
+            AddToRegistry(BoxStroke, "Color", "Stroke")
+
+            Library.Flags[text] = ""
+
+            Box.Focused:Connect(function() Tween(BoxStroke, {Transparency = 0.2}, 0.2) end)
+            Box.FocusLost:Connect(function()
+                Tween(BoxStroke, {Transparency = 0.75}, 0.2)
+                Library.Flags[text] = Box.Text
+                if ConfigObjects[text] then ConfigObjects[text].Value = Box.Text end
+                callback(Box.Text)
+            end)
+            ConfigObjects[text] = {Type = "Textbox", Value = "", Set = function(val)
+                Box.Text = val; Library.Flags[text] = val; callback(val)
+            end}
+        end
+
+        function Elements:Keybind(text, default, callback)
+            local Key = default or Enum.KeyCode.M
+            local Tile = MakeTile(44)
+            local ClickBtn = Instance.new("TextButton")
+            ClickBtn.Size = UDim2.new(1, 0, 1, 0); ClickBtn.BackgroundTransparency = 1
+            ClickBtn.Text = ""; ClickBtn.Parent = Tile
+
+            local TitleLbl = Instance.new("TextLabel")
+            TitleLbl.Text = text; TitleLbl.Size = UDim2.new(0.6, 0, 1, 0)
+            TitleLbl.Position = UDim2.new(0, 16, 0, 0); TitleLbl.BackgroundTransparency = 1
+            TitleLbl.Font = Enum.Font.GothamMedium; TitleLbl.TextSize = 13
+            TitleLbl.TextXAlignment = Enum.TextXAlignment.Left; TitleLbl.Parent = Tile
+            AddToRegistry(TitleLbl, "TextColor3", "Text")
+
+            local KeyLabel = Instance.new("TextLabel")
+            KeyLabel.Text = Key.Name; KeyLabel.Size = UDim2.new(0, 86, 0, 28)
+            KeyLabel.Position = UDim2.new(1, -100, 0.5, -14)
+            KeyLabel.Font = Enum.Font.GothamMedium; KeyLabel.TextSize = 11; KeyLabel.Parent = Tile
+            KeyLabel.BackgroundTransparency = 0.1
+            Instance.new("UICorner", KeyLabel).CornerRadius = UDim.new(0, 8)
+            AddToRegistry(KeyLabel, "BackgroundColor3", "Main")
+            AddToRegistry(KeyLabel, "TextColor3", "Accent")
+
+            Library.Flags[text] = Key.Name
+
+            ClickBtn.MouseButton1Click:Connect(function()
+                PlaySound(Sounds.Click); KeyLabel.Text = "..."
+                local input = UserInputService.InputBegan:Wait()
+                if input.KeyCode.Name ~= "Unknown" then
+                    Key = input.KeyCode; KeyLabel.Text = Key.Name
+                    Library.Flags[text] = Key.Name; ConfigObjects[text].Value = Key.Name
+                    callback(Key)
+                    Window:Notification("keybind changed to " .. Key.Name)
+                else
+                    KeyLabel.Text = Key.Name
+                end
+            end)
+            ConfigObjects[text] = {Type = "Keybind", Value = Key.Name, Set = function(val)
+                Key = Enum.KeyCode[val] or Key; KeyLabel.Text = Key.Name
+                Library.Flags[text] = Key.Name; callback(Key)
+            end}
+        end
+
+        function Elements:Value(text, default, callback)
+            local ValFrame = MakeTile(44)
+
+            local NameLbl = Instance.new("TextLabel")
+            NameLbl.Text = text; NameLbl.Size = UDim2.new(0.6, 0, 1, 0)
+            NameLbl.Position = UDim2.new(0, 16, 0, 0); NameLbl.TextXAlignment = Enum.TextXAlignment.Left
+            NameLbl.Font = Enum.Font.GothamMedium; NameLbl.TextSize = 13
+            NameLbl.BackgroundTransparency = 1; NameLbl.Parent = ValFrame
+            AddToRegistry(NameLbl, "TextColor3", "Text")
+
+            local ValBox = Instance.new("TextBox")
+            ValBox.Text = tostring(default); ValBox.Size = UDim2.new(0.28, 0, 0, 28)
+            ValBox.Position = UDim2.new(0.72, -14, 0.5, -14)
+            ValBox.Font = Enum.Font.GothamMedium; ValBox.TextSize = 12
+            ValBox.TextXAlignment = Enum.TextXAlignment.Center; ValBox.Parent = ValFrame
+            ValBox.BackgroundTransparency = 0.1
+            Instance.new("UICorner", ValBox).CornerRadius = UDim.new(0, 8)
+            AddToRegistry(ValBox, "BackgroundColor3", "Main"); AddToRegistry(ValBox, "TextColor3", "Accent")
+
+            Library.Flags[text] = default
+
+            ValBox.FocusLost:Connect(function()
+                PlaySound(Sounds.Click)
+                Library.Flags[text] = ValBox.Text
+                ConfigObjects[text].Value = ValBox.Text
+                if callback then callback(ValBox.Text) end
+            end)
+            ConfigObjects[text] = {Type = "Value", Value = default, Set = function(val)
+                ValBox.Text = tostring(val); Library.Flags[text] = val
+            end}
+        end
+
+        -- color picker: opens an HSV picker panel
+        function Elements:ColorPicker(text, default, callback)
+            local Color = default or Color3.fromRGB(255, 255, 255)
+            local h, s, v = Color3.toHSV(Color)
+
+            local Tile = MakeTile(44)
+            local ClickBtn = Instance.new("TextButton")
+            ClickBtn.Size = UDim2.new(1, 0, 1, 0); ClickBtn.BackgroundTransparency = 1
+            ClickBtn.Text = ""; ClickBtn.Parent = Tile
+
+            local TitleLbl = Instance.new("TextLabel")
+            TitleLbl.Text = text; TitleLbl.Size = UDim2.new(0.7, 0, 1, 0)
+            TitleLbl.Position = UDim2.new(0, 16, 0, 0); TitleLbl.BackgroundTransparency = 1
+            TitleLbl.Font = Enum.Font.GothamMedium; TitleLbl.TextSize = 13
+            TitleLbl.TextXAlignment = Enum.TextXAlignment.Left; TitleLbl.Parent = Tile
+            AddToRegistry(TitleLbl, "TextColor3", "Text")
+
+            -- small color preview swatch
+            local Swatch = Instance.new("Frame")
+            Swatch.Size = UDim2.new(0, 32, 0, 22); Swatch.Position = UDim2.new(1, -46, 0.5, -11)
+            Swatch.BackgroundColor3 = Color; Swatch.Parent = Tile
+            Instance.new("UICorner", Swatch).CornerRadius = UDim.new(0, 6)
+            local SwStroke = Instance.new("UIStroke")
+            SwStroke.Thickness = 1; SwStroke.Transparency = 0.6; SwStroke.Parent = Swatch
+            AddToRegistry(SwStroke, "Color", "Stroke")
+
+            -- picker panel
+            local Panel = Instance.new("Frame")
+            Panel.Size = UDim2.new(1, 0, 0, 0); Panel.Visible = false
+            Panel.ClipsDescendants = true; Panel.Parent = Page
+            Instance.new("UICorner", Panel).CornerRadius = UDim.new(0, 12)
+            Panel.BackgroundTransparency = 0.04
+            AddToRegistry(Panel, "BackgroundColor3", "Top")
+            local PSt = Instance.new("UIStroke")
+            PSt.Thickness = 1; PSt.Transparency = 0.65; PSt.Parent = Panel
+            AddToRegistry(PSt, "Color", "Accent")
+
+            local pickerOpen = false
+
+            -- SV square (saturation/value)
+            local SVBox = Instance.new("ImageLabel")
+            SVBox.Size = UDim2.new(1, -60, 0, 100); SVBox.Position = UDim2.new(0, 10, 0, 10)
+            SVBox.Image = "rbxassetid://4155801252"
+            SVBox.BackgroundColor3 = Color3.fromHSV(h, 1, 1); SVBox.Parent = Panel
+            Instance.new("UICorner", SVBox).CornerRadius = UDim.new(0, 6)
+
+            local SVDot = Instance.new("Frame")
+            SVDot.Size = UDim2.new(0, 10, 0, 10); SVDot.AnchorPoint = Vector2.new(0.5, 0.5)
+            SVDot.Position = UDim2.new(s, 0, 1 - v, 0)
+            SVDot.BackgroundColor3 = Color3.new(1, 1, 1); SVDot.ZIndex = 2; SVDot.Parent = SVBox
+            Instance.new("UICorner", SVDot).CornerRadius = UDim.new(1, 0)
+
+            -- hue bar
+            local HueBar = Instance.new("ImageLabel")
+            HueBar.Size = UDim2.new(0, 18, 0, 100); HueBar.Position = UDim2.new(1, -38, 0, 10)
+            HueBar.Image = "rbxassetid://4155805445"
+            HueBar.BackgroundTransparency = 1; HueBar.Parent = Panel
+            Instance.new("UICorner", HueBar).CornerRadius = UDim.new(0, 6)
+
+            local HueDot = Instance.new("Frame")
+            HueDot.Size = UDim2.new(1, 4, 0, 4); HueDot.AnchorPoint = Vector2.new(0.5, 0.5)
+            HueDot.Position = UDim2.new(0.5, 0, h, 0)
+            HueDot.BackgroundColor3 = Color3.new(1, 1, 1); HueDot.ZIndex = 2; HueDot.Parent = HueBar
+            Instance.new("UICorner", HueDot).CornerRadius = UDim.new(1, 0)
+
+            -- hex label at the bottom
+            local HexLbl = Instance.new("TextLabel")
+            HexLbl.Size = UDim2.new(1, -20, 0, 22); HexLbl.Position = UDim2.new(0, 10, 0, 118)
+            HexLbl.BackgroundTransparency = 1; HexLbl.Font = Enum.Font.GothamMedium
+            HexLbl.TextSize = 11; HexLbl.TextXAlignment = Enum.TextXAlignment.Left; HexLbl.Parent = Panel
+            AddToRegistry(HexLbl, "TextColor3", "Text")
+
+            local function ApplyColor()
+                Color = Color3.fromHSV(h, s, v)
+                Swatch.BackgroundColor3 = Color
+                SVBox.BackgroundColor3 = Color3.fromHSV(h, 1, 1)
+                HexLbl.Text = string.format("#%02X%02X%02X", math.floor(Color.R*255), math.floor(Color.G*255), math.floor(Color.B*255))
+                Library.Flags[text] = {R = Color.R, G = Color.G, B = Color.B}
+                callback(Color)
+            end
+            ApplyColor()
+
+            -- SV drag
+            local svDragging = false
+            local SVBtn = Instance.new("TextButton")
+            SVBtn.Size = UDim2.new(1, 0, 1, 0); SVBtn.BackgroundTransparency = 1
+            SVBtn.Text = ""; SVBtn.ZIndex = 3; SVBtn.Parent = SVBox
+            SVBtn.InputBegan:Connect(function(i)
+                if i.UserInputType == Enum.UserInputType.MouseButton1 then svDragging = true end
+            end)
+            UserInputService.InputEnded:Connect(function(i)
+                if i.UserInputType == Enum.UserInputType.MouseButton1 then svDragging = false end
+            end)
+            UserInputService.InputChanged:Connect(function(i)
+                if svDragging and i.UserInputType == Enum.UserInputType.MouseMovement then
+                    s = math.clamp((i.Position.X - SVBox.AbsolutePosition.X) / SVBox.AbsoluteSize.X, 0, 1)
+                    v = 1 - math.clamp((i.Position.Y - SVBox.AbsolutePosition.Y) / SVBox.AbsoluteSize.Y, 0, 1)
+                    SVDot.Position = UDim2.new(s, 0, 1 - v, 0)
+                    ApplyColor()
+                end
+            end)
+
+            -- hue drag
+            local hueDragging = false
+            local HueBtn = Instance.new("TextButton")
+            HueBtn.Size = UDim2.new(1, 0, 1, 0); HueBtn.BackgroundTransparency = 1
+            HueBtn.Text = ""; HueBtn.ZIndex = 3; HueBtn.Parent = HueBar
+            HueBtn.InputBegan:Connect(function(i)
+                if i.UserInputType == Enum.UserInputType.MouseButton1 then hueDragging = true end
+            end)
+            UserInputService.InputEnded:Connect(function(i)
+                if i.UserInputType == Enum.UserInputType.MouseButton1 then hueDragging = false end
+            end)
+            UserInputService.InputChanged:Connect(function(i)
+                if hueDragging and i.UserInputType == Enum.UserInputType.MouseMovement then
+                    h = math.clamp((i.Position.Y - HueBar.AbsolutePosition.Y) / HueBar.AbsoluteSize.Y, 0, 1)
+                    HueDot.Position = UDim2.new(0.5, 0, h, 0)
+                    ApplyColor()
+                end
+            end)
+
+            ClickBtn.MouseButton1Click:Connect(function()
+                pickerOpen = not pickerOpen
+                if pickerOpen then
+                    Panel.Visible = true
+                    Tween(Panel, {Size = UDim2.new(1, 0, 0, 148)}, 0.32)
+                else
+                    Tween(Panel, {Size = UDim2.new(1, 0, 0, 0)}, 0.28)
+                    task.wait(0.3); Panel.Visible = false
+                end
+            end)
+
+            Library.Flags[text] = {R = Color.R, G = Color.G, B = Color.B}
+            ConfigObjects[text] = {Type = "ColorPicker", Value = {R = Color.R, G = Color.G, B = Color.B}, Set = function(val)
+                if type(val) == "table" then
+                    Color = Color3.new(val.R, val.G, val.B)
+                    h, s, v = Color3.toHSV(Color)
+                    SVDot.Position = UDim2.new(s, 0, 1 - v, 0)
+                    HueDot.Position = UDim2.new(0.5, 0, h, 0)
+                    ApplyColor()
+                end
+            end}
         end
 
         return Elements
@@ -1063,51 +1147,45 @@ function Library:CreateWindow(Config)
     end
 
     ConfigTab:Button("Refresh List", function() RefreshConfigs() end)
-
     ConfigTab:Button("Save Config", function()
-        if ConfigName == "" then Window:Notification("enter a name first"); return end
+        if ConfigName == "" then Window:Notification("enter a name first", "warning"); return end
         Library:SaveConfig(ConfigName, Window.ConfigFolder)
-        Window:Notification("saved " .. ConfigName)
+        Window:Notification("saved " .. ConfigName, "success")
         RefreshConfigs()
     end)
-
     ConfigTab:Button("Load Config", function()
         if Window.CurrentConfig == "" or Window.CurrentConfig == "None" then
-            Window:Notification("select a config first"); return
+            Window:Notification("select a config first", "warning"); return
         end
         local path = Window.ConfigFolder .. "/" .. Window.CurrentConfig .. ".json"
-        local ok = Library:LoadConfig(path)
-        if ok then
-            Window:Notification("loaded " .. Window.CurrentConfig)
+        if Library:LoadConfig(path) then
+            Window:Notification("loaded " .. Window.CurrentConfig, "success")
         else
-            Window:Notification("config file not found")
+            Window:Notification("config file not found", "error")
         end
     end)
-
     ConfigTab:Button("Delete Config", function()
         if Window.CurrentConfig == "" or Window.CurrentConfig == "None" then
-            Window:Notification("select a config first"); return
+            Window:Notification("select a config first", "warning"); return
         end
         local path = Window.ConfigFolder .. "/" .. Window.CurrentConfig .. ".json"
         if isfile(path) then
-            delfile(path)
-            Window:Notification("deleted " .. Window.CurrentConfig)
-            Window.CurrentConfig = ""
-            RefreshConfigs()
+            delfile(path); Window:Notification("deleted " .. Window.CurrentConfig, "info")
+            Window.CurrentConfig = ""; RefreshConfigs()
         else
-            Window:Notification("config file not found")
+            Window:Notification("config file not found", "error")
         end
     end)
 
-    -- settings tab, always pinned at the bottom of the tab list
+    -- settings tab
     local Settings = Window:Tab("Settings")
     Settings:Section("appearance")
     Settings:Toggle("Rainbow Edge", false, function(v) Library:ToggleRainbow(v) end)
     Settings:Dropdown("Rainbow Type", {"Linear Gradient (Solid Rainbow)", "Animated/Cycling Rainbow", "Smooth Fading Gradient", "Step/Band Rainbow", "Rainbow Pulse", "Radial Rainbow", "Neon/Glowing Rainbow", "Pastel Rainbow", "Vertical/Horizontal Fade"}, function(val) Library:SetRainbowType(val) end)
-    Settings:Dropdown("Theme", {"Dark", "White", "Purple", "Blue", "Red", "Yellow", "Green"}, function(v) Library:SetTheme(v) end)
+    Settings:Dropdown("Theme", {"Light", "Dark", "White", "Purple", "Blue", "Red", "Yellow", "Green"}, function(v) Library:SetTheme(v) end)
     Settings:Keybind("Menu Keybind", Keybind or Enum.KeyCode.M, function(v) Window:SetKeybind(v) end)
     Settings:Toggle("UI SFX", true, function(v) SFXEnabled = v end)
-    Settings:Button("Destroy UI", function() Window:Destroy() end)
+    Settings:Button("Unload UI", function() Window:Unload() end)
 
     RefreshConfigs()
     return Window
