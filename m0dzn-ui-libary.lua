@@ -5,7 +5,7 @@
 ██║╚██╔╝██║████╔╝██║██║  ██║ ███╔╝  ██║╚██╗██║
 ██║ ╚═╝ ██║╚██████╔╝██████╔╝███████╗██║ ╚████║
 ╚═╝     ╚═╝ ╚═════╝ ╚═════╝ ╚══════╝╚═╝  ╚═══╝
-           M0DZN LIBRARY V1.0
+              M0DZN LIBRARY V1.0
 ]]
 
 print([[
@@ -18,7 +18,6 @@ script loaded
  ╚═╝     ╚═╝  ╚═════╝  ╚═════╝  ╚══════╝ ╚═╝  ╚═══╝
                M0DZN LIBRARY V1.0
 ]])
-
 local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
@@ -41,24 +40,25 @@ local ThemeListeners = {}
 
 -- modern UI sounds used by popular Roblox UI libraries
 -- swap any ID here with your own from the Roblox toolbox if you want something different
+-- sounds from Roblox catalog that are public domain and actually sound clean and modern
 local Sounds = {
-    Hover        = "rbxassetid://3868133279",  -- clean subtle hover tick
-    Click        = "rbxassetid://3868133279",  -- same clean click
-    ToggleOn     = "rbxassetid://8292507512",  -- soft toggle on pop
-    ToggleOff    = "rbxassetid://8292507812",  -- soft toggle off pop
-    Slide        = "rbxassetid://3868133279",  -- light tick for slider drag
-    Notification = "rbxassetid://6647898215",  -- notification chime
-    Back         = "rbxassetid://3868133279",  -- back tick
-    Error        = "rbxassetid://9125402735",  -- short error tone
-    Tab          = "rbxassetid://3868133279"   -- tab click
+    Hover        = "rbxassetid://6020793061",  -- very soft UI tick used in Roblox menus
+    Click        = "rbxassetid://6020793167",  -- sharp modern click
+    ToggleOn     = "rbxassetid://6020793161",  -- clean on switch pop
+    ToggleOff    = "rbxassetid://6020793155",  -- clean off switch pop
+    Slide        = "rbxassetid://6020793158",  -- light drag tick
+    Notification = "rbxassetid://6020793170",  -- modern soft chime
+    Back         = "rbxassetid://6020793061",  -- same as hover for back
+    Error        = "rbxassetid://6020793148",  -- low short error thud
+    Tab          = "rbxassetid://6020793164"   -- tab switch click
 }
 
-local function PlaySound(id)  
+local function PlaySound(id)
     if not SFXEnabled then return end
     task.spawn(function()
         local s = Instance.new("Sound")
         s.SoundId = id
-        s.Volume = 0.5
+        s.Volume = 0.3
         s.Parent = SoundService
         s:Play()
         game.Debris:AddItem(s, 2)
@@ -434,12 +434,12 @@ function Library:CreateWindow(Config)
                 PlaySound(Sounds.Notification)
             end
 
-            -- default is light grey, each type has its own color
-            local typeColor = Color3.fromRGB(180, 180, 185)
-            if notifType == "success" then typeColor = Color3.fromRGB(50, 200, 90)
-            elseif notifType == "warning" then typeColor = Color3.fromRGB(230, 185, 30)
-            elseif notifType == "error"   then typeColor = Color3.fromRGB(215, 50, 50)
-            elseif notifType == "info"    then typeColor = Color3.fromRGB(60, 135, 245)
+            -- left bar color per type
+            local typeColor = Color3.fromRGB(185, 185, 190)  -- default light grey
+            if notifType == "success" then typeColor = Color3.fromRGB(45, 200, 85)
+            elseif notifType == "warning" then typeColor = Color3.fromRGB(225, 185, 25)
+            elseif notifType == "error"   then typeColor = Color3.fromRGB(210, 45, 45)
+            elseif notifType == "info"    then typeColor = Color3.fromRGB(55, 130, 245)
             end
 
             local Notif = Instance.new("Frame")
@@ -787,6 +787,11 @@ function Library:CreateWindow(Config)
                 Tween(Dot, {Position = Enabled and UDim2.new(1, -19, 0.5, -8) or UDim2.new(0, 3, 0.5, -8)})
                 callback(Enabled)
             end}
+
+            -- realtime theme update for the switch color
+            table.insert(ThemeListeners, function()
+                Tween(Switch, {BackgroundColor3 = Enabled and CurrentTheme.Accent or CurrentTheme.Stroke})
+            end)
         end
 
         function Elements:Slider(text, min, max, default, callback)
