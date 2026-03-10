@@ -53,7 +53,7 @@ local Sounds = {
     Tab          = "rbxassetid://3868133279"   -- tab click
 }
 
-local function PlaySound(id)
+local function PlaySound(id)  -- sfx
     if not SFXEnabled then return end
     task.spawn(function()
         local s = Instance.new("Sound")
