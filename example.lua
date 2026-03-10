@@ -3,8 +3,8 @@ local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/m0dzn
 
 -- 2. CREATE THE WINDOW
 local Window = Library:CreateWindow({
-    Title = "TEST HUB",            -- Change the name of your hub here
-    Keybind = Enum.KeyCode.RightControl  -- The key to Open/Close the menu
+    Title = "TEST HUB",                      -- Change the name of your hub here
+    Keybind = Enum.KeyCode.RightControl      -- The key to Open/Close the menu
 })
 
 -- 3. CREATE TABS
@@ -15,7 +15,7 @@ local MiscTab = Window:Tab("Misc & Text")
 
 --[[ ----------------------------------------------
 TAB 1: MAIN FEATURES (Button, Toggle, Notification)
----------------------------------------------------]
+---------------------------------------------------]]
 
 MainTab:Section("Basic Interactions") -- Creates a section title
 
@@ -24,7 +24,7 @@ MainTab:Section("Basic Interactions") -- Creates a section title
 MainTab:Button("Test Notification", function()
     -- PUT YOUR CODE HERE
     -- This triggers a notification at the bottom right
-    Window:Notification("Success! Button works.") 
+    Window:Notification("Success! Button works.")
 end)
 
 -- TOGGLE
@@ -37,7 +37,7 @@ MainTab:Toggle("Auto Print Loop", false, function(State)
     task.spawn(function()
         while getgenv().TestingLoop do
             print("Loop is running...") -- PUT CODE TO REPEAT HERE
-            task.wait(1) -- How fast the loop runs
+            task.wait(1)               -- How fast the loop runs
         end
     end)
 
@@ -63,7 +63,7 @@ TAB 2: PLAYER STATS (Slider, Value/Input)
 
 PlayerTab:Section("Character Modifiers")
 
--- SLIDER TEST
+-- SLIDER
 -- Used for Speed, Jump, FOV, etc. (Range of numbers).
 -- Format: "Name", Min, Max, Default, Callback
 PlayerTab:Slider("WalkSpeed", 16, 200, 16, function(Value)
@@ -75,16 +75,14 @@ PlayerTab:Slider("JumpPower", 50, 300, 50, function(Value)
     game.Players.LocalPlayer.Character.Humanoid.JumpPower = Value
 end)
 
--- [ VALUE (INPUT) TEST ]
--- This is the new function you asked for.
+-- VALUE (INPUT)
 -- Used for specific numbers like Hitbox Size or TP coordinates.
 PlayerTab:Value("Hitbox Size", "10", function(Value)
     -- 'Value' is what the user typed in the box
     print("Hitbox size changed to: " .. Value)
-    
-    -- Example of using it (This is just a print test, not real hitbox code)
+
     Window:Notification("Hitbox set to " .. Value)
-    
+
     -- REAL USAGE EXAMPLE:
     -- _G.HeadSize = tonumber(Value)
 end)
@@ -95,11 +93,10 @@ TAB 3: MISC (Keybind, Textbox)
 
 MiscTab:Section("Text & Binds")
 
--- KEYBIND TEST
+-- KEYBIND
 -- Lets the user choose a key to do something.
 MiscTab:Keybind("Fly Toggle Key", Enum.KeyCode.F, function(Key)
     -- This runs when they CHANGE the key, not when they press it.
-    -- To make it work, usually you check InputBegan or use a library flag.
     print("Keybind changed to: " .. Key.Name)
     Window:Notification("Keybind is now: " .. Key.Name)
 end)
