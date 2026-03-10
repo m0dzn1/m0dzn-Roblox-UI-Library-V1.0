@@ -1,6 +1,6 @@
 -- m0dzn ui library v1.0
--- dark futuristic style, obsidian black + crimson red
--- config system works like orion (flags table, auto save/load)
+-- modern ui maybe
+-- config system
 
 local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
@@ -135,31 +135,19 @@ function Library:CreateWindow(Config)
     MainFrame.ClipsDescendants = true
     MainFrame.BackgroundTransparency = 0
     MainFrame.Parent = ScreenGui
-    Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 10)
+    Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 14)
     AddToRegistry(MainFrame, "BackgroundColor3", "Main")
 
     -- outer border, crimson by default
     local Stroke = Instance.new("UIStroke")
-    Stroke.Thickness = 1.5
-    Stroke.Transparency = 0.15
+    Stroke.Thickness = 1
+    Stroke.Transparency = 0.35
     Stroke.Parent = MainFrame
     AddToRegistry(Stroke, "Color", "Accent")
 
     local Gradient = Instance.new("UIGradient")
     Gradient.Parent = Stroke
     Gradient.Enabled = false
-
-    -- soft red glow behind the content area for depth
-    local GlowBlob = Instance.new("ImageLabel")
-    GlowBlob.Size = UDim2.new(0, 380, 0, 280)
-    GlowBlob.Position = UDim2.new(0.5, -190, 0, -90)
-    GlowBlob.BackgroundTransparency = 1
-    GlowBlob.Image = "rbxassetid://5028857472"
-    GlowBlob.ImageColor3 = Color3.fromRGB(160, 15, 25)
-    GlowBlob.ImageTransparency = 0.78
-    GlowBlob.ZIndex = 0
-    GlowBlob.ScaleType = Enum.ScaleType.Fit
-    GlowBlob.Parent = MainFrame
 
     -- thin crimson line at the top of the window
     local TopLine = Instance.new("Frame")
@@ -168,30 +156,8 @@ function Library:CreateWindow(Config)
     TopLine.BorderSizePixel = 0
     TopLine.ZIndex = 6
     TopLine.Parent = MainFrame
-    Instance.new("UICorner", TopLine).CornerRadius = UDim.new(0, 10)
+    Instance.new("UICorner", TopLine).CornerRadius = UDim.new(0, 14)
     AddToRegistry(TopLine, "BackgroundColor3", "Accent")
-
-    -- gradient overlay on the topbar to fade from dark into the window
-    local TopGrad = Instance.new("Frame")
-    TopGrad.Size = UDim2.new(1, 0, 0, 60)
-    TopGrad.Position = UDim2.new(0, 0, 0, 0)
-    TopGrad.BackgroundTransparency = 0
-    TopGrad.BorderSizePixel = 0
-    TopGrad.ZIndex = 1
-    TopGrad.Parent = MainFrame
-    AddToRegistry(TopGrad, "BackgroundColor3", "Top")
-    local TGCorner = Instance.new("UICorner", TopGrad)
-    TGCorner.CornerRadius = UDim.new(0, 10)
-    local TGGrad = Instance.new("UIGradient", TopGrad)
-    TGGrad.Rotation = 90
-    TGGrad.Color = ColorSequence.new({
-        ColorSequenceKeypoint.new(0, Color3.new(1, 1, 1)),
-        ColorSequenceKeypoint.new(1, Color3.new(1, 1, 1)),
-    })
-    TGGrad.Transparency = NumberSequence.new({
-        NumberSequenceKeypoint.new(0, 0),
-        NumberSequenceKeypoint.new(1, 1),
-    })
 
     -- rainbow border loop
     task.spawn(function()
@@ -287,36 +253,6 @@ function Library:CreateWindow(Config)
     TitleLabel.Parent = Topbar
     AddToRegistry(TitleLabel, "TextColor3", "Text")
 
-    -- subtle status pill on the right side of the topbar
-    local StatusPill = Instance.new("Frame")
-    StatusPill.Size = UDim2.new(0, 68, 0, 20)
-    StatusPill.Position = UDim2.new(1, -84, 0.5, -10)
-    StatusPill.ZIndex = 5
-    StatusPill.BackgroundTransparency = 0.1
-    StatusPill.Parent = Topbar
-    Instance.new("UICorner", StatusPill).CornerRadius = UDim.new(1, 0)
-    AddToRegistry(StatusPill, "BackgroundColor3", "Top")
-
-    local StatusDot = Instance.new("Frame")
-    StatusDot.Size = UDim2.new(0, 6, 0, 6)
-    StatusDot.Position = UDim2.new(0, 8, 0.5, -3)
-    StatusDot.BackgroundColor3 = Color3.fromRGB(80, 220, 100)
-    StatusDot.ZIndex = 6
-    StatusDot.Parent = StatusPill
-    Instance.new("UICorner", StatusDot).CornerRadius = UDim.new(1, 0)
-
-    local StatusText = Instance.new("TextLabel")
-    StatusText.Text = "online"
-    StatusText.Size = UDim2.new(1, -20, 1, 0)
-    StatusText.Position = UDim2.new(0, 18, 0, 0)
-    StatusText.BackgroundTransparency = 1
-    StatusText.Font = Enum.Font.GothamMedium
-    StatusText.TextSize = 10
-    StatusText.ZIndex = 6
-    StatusText.TextXAlignment = Enum.TextXAlignment.Left
-    StatusText.Parent = StatusPill
-    AddToRegistry(StatusText, "TextColor3", "Text")
-
     local Content = Instance.new("Frame")
     Content.Size = UDim2.new(1, -20, 1, -68)
     Content.Position = UDim2.new(0, 10, 0, 58)
@@ -340,7 +276,7 @@ function Library:CreateWindow(Config)
     ProfileFrame.Position = UDim2.new(0, 0, 1, -44)
     ProfileFrame.BackgroundTransparency = 0.04
     ProfileFrame.Parent = Content
-    Instance.new("UICorner", ProfileFrame).CornerRadius = UDim.new(0, 8)
+    Instance.new("UICorner", ProfileFrame).CornerRadius = UDim.new(0, 12)
     AddToRegistry(ProfileFrame, "BackgroundColor3", "Top")
 
     -- left accent bar on the profile card
@@ -448,7 +384,7 @@ function Library:CreateWindow(Config)
             Notif.Position = UDim2.new(1, 20, 1, -68)
             Notif.Parent = ScreenGui
             Notif.BackgroundTransparency = 0.04
-            Instance.new("UICorner", Notif).CornerRadius = UDim.new(0, 8)
+            Instance.new("UICorner", Notif).CornerRadius = UDim.new(0, 12)
             AddToRegistry(Notif, "BackgroundColor3", "Top")
 
             local NAccentBar = Instance.new("Frame")
@@ -522,7 +458,7 @@ function Library:CreateWindow(Config)
         TabBtn.TextColor3 = Color3.fromRGB(85, 85, 92)
         TabBtn.TextSize = 12
         TabBtn.Parent = TabContainer
-        Instance.new("UICorner", TabBtn).CornerRadius = UDim.new(0, 7)
+        Instance.new("UICorner", TabBtn).CornerRadius = UDim.new(0, 10)
 
         -- red indicator bar that appears on the active tab
         local TabBar = Instance.new("Frame")
@@ -613,7 +549,7 @@ function Library:CreateWindow(Config)
             F.Size = UDim2.new(1, 0, 0, h)
             F.Parent = Page
             F.BackgroundTransparency = 0.04
-            Instance.new("UICorner", F).CornerRadius = UDim.new(0, 8)
+            Instance.new("UICorner", F).CornerRadius = UDim.new(0, 12)
             AddToRegistry(F, "BackgroundColor3", "Top")
 
             local A = Instance.new("Frame")
@@ -656,7 +592,7 @@ function Library:CreateWindow(Config)
             ValBox.TextXAlignment = Enum.TextXAlignment.Center
             ValBox.Parent = ValFrame
             ValBox.BackgroundTransparency = 0.1
-            Instance.new("UICorner", ValBox).CornerRadius = UDim.new(0, 6)
+            Instance.new("UICorner", ValBox).CornerRadius = UDim.new(0, 8)
             AddToRegistry(ValBox, "BackgroundColor3", "Main")
             AddToRegistry(ValBox, "TextColor3", "Accent")
 
@@ -704,7 +640,7 @@ function Library:CreateWindow(Config)
             KeyLabel.TextSize = 11
             KeyLabel.Parent = Tile
             KeyLabel.BackgroundTransparency = 0.1
-            Instance.new("UICorner", KeyLabel).CornerRadius = UDim.new(0, 6)
+            Instance.new("UICorner", KeyLabel).CornerRadius = UDim.new(0, 8)
             AddToRegistry(KeyLabel, "BackgroundColor3", "Main")
             AddToRegistry(KeyLabel, "TextColor3", "Accent")
 
@@ -742,7 +678,7 @@ function Library:CreateWindow(Config)
             Btn.TextSize = 13
             Btn.TextXAlignment = Enum.TextXAlignment.Left
             Btn.Parent = Page
-            Instance.new("UICorner", Btn).CornerRadius = UDim.new(0, 8)
+            Instance.new("UICorner", Btn).CornerRadius = UDim.new(0, 12)
             Btn.BackgroundTransparency = 0.04
             AddToRegistry(Btn, "BackgroundColor3", "Top")
             AddToRegistry(Btn, "TextColor3", "Text")
@@ -954,7 +890,7 @@ function Library:CreateWindow(Config)
             Box.TextSize = 12
             Box.Parent = Frame
             Box.BackgroundTransparency = 0.08
-            Instance.new("UICorner", Box).CornerRadius = UDim.new(0, 6)
+            Instance.new("UICorner", Box).CornerRadius = UDim.new(0, 8)
             AddToRegistry(Box, "BackgroundColor3", "Main")
             AddToRegistry(Box, "TextColor3", "Text")
 
@@ -991,7 +927,7 @@ function Library:CreateWindow(Config)
             Btn.Size = UDim2.new(1, 0, 0, 44)
             Btn.Text = ""
             Btn.Parent = Page
-            Instance.new("UICorner", Btn).CornerRadius = UDim.new(0, 8)
+            Instance.new("UICorner", Btn).CornerRadius = UDim.new(0, 12)
             Btn.BackgroundTransparency = 0.04
             AddToRegistry(Btn, "BackgroundColor3", "Top")
 
@@ -1033,7 +969,7 @@ function Library:CreateWindow(Config)
             Container.Visible = false
             Container.ClipsDescendants = true
             Container.Parent = Page
-            Instance.new("UICorner", Container).CornerRadius = UDim.new(0, 8)
+            Instance.new("UICorner", Container).CornerRadius = UDim.new(0, 12)
             Container.BackgroundTransparency = 0.04
             AddToRegistry(Container, "BackgroundColor3", "Top")
 
