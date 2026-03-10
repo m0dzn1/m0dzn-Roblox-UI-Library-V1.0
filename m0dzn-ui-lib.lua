@@ -49,7 +49,7 @@ end
 local Themes = {
     Dark   = {Main = Color3.fromRGB(28, 28, 30),      Top = Color3.fromRGB(38, 38, 40),     Text = Color3.fromRGB(220, 220, 225), Accent = Color3.fromRGB(160, 160, 168), Stroke = Color3.fromRGB(55, 55, 60)},
     Light  = {Main = Color3.fromRGB(235, 235, 238),   Top = Color3.fromRGB(245, 245, 248),  Text = Color3.fromRGB(30, 30, 35),    Accent = Color3.fromRGB(110, 110, 120), Stroke = Color3.fromRGB(200, 200, 205)},
-
+    White  = {Main = Color3.fromRGB(243, 243, 243),   Top = Color3.fromRGB(255, 255, 255),  Text = Color3.fromRGB(20, 20, 20),    Accent = Color3.fromRGB(0, 100, 210),   Stroke = Color3.fromRGB(220, 220, 225)},
     Purple = {Main = Color3.fromRGB(18, 15, 22),      Top = Color3.fromRGB(30, 25, 35),     Text = Color3.fromRGB(245, 240, 255), Accent = Color3.fromRGB(160, 90, 255),  Stroke = Color3.fromRGB(50, 45, 60)},
     Blue   = {Main = Color3.fromRGB(12, 18, 28),      Top = Color3.fromRGB(25, 32, 45),     Text = Color3.fromRGB(240, 245, 255), Accent = Color3.fromRGB(70, 130, 255),  Stroke = Color3.fromRGB(45, 55, 75)},
     Red    = {Main = Color3.fromRGB(22, 10, 10),      Top = Color3.fromRGB(35, 18, 18),     Text = Color3.fromRGB(255, 235, 235), Accent = Color3.fromRGB(210, 50, 50),   Stroke = Color3.fromRGB(60, 30, 30)},
@@ -57,8 +57,8 @@ local Themes = {
     Green  = {Main = Color3.fromRGB(12, 22, 15),      Top = Color3.fromRGB(20, 35, 25),     Text = Color3.fromRGB(240, 255, 245), Accent = Color3.fromRGB(60, 220, 130),  Stroke = Color3.fromRGB(40, 60, 50)},
 }
 
--- default theme is Red
-local CurrentTheme = Themes.Red
+-- default theme is Dark (grey version)
+local CurrentTheme = Themes.Dark
 
 local function AddToRegistry(obj, prop, themeKey)
     table.insert(Registry, {Object = obj, Property = prop, Type = themeKey})
@@ -1090,27 +1090,13 @@ function Library:CreateWindow(Config)
             DotStroke.Parent = SVDot
 
             -- hue bar on the right side next to the SV box
-            -- using UIGradient instead of an image so the rainbow is always clean and correct
-            local HueBar = Instance.new("Frame")
+            local HueBar = Instance.new("ImageLabel")
             HueBar.Size = UDim2.new(0, 16, 0, 110)
             HueBar.Position = UDim2.new(1, -30, 0, 10)
-            HueBar.BackgroundColor3 = Color3.new(1, 1, 1)
-            HueBar.BorderSizePixel = 0
+            HueBar.Image = "rbxassetid://4155805445"
+            HueBar.BackgroundTransparency = 1
             HueBar.Parent = Panel
             Instance.new("UICorner", HueBar).CornerRadius = UDim.new(0, 6)
-
-            local HueGradient = Instance.new("UIGradient")
-            HueGradient.Rotation = 90
-            HueGradient.Color = ColorSequence.new({
-                ColorSequenceKeypoint.new(0,    Color3.fromRGB(255, 0,   0)),
-                ColorSequenceKeypoint.new(0.17, Color3.fromRGB(255, 255, 0)),
-                ColorSequenceKeypoint.new(0.33, Color3.fromRGB(0,   255, 0)),
-                ColorSequenceKeypoint.new(0.50, Color3.fromRGB(0,   255, 255)),
-                ColorSequenceKeypoint.new(0.67, Color3.fromRGB(0,   0,   255)),
-                ColorSequenceKeypoint.new(0.83, Color3.fromRGB(255, 0,   255)),
-                ColorSequenceKeypoint.new(1,    Color3.fromRGB(255, 0,   0)),
-            })
-            HueGradient.Parent = HueBar
 
             local HueDot = Instance.new("Frame")
             HueDot.Size = UDim2.new(1, 6, 0, 4)
@@ -1395,7 +1381,7 @@ function Library:CreateWindow(Config)
     Settings:Section("appearance")
     Settings:Toggle("Rainbow Edge", false, function(v) Library:ToggleRainbow(v) end)
     Settings:Dropdown("Rainbow Type", {"Linear Gradient (Solid Rainbow)", "Animated/Cycling Rainbow", "Smooth Fading Gradient", "Step/Band Rainbow", "Rainbow Pulse", "Radial Rainbow", "Neon/Glowing Rainbow", "Pastel Rainbow", "Vertical/Horizontal Fade"}, function(val) Library:SetRainbowType(val) end)
-    Settings:Dropdown("Theme", {"Red", "Dark", "Light", "Purple", "Blue", "Yellow", "Green"}, function(v) Library:SetTheme(v) end)
+    Settings:Dropdown("Theme", {"Dark", "Light", "White", "Purple", "Blue", "Red", "Yellow", "Green"}, function(v) Library:SetTheme(v) end)
     Settings:Keybind("Menu Keybind", Keybind or Enum.KeyCode.M, function(v) Window:SetKeybind(v) end)
     Settings:Toggle("UI SFX", true, function(v) SFXEnabled = v end)
     Settings:Button("Unload UI", function() Window:Unload() end)
