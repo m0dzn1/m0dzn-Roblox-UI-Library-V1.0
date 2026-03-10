@@ -1,5 +1,23 @@
--- m0dzn ui library v2.0
--- dark grey theme by default smooth edges full module set
+--[[ 
+███╗   ███╗ ██████╗ ██████╗ ███████╗███╗   ██╗
+████╗ ████║██╔═████╗██╔══██╗╚══███╔╝████╗  ██║
+██╔████╔██║██║██╔██║██║  ██║  ███╔╝ ██╔██╗ ██║
+██║╚██╔╝██║████╔╝██║██║  ██║ ███╔╝  ██║╚██╗██║
+██║ ╚═╝ ██║╚██████╔╝██████╔╝███████╗██║ ╚████║
+╚═╝     ╚═╝ ╚═════╝ ╚═════╝ ╚══════╝╚═╝  ╚═══╝
+           M0DZN LIBRARY V1.0
+]]
+
+print([[
+script loaded
+ ███╗   ███╗  ██████╗  ██████╗  ███████╗ ███╗   ██╗
+ ████╗ ████║ ██╔═████╗ ██╔══██╗ ╚══███╔╝ ████╗  ██║
+ ██╔████╔██║ ██║██╔██║ ██║  ██║   ███╔╝  ██╔██╗ ██║
+ ██║╚██╔╝██║ ████╔╝██║ ██║  ██║  ███╔╝   ██║╚██╗██║
+ ██║ ╚═╝ ██║ ╚██████╔╝ ██████╔╝ ███████╗ ██║ ╚████║
+ ╚═╝     ╚═╝  ╚═════╝  ╚═════╝  ╚══════╝ ╚═╝  ╚═══╝
+               M0DZN LIBRARY V1.0
+]])
 
 local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
@@ -19,17 +37,20 @@ local RainbowType = "Animated/Cycling Rainbow"
 local SFXEnabled = true
 local Registry = {}
 local ConfigObjects = {}
+local ThemeListeners = {}
 
+-- modern UI sounds used by popular Roblox UI libraries
+-- swap any ID here with your own from the Roblox toolbox if you want something different
 local Sounds = {
-    Hover        = "rbxassetid://4510086912",
-    Click        = "rbxassetid://4510086561",
-    ToggleOn     = "rbxassetid://4510087425",
-    ToggleOff    = "rbxassetid://4510087425",
-    Slide        = "rbxassetid://4510087798",
-    Notification = "rbxassetid://4590657391",
-    Back         = "rbxassetid://4510087236",
-    Error        = "rbxassetid://4510087545",
-    Tab          = "rbxassetid://4510087056"
+    Hover        = "rbxassetid://3868133279",  -- clean subtle hover tick
+    Click        = "rbxassetid://3868133279",  -- same clean click
+    ToggleOn     = "rbxassetid://8292507512",  -- soft toggle on pop
+    ToggleOff    = "rbxassetid://8292507812",  -- soft toggle off pop
+    Slide        = "rbxassetid://3868133279",  -- light tick for slider drag
+    Notification = "rbxassetid://6647898215",  -- notification chime
+    Back         = "rbxassetid://3868133279",  -- back tick
+    Error        = "rbxassetid://9125402735",  -- short error tone
+    Tab          = "rbxassetid://3868133279"   -- tab click
 }
 
 local function PlaySound(id)
@@ -49,7 +70,7 @@ end
 local Themes = {
     Dark   = {Main = Color3.fromRGB(28, 28, 30),      Top = Color3.fromRGB(38, 38, 40),     Text = Color3.fromRGB(220, 220, 225), Accent = Color3.fromRGB(160, 160, 168), Stroke = Color3.fromRGB(55, 55, 60)},
     Light  = {Main = Color3.fromRGB(235, 235, 238),   Top = Color3.fromRGB(245, 245, 248),  Text = Color3.fromRGB(30, 30, 35),    Accent = Color3.fromRGB(110, 110, 120), Stroke = Color3.fromRGB(200, 200, 205)},
-    White  = {Main = Color3.fromRGB(243, 243, 243),   Top = Color3.fromRGB(255, 255, 255),  Text = Color3.fromRGB(20, 20, 20),    Accent = Color3.fromRGB(0, 100, 210),   Stroke = Color3.fromRGB(220, 220, 225)},
+
     Purple = {Main = Color3.fromRGB(18, 15, 22),      Top = Color3.fromRGB(30, 25, 35),     Text = Color3.fromRGB(245, 240, 255), Accent = Color3.fromRGB(160, 90, 255),  Stroke = Color3.fromRGB(50, 45, 60)},
     Blue   = {Main = Color3.fromRGB(12, 18, 28),      Top = Color3.fromRGB(25, 32, 45),     Text = Color3.fromRGB(240, 245, 255), Accent = Color3.fromRGB(70, 130, 255),  Stroke = Color3.fromRGB(45, 55, 75)},
     Red    = {Main = Color3.fromRGB(22, 10, 10),      Top = Color3.fromRGB(35, 18, 18),     Text = Color3.fromRGB(255, 235, 235), Accent = Color3.fromRGB(210, 50, 50),   Stroke = Color3.fromRGB(60, 30, 30)},
@@ -57,8 +78,8 @@ local Themes = {
     Green  = {Main = Color3.fromRGB(12, 22, 15),      Top = Color3.fromRGB(20, 35, 25),     Text = Color3.fromRGB(240, 255, 245), Accent = Color3.fromRGB(60, 220, 130),  Stroke = Color3.fromRGB(40, 60, 50)},
 }
 
--- default theme is Dark (grey version)
-local CurrentTheme = Themes.Dark
+-- default theme is Red
+local CurrentTheme = Themes.Red
 
 local function AddToRegistry(obj, prop, themeKey)
     table.insert(Registry, {Object = obj, Property = prop, Type = themeKey})
@@ -76,6 +97,10 @@ function Library:SetTheme(name)
             if r.Object then
                 Tween(r.Object, {[r.Property] = CurrentTheme[r.Type]})
             end
+        end
+        -- fire all dynamic theme listeners so tabs dropdowns and scrollbars update too
+        for _, fn in pairs(ThemeListeners) do
+            pcall(fn)
         end
     end
 end
@@ -159,7 +184,7 @@ function Library:CreateWindow(Config)
     AddToRegistry(MainFrame, "BackgroundColor3", "Main")
 
     local Stroke = Instance.new("UIStroke")
-    Stroke.Thickness = 6
+    Stroke.Thickness = 3
     Stroke.Transparency = 0.5
     Stroke.Parent = MainFrame
     AddToRegistry(Stroke, "Color", "Stroke")
@@ -409,11 +434,12 @@ function Library:CreateWindow(Config)
                 PlaySound(Sounds.Notification)
             end
 
-            local typeColor = CurrentTheme.Accent
-            if notifType == "success" then typeColor = Color3.fromRGB(60, 200, 100)
-            elseif notifType == "warning" then typeColor = Color3.fromRGB(240, 180, 40)
-            elseif notifType == "error"   then typeColor = Color3.fromRGB(220, 60, 60)
-            elseif notifType == "info"    then typeColor = Color3.fromRGB(80, 150, 255)
+            -- default is light grey, each type has its own color
+            local typeColor = Color3.fromRGB(180, 180, 185)
+            if notifType == "success" then typeColor = Color3.fromRGB(50, 200, 90)
+            elseif notifType == "warning" then typeColor = Color3.fromRGB(230, 185, 30)
+            elseif notifType == "error"   then typeColor = Color3.fromRGB(215, 50, 50)
+            elseif notifType == "info"    then typeColor = Color3.fromRGB(60, 135, 245)
             end
 
             local Notif = Instance.new("Frame")
@@ -573,6 +599,16 @@ function Library:CreateWindow(Config)
         if name == "Config"   then TabBtn.LayoutOrder = 99998 end
         if name == "Settings" then TabBtn.LayoutOrder = 99999 end
 
+        -- register a theme listener so this tab button and scrollbar update when theme changes
+        table.insert(ThemeListeners, function()
+            Page.ScrollBarImageColor3 = CurrentTheme.Accent
+            if TabBar.BackgroundTransparency == 0 then
+                -- this is the active tab so update its text and bg
+                TabBtn.TextColor3 = CurrentTheme.Text
+                TabBtn.BackgroundColor3 = CurrentTheme.Top
+            end
+        end)
+
         local Elements = {}
 
         function Elements:Section(text)
@@ -721,7 +757,7 @@ function Library:CreateWindow(Config)
             local Switch = Instance.new("Frame")
             Switch.Size = UDim2.new(0, 42, 0, 22); Switch.Position = UDim2.new(1, -56, 0.5, -11)
             Switch.Parent = Tile; Instance.new("UICorner", Switch).CornerRadius = UDim.new(1, 0)
-            Switch.BackgroundColor3 = Enabled and CurrentTheme.Accent or Color3.fromRGB(200, 200, 205)
+            Switch.BackgroundColor3 = Enabled and CurrentTheme.Accent or CurrentTheme.Stroke
 
             local SwStroke = Instance.new("UIStroke")
             SwStroke.Thickness = 1; SwStroke.Transparency = 0.6; SwStroke.Parent = Switch
@@ -737,7 +773,7 @@ function Library:CreateWindow(Config)
 
             local function Update()
                 if Enabled then PlaySound(Sounds.ToggleOn) else PlaySound(Sounds.ToggleOff) end
-                Tween(Switch, {BackgroundColor3 = Enabled and CurrentTheme.Accent or Color3.fromRGB(200, 200, 205)})
+                Tween(Switch, {BackgroundColor3 = Enabled and CurrentTheme.Accent or CurrentTheme.Stroke})
                 Tween(Dot, {Position = Enabled and UDim2.new(1, -19, 0.5, -8) or UDim2.new(0, 3, 0.5, -8)})
                 Library.Flags[text] = Enabled
                 ConfigObjects[text].Value = Enabled
@@ -747,7 +783,7 @@ function Library:CreateWindow(Config)
             ClickBtn.MouseButton1Click:Connect(function() Enabled = not Enabled; Update() end)
             ConfigObjects[text] = {Type = "Toggle", Value = Enabled, Set = function(val)
                 Enabled = val; Library.Flags[text] = val
-                Tween(Switch, {BackgroundColor3 = Enabled and CurrentTheme.Accent or Color3.fromRGB(200, 200, 205)})
+                Tween(Switch, {BackgroundColor3 = Enabled and CurrentTheme.Accent or CurrentTheme.Stroke})
                 Tween(Dot, {Position = Enabled and UDim2.new(1, -19, 0.5, -8) or UDim2.new(0, 3, 0.5, -8)})
                 callback(Enabled)
             end}
@@ -881,22 +917,36 @@ function Library:CreateWindow(Config)
                 task.wait(0.3); Container.Visible = false
             end
 
+            -- track the option buttons so we can re-color them when theme changes
+            local OptionButtons = {}
+
             local function RefreshOptions(newOpts)
                 for _, v in pairs(Container:GetChildren()) do
                     if v:IsA("TextButton") then v:Destroy() end
                 end
+                OptionButtons = {}
                 for _, opt in pairs(newOpts) do
                     local O = Instance.new("TextButton")
                     O.Size = UDim2.new(1, 0, 0, 34); O.Text = "   " .. opt
                     O.TextXAlignment = Enum.TextXAlignment.Left
                     O.Font = Enum.Font.GothamMedium; O.TextSize = 12
                     O.BackgroundTransparency = 1; O.Parent = Container
-                    AddToRegistry(O, "TextColor3", "Text")
+                    O.TextColor3 = CurrentTheme.Text
+                    table.insert(OptionButtons, O)
                     O.MouseButton1Click:Connect(function() Select(opt) end)
                     O.MouseEnter:Connect(function() Tween(O, {TextColor3 = CurrentTheme.Accent}, 0.15) end)
                     O.MouseLeave:Connect(function() Tween(O, {TextColor3 = CurrentTheme.Text}, 0.15) end)
                 end
             end
+
+            -- register a theme listener so all option items update color on theme change
+            table.insert(ThemeListeners, function()
+                for _, O in pairs(OptionButtons) do
+                    if O and O.Parent then
+                        O.TextColor3 = CurrentTheme.Text
+                    end
+                end
+            end)
             RefreshOptions(options)
 
             Btn.MouseButton1Click:Connect(function()
@@ -1090,13 +1140,27 @@ function Library:CreateWindow(Config)
             DotStroke.Parent = SVDot
 
             -- hue bar on the right side next to the SV box
-            local HueBar = Instance.new("ImageLabel")
+            -- using UIGradient instead of an image so the rainbow is always clean and correct
+            local HueBar = Instance.new("Frame")
             HueBar.Size = UDim2.new(0, 16, 0, 110)
             HueBar.Position = UDim2.new(1, -30, 0, 10)
-            HueBar.Image = "rbxassetid://4155805445"
-            HueBar.BackgroundTransparency = 1
+            HueBar.BackgroundColor3 = Color3.new(1, 1, 1)
+            HueBar.BorderSizePixel = 0
             HueBar.Parent = Panel
             Instance.new("UICorner", HueBar).CornerRadius = UDim.new(0, 6)
+
+            local HueGradient = Instance.new("UIGradient")
+            HueGradient.Rotation = 90
+            HueGradient.Color = ColorSequence.new({
+                ColorSequenceKeypoint.new(0,    Color3.fromRGB(255, 0,   0)),
+                ColorSequenceKeypoint.new(0.17, Color3.fromRGB(255, 255, 0)),
+                ColorSequenceKeypoint.new(0.33, Color3.fromRGB(0,   255, 0)),
+                ColorSequenceKeypoint.new(0.50, Color3.fromRGB(0,   255, 255)),
+                ColorSequenceKeypoint.new(0.67, Color3.fromRGB(0,   0,   255)),
+                ColorSequenceKeypoint.new(0.83, Color3.fromRGB(255, 0,   255)),
+                ColorSequenceKeypoint.new(1,    Color3.fromRGB(255, 0,   0)),
+            })
+            HueGradient.Parent = HueBar
 
             local HueDot = Instance.new("Frame")
             HueDot.Size = UDim2.new(1, 6, 0, 4)
@@ -1381,12 +1445,16 @@ function Library:CreateWindow(Config)
     Settings:Section("appearance")
     Settings:Toggle("Rainbow Edge", false, function(v) Library:ToggleRainbow(v) end)
     Settings:Dropdown("Rainbow Type", {"Linear Gradient (Solid Rainbow)", "Animated/Cycling Rainbow", "Smooth Fading Gradient", "Step/Band Rainbow", "Rainbow Pulse", "Radial Rainbow", "Neon/Glowing Rainbow", "Pastel Rainbow", "Vertical/Horizontal Fade"}, function(val) Library:SetRainbowType(val) end)
-    Settings:Dropdown("Theme", {"Dark", "Light", "White", "Purple", "Blue", "Red", "Yellow", "Green"}, function(v) Library:SetTheme(v) end)
+    local ThemeDropdown = Settings:Dropdown("Theme", {"Red", "Dark", "Light", "Purple", "Blue", "Yellow", "Green"}, function(v) Library:SetTheme(v) end)
     Settings:Keybind("Menu Keybind", Keybind or Enum.KeyCode.M, function(v) Window:SetKeybind(v) end)
     Settings:Toggle("UI SFX", true, function(v) SFXEnabled = v end)
     Settings:Button("Unload UI", function() Window:Unload() end)
 
     RefreshConfigs()
+
+    -- force apply the default theme right away so everything renders with correct colors
+    Library:SetTheme("Red")
+
     return Window
 end
 
