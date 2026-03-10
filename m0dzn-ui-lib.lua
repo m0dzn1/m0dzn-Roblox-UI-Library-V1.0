@@ -1,5 +1,5 @@
 -- m0dzn ui library v1.0
--- light grey theme by default, smooth edges, full module set
+-- dark grey theme by default smooth edges full module set
 
 local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
@@ -44,18 +44,21 @@ local function PlaySound(id)
     end)
 end
 
--- light grey is the default, grey accent
+-- dark grey is the default theme now
+-- dark theme changed from dark red to grey and light grey
 local Themes = {
-    Dark   = {Main = Color3.fromRGB(6, 6, 8),       Top = Color3.fromRGB(14, 14, 18),    Text = Color3.fromRGB(220, 220, 230), Accent = Color3.fromRGB(210, 30, 45),   Stroke = Color3.fromRGB(35, 12, 15)},
-    Light  = {Main = Color3.fromRGB(235, 235, 238),  Top = Color3.fromRGB(245, 245, 248),  Text = Color3.fromRGB(30, 30, 35),    Accent = Color3.fromRGB(110, 110, 120), Stroke = Color3.fromRGB(200, 200, 205)},
-    White  = {Main = Color3.fromRGB(243, 243, 243),  Top = Color3.fromRGB(255, 255, 255),  Text = Color3.fromRGB(20, 20, 20),    Accent = Color3.fromRGB(0, 100, 210),   Stroke = Color3.fromRGB(220, 220, 225)},
-    Purple = {Main = Color3.fromRGB(18, 15, 22),     Top = Color3.fromRGB(30, 25, 35),     Text = Color3.fromRGB(245, 240, 255), Accent = Color3.fromRGB(160, 90, 255),  Stroke = Color3.fromRGB(50, 45, 60)},
-    Blue   = {Main = Color3.fromRGB(12, 18, 28),     Top = Color3.fromRGB(25, 32, 45),     Text = Color3.fromRGB(240, 245, 255), Accent = Color3.fromRGB(70, 130, 255),  Stroke = Color3.fromRGB(45, 55, 75)},
-    Red    = {Main = Color3.fromRGB(6, 6, 8),        Top = Color3.fromRGB(14, 14, 18),     Text = Color3.fromRGB(220, 220, 230), Accent = Color3.fromRGB(210, 30, 45),   Stroke = Color3.fromRGB(35, 12, 15)},
-    Yellow = {Main = Color3.fromRGB(22, 22, 12),     Top = Color3.fromRGB(35, 35, 20),     Text = Color3.fromRGB(255, 255, 240), Accent = Color3.fromRGB(255, 200, 80),  Stroke = Color3.fromRGB(60, 60, 40)},
-    Green  = {Main = Color3.fromRGB(12, 22, 15),     Top = Color3.fromRGB(20, 35, 25),     Text = Color3.fromRGB(240, 255, 245), Accent = Color3.fromRGB(60, 220, 130),  Stroke = Color3.fromRGB(40, 60, 50)},
+    Dark   = {Main = Color3.fromRGB(28, 28, 30),      Top = Color3.fromRGB(38, 38, 40),     Text = Color3.fromRGB(220, 220, 225), Accent = Color3.fromRGB(160, 160, 168), Stroke = Color3.fromRGB(55, 55, 60)},
+    Light  = {Main = Color3.fromRGB(235, 235, 238),   Top = Color3.fromRGB(245, 245, 248),  Text = Color3.fromRGB(30, 30, 35),    Accent = Color3.fromRGB(110, 110, 120), Stroke = Color3.fromRGB(200, 200, 205)},
+    White  = {Main = Color3.fromRGB(243, 243, 243),   Top = Color3.fromRGB(255, 255, 255),  Text = Color3.fromRGB(20, 20, 20),    Accent = Color3.fromRGB(0, 100, 210),   Stroke = Color3.fromRGB(220, 220, 225)},
+    Purple = {Main = Color3.fromRGB(18, 15, 22),      Top = Color3.fromRGB(30, 25, 35),     Text = Color3.fromRGB(245, 240, 255), Accent = Color3.fromRGB(160, 90, 255),  Stroke = Color3.fromRGB(50, 45, 60)},
+    Blue   = {Main = Color3.fromRGB(12, 18, 28),      Top = Color3.fromRGB(25, 32, 45),     Text = Color3.fromRGB(240, 245, 255), Accent = Color3.fromRGB(70, 130, 255),  Stroke = Color3.fromRGB(45, 55, 75)},
+    Red    = {Main = Color3.fromRGB(22, 10, 10),      Top = Color3.fromRGB(35, 18, 18),     Text = Color3.fromRGB(255, 235, 235), Accent = Color3.fromRGB(210, 50, 50),   Stroke = Color3.fromRGB(60, 30, 30)},
+    Yellow = {Main = Color3.fromRGB(22, 22, 12),      Top = Color3.fromRGB(35, 35, 20),     Text = Color3.fromRGB(255, 255, 240), Accent = Color3.fromRGB(255, 200, 80),  Stroke = Color3.fromRGB(60, 60, 40)},
+    Green  = {Main = Color3.fromRGB(12, 22, 15),      Top = Color3.fromRGB(20, 35, 25),     Text = Color3.fromRGB(240, 255, 245), Accent = Color3.fromRGB(60, 220, 130),  Stroke = Color3.fromRGB(40, 60, 50)},
 }
-local CurrentTheme = Themes.Light  -- default is now light grey
+
+-- default theme is Dark (grey version)
+local CurrentTheme = Themes.Dark
 
 local function AddToRegistry(obj, prop, themeKey)
     table.insert(Registry, {Object = obj, Property = prop, Type = themeKey})
@@ -90,24 +93,46 @@ function Library:SaveConfig(configName, configFolder)
 end
 
 function Library:LoadConfig(path)
-    if not isfile(path) then return false end
+    if not isfile(path) then return false, "file_missing" end
     local ok, data = pcall(function()
         return HttpService:JSONDecode(readfile(path))
     end)
-    if not ok or type(data) ~= "table" then return false end
+    if not ok or type(data) ~= "table" then return false, "bad_data" end
+
+    -- count how many flags we expect vs how many loaded correctly
+    local totalFlags = 0
+    local loadedFlags = 0
+    for flag, _ in pairs(self.Flags) do
+        totalFlags = totalFlags + 1
+    end
+
     for flag, val in pairs(data) do
         self.Flags[flag] = val
         if ConfigObjects[flag] and ConfigObjects[flag].Set then
-            ConfigObjects[flag].Set(val)
+            local setOk = pcall(function()
+                ConfigObjects[flag].Set(val)
+            end)
+            if setOk then
+                loadedFlags = loadedFlags + 1
+            end
+        else
+            -- flag doesnt have a config object but still counted as loaded
+            loadedFlags = loadedFlags + 1
         end
     end
-    return true
+
+    -- if we loaded way less than we expected something is off
+    if totalFlags > 0 and loadedFlags < math.floor(totalFlags * 0.5) then
+        return false, "partial_load"
+    end
+
+    return true, "ok"
 end
 
 function Library:CreateWindow(Config)
     local Window = {}
     local Title = Config.Title or "m0dzn ui"
-    local Keybind = Config.Keybind or Enum.KeyCode.M  -- default keybind is M
+    local Keybind = Config.Keybind or Enum.KeyCode.M
 
     Window.RootFolder = Title
     Window.ConfigFolder = Title .. "/Config"
@@ -342,33 +367,48 @@ function Library:CreateWindow(Config)
         end
     end)
 
-    -- keybind to show/hide with animation both ways
+    -- keybind to show/hide with animation
+    -- cooldown lock so spamming the key doesnt break animation or let you click mid tween
     local isOpen = true
+    local isAnimating = false
     local openSize = UDim2.new(0, 650, 0, 430)
 
     UserInputService.InputBegan:Connect(function(input, gpe)
         if not gpe and Keybind and input.KeyCode == Keybind then
+            -- if already animating just ignore the keypress completely
+            if isAnimating then return end
+            isAnimating = true
+
             if isOpen then
-                -- hide animation: shrink down then invisible
+                -- disable all input on the frame so nothing is clickable during close
+                MainFrame.Active = false
                 Tween(MainFrame, {Size = UDim2.new(0, 650, 0, 0)}, 0.45)
-                task.wait(0.45)
+                task.wait(0.48)
                 MainFrame.Visible = false
             else
-                -- show animation: pop open from nothing
                 MainFrame.Visible = true
                 MainFrame.Size = UDim2.new(0, 650, 0, 0)
                 Tween(MainFrame, {Size = openSize}, 0.5)
+                task.wait(0.52)
+                -- re-enable input only after the open animation fully finishes
+                MainFrame.Active = true
             end
+
             isOpen = not isOpen
+            isAnimating = false
         end
     end)
 
-    -- notification toast, slides in from the bottom right
-    function Window:Notification(text, notifType)
+    -- notification toast with title and body support
+    -- notifType can be "success" "warning" "error" "info" or nil for default
+    function Window:Notification(title, body, notifType)
         task.spawn(function()
-            PlaySound(Sounds.Notification)
+            if notifType == "error" then
+                PlaySound(Sounds.Error)
+            else
+                PlaySound(Sounds.Notification)
+            end
 
-            -- pick accent color based on type
             local typeColor = CurrentTheme.Accent
             if notifType == "success" then typeColor = Color3.fromRGB(60, 200, 100)
             elseif notifType == "warning" then typeColor = Color3.fromRGB(240, 180, 40)
@@ -378,8 +418,8 @@ function Library:CreateWindow(Config)
 
             local Notif = Instance.new("Frame")
             Notif.ZIndex = 100
-            Notif.Size = UDim2.new(0, 272, 0, 50)
-            Notif.Position = UDim2.new(1, 20, 1, -70)
+            Notif.Size = UDim2.new(0, 272, 0, 62)
+            Notif.Position = UDim2.new(1, 20, 1, -82)
             Notif.Parent = ScreenGui
             Notif.BackgroundTransparency = 0.04
             Instance.new("UICorner", Notif).CornerRadius = UDim.new(0, 14)
@@ -399,16 +439,31 @@ function Library:CreateWindow(Config)
             NStroke.Transparency = 0.6
             NStroke.Color = typeColor
 
+            -- title line
+            local NTitle = Instance.new("TextLabel")
+            NTitle.ZIndex = 101
+            NTitle.Text = title or ""
+            NTitle.Size = UDim2.new(1, -22, 0, 18)
+            NTitle.Position = UDim2.new(0, 16, 0, 8)
+            NTitle.BackgroundTransparency = 1
+            NTitle.Parent = Notif
+            NTitle.Font = Enum.Font.GothamBold
+            NTitle.TextSize = 12
+            NTitle.TextXAlignment = Enum.TextXAlignment.Left
+            AddToRegistry(NTitle, "TextColor3", "Text")
+
+            -- body line
             local NText = Instance.new("TextLabel")
             NText.ZIndex = 101
-            NText.Text = text
-            NText.Size = UDim2.new(1, -22, 1, 0)
-            NText.Position = UDim2.new(0, 16, 0, 0)
+            NText.Text = body or ""
+            NText.Size = UDim2.new(1, -22, 0, 16)
+            NText.Position = UDim2.new(0, 16, 0, 28)
             NText.BackgroundTransparency = 1
             NText.Parent = Notif
             NText.Font = Enum.Font.GothamMedium
-            NText.TextSize = 12
+            NText.TextSize = 11
             NText.TextXAlignment = Enum.TextXAlignment.Left
+            NText.TextTransparency = 0.25
             AddToRegistry(NText, "TextColor3", "Text")
 
             local NBar = Instance.new("Frame")
@@ -421,9 +476,9 @@ function Library:CreateWindow(Config)
             Instance.new("UICorner", NBar).CornerRadius = UDim.new(1, 0)
             Tween(NBar, {Size = UDim2.new(0, 0, 0, 2)}, 3)
 
-            Tween(Notif, {Position = UDim2.new(1, -292, 1, -70)}, 0.5)
+            Tween(Notif, {Position = UDim2.new(1, -292, 1, -82)}, 0.5)
             task.wait(3)
-            Tween(Notif, {Position = UDim2.new(1, 20, 1, -70)}, 0.5)
+            Tween(Notif, {Position = UDim2.new(1, 20, 1, -82)}, 0.5)
             task.wait(0.55)
             Notif:Destroy()
         end)
@@ -431,14 +486,12 @@ function Library:CreateWindow(Config)
 
     function Window:SetKeybind(key) Keybind = key end
 
-    -- Unload: animate close first, then destroy
     function Window:Unload()
         Tween(MainFrame, {Size = UDim2.new(0, 650, 0, 0)}, 0.45)
         task.wait(0.48)
         ScreenGui:Destroy()
     end
 
-    -- kept for backwards compat, same as Unload
     function Window:Destroy()
         Window:Unload()
     end
@@ -522,7 +575,6 @@ function Library:CreateWindow(Config)
 
         local Elements = {}
 
-        -- section header
         function Elements:Section(text)
             local S = Instance.new("TextLabel")
             S.Text = string.upper(text)
@@ -536,7 +588,6 @@ function Library:CreateWindow(Config)
             AddToRegistry(S, "TextColor3", "Accent")
         end
 
-        -- label: static single line of text
         function Elements:Label(text)
             local L = Instance.new("TextLabel")
             L.Text = text
@@ -550,7 +601,6 @@ function Library:CreateWindow(Config)
             AddToRegistry(L, "TextColor3", "Text")
         end
 
-        -- paragraph: multi-line block of info text
         function Elements:Paragraph(title, body)
             local F = Instance.new("Frame")
             F.Size = UDim2.new(1, 0, 0, 0)
@@ -588,7 +638,6 @@ function Library:CreateWindow(Config)
             BLbl.TextTransparency = 0.25
             AddToRegistry(BLbl, "TextColor3", "Text")
 
-            -- auto resize the frame to fit the text
             task.defer(function()
                 local pad = 12
                 F.Size = UDim2.new(1, 0, 0, 30 + BLbl.AbsoluteSize.Y + pad)
@@ -935,7 +984,7 @@ function Library:CreateWindow(Config)
                     Key = input.KeyCode; KeyLabel.Text = Key.Name
                     Library.Flags[text] = Key.Name; ConfigObjects[text].Value = Key.Name
                     callback(Key)
-                    Window:Notification("keybind changed to " .. Key.Name)
+                    Window:Notification("Keybind", "Changed to " .. Key.Name)
                 else
                     KeyLabel.Text = Key.Name
                 end
@@ -978,7 +1027,8 @@ function Library:CreateWindow(Config)
             end}
         end
 
-        -- color picker: opens an HSV picker panel
+        -- color picker with RGB inputs and proper Color3 output for scripters
+        -- callback returns a Color3 value so you can use it directly like BrickColor.new or Part.Color
         function Elements:ColorPicker(text, default, callback)
             local Color = default or Color3.fromRGB(255, 255, 255)
             local h, s, v = Color3.toHSV(Color)
@@ -995,7 +1045,6 @@ function Library:CreateWindow(Config)
             TitleLbl.TextXAlignment = Enum.TextXAlignment.Left; TitleLbl.Parent = Tile
             AddToRegistry(TitleLbl, "TextColor3", "Text")
 
-            -- small color preview swatch
             local Swatch = Instance.new("Frame")
             Swatch.Size = UDim2.new(0, 32, 0, 22); Swatch.Position = UDim2.new(1, -46, 0.5, -11)
             Swatch.BackgroundColor3 = Color; Swatch.Parent = Tile
@@ -1004,7 +1053,7 @@ function Library:CreateWindow(Config)
             SwStroke.Thickness = 1; SwStroke.Transparency = 0.6; SwStroke.Parent = Swatch
             AddToRegistry(SwStroke, "Color", "Stroke")
 
-            -- picker panel
+            -- picker panel sized correctly to fit SV box + hue bar + RGB inputs
             local Panel = Instance.new("Frame")
             Panel.Size = UDim2.new(1, 0, 0, 0); Panel.Visible = false
             Panel.ClipsDescendants = true; Panel.Parent = Page
@@ -1017,48 +1066,148 @@ function Library:CreateWindow(Config)
 
             local pickerOpen = false
 
-            -- SV square (saturation/value)
+            -- SV square takes up the left side with proper padding
+            -- it goes from x=10 to (panel width - 48) so the hue bar fits on the right
             local SVBox = Instance.new("ImageLabel")
-            SVBox.Size = UDim2.new(1, -60, 0, 100); SVBox.Position = UDim2.new(0, 10, 0, 10)
+            SVBox.Size = UDim2.new(1, -52, 0, 110)
+            SVBox.Position = UDim2.new(0, 10, 0, 10)
             SVBox.Image = "rbxassetid://4155801252"
-            SVBox.BackgroundColor3 = Color3.fromHSV(h, 1, 1); SVBox.Parent = Panel
+            SVBox.BackgroundColor3 = Color3.fromHSV(h, 1, 1)
+            SVBox.Parent = Panel
             Instance.new("UICorner", SVBox).CornerRadius = UDim.new(0, 6)
 
             local SVDot = Instance.new("Frame")
-            SVDot.Size = UDim2.new(0, 10, 0, 10); SVDot.AnchorPoint = Vector2.new(0.5, 0.5)
+            SVDot.Size = UDim2.new(0, 10, 0, 10)
+            SVDot.AnchorPoint = Vector2.new(0.5, 0.5)
             SVDot.Position = UDim2.new(s, 0, 1 - v, 0)
-            SVDot.BackgroundColor3 = Color3.new(1, 1, 1); SVDot.ZIndex = 2; SVDot.Parent = SVBox
+            SVDot.BackgroundColor3 = Color3.new(1, 1, 1)
+            SVDot.ZIndex = 2; SVDot.Parent = SVBox
             Instance.new("UICorner", SVDot).CornerRadius = UDim.new(1, 0)
+            -- dot outline so its visible on bright colors
+            local DotStroke = Instance.new("UIStroke")
+            DotStroke.Thickness = 1.5
+            DotStroke.Color = Color3.fromRGB(80, 80, 80)
+            DotStroke.Parent = SVDot
 
-            -- hue bar
+            -- hue bar on the right side next to the SV box
             local HueBar = Instance.new("ImageLabel")
-            HueBar.Size = UDim2.new(0, 18, 0, 100); HueBar.Position = UDim2.new(1, -38, 0, 10)
+            HueBar.Size = UDim2.new(0, 16, 0, 110)
+            HueBar.Position = UDim2.new(1, -30, 0, 10)
             HueBar.Image = "rbxassetid://4155805445"
-            HueBar.BackgroundTransparency = 1; HueBar.Parent = Panel
+            HueBar.BackgroundTransparency = 1
+            HueBar.Parent = Panel
             Instance.new("UICorner", HueBar).CornerRadius = UDim.new(0, 6)
 
             local HueDot = Instance.new("Frame")
-            HueDot.Size = UDim2.new(1, 4, 0, 4); HueDot.AnchorPoint = Vector2.new(0.5, 0.5)
+            HueDot.Size = UDim2.new(1, 6, 0, 4)
+            HueDot.AnchorPoint = Vector2.new(0.5, 0.5)
             HueDot.Position = UDim2.new(0.5, 0, h, 0)
-            HueDot.BackgroundColor3 = Color3.new(1, 1, 1); HueDot.ZIndex = 2; HueDot.Parent = HueBar
+            HueDot.BackgroundColor3 = Color3.new(1, 1, 1)
+            HueDot.ZIndex = 2; HueDot.Parent = HueBar
             Instance.new("UICorner", HueDot).CornerRadius = UDim.new(1, 0)
 
-            -- hex label at the bottom
-            local HexLbl = Instance.new("TextLabel")
-            HexLbl.Size = UDim2.new(1, -20, 0, 22); HexLbl.Position = UDim2.new(0, 10, 0, 118)
-            HexLbl.BackgroundTransparency = 1; HexLbl.Font = Enum.Font.GothamMedium
-            HexLbl.TextSize = 11; HexLbl.TextXAlignment = Enum.TextXAlignment.Left; HexLbl.Parent = Panel
-            AddToRegistry(HexLbl, "TextColor3", "Text")
+            -- RGB input row at the bottom of the panel
+            -- three boxes side by side labeled R G B
+            -- scripters can read Library.Flags[text] which is a Color3
+            local RGBRow = Instance.new("Frame")
+            RGBRow.Size = UDim2.new(1, -20, 0, 28)
+            RGBRow.Position = UDim2.new(0, 10, 0, 128)
+            RGBRow.BackgroundTransparency = 1
+            RGBRow.Parent = Panel
+
+            local function MakeRGBBox(label, xPos)
+                local Holder = Instance.new("Frame")
+                Holder.Size = UDim2.new(0.33, -4, 1, 0)
+                Holder.Position = UDim2.new(xPos, 2, 0, 0)
+                Holder.BackgroundTransparency = 0.08
+                Holder.Parent = RGBRow
+                Instance.new("UICorner", Holder).CornerRadius = UDim.new(0, 6)
+                AddToRegistry(Holder, "BackgroundColor3", "Main")
+
+                local HolderStroke = Instance.new("UIStroke")
+                HolderStroke.Thickness = 1; HolderStroke.Transparency = 0.75; HolderStroke.Parent = Holder
+                AddToRegistry(HolderStroke, "Color", "Stroke")
+
+                local Prefix = Instance.new("TextLabel")
+                Prefix.Text = label .. ":"
+                Prefix.Size = UDim2.new(0, 20, 1, 0)
+                Prefix.Position = UDim2.new(0, 4, 0, 0)
+                Prefix.BackgroundTransparency = 1
+                Prefix.Font = Enum.Font.GothamBold
+                Prefix.TextSize = 10
+                Prefix.TextXAlignment = Enum.TextXAlignment.Left
+                Prefix.Parent = Holder
+                AddToRegistry(Prefix, "TextColor3", "Accent")
+
+                local Box = Instance.new("TextBox")
+                Box.Size = UDim2.new(1, -26, 1, 0)
+                Box.Position = UDim2.new(0, 22, 0, 0)
+                Box.Text = "0"
+                Box.BackgroundTransparency = 1
+                Box.Font = Enum.Font.GothamMedium
+                Box.TextSize = 11
+                Box.TextXAlignment = Enum.TextXAlignment.Left
+                Box.Parent = Holder
+                AddToRegistry(Box, "TextColor3", "Text")
+
+                Box.Focused:Connect(function()
+                    Tween(HolderStroke, {Transparency = 0.15}, 0.15)
+                end)
+                Box.FocusLost:Connect(function()
+                    Tween(HolderStroke, {Transparency = 0.75}, 0.15)
+                end)
+
+                return Box
+            end
+
+            local RBox = MakeRGBBox("R", 0)
+            local GBox = MakeRGBBox("G", 0.33)
+            local BBox = MakeRGBBox("B", 0.66)
+
+            local updatingFromPicker = false
 
             local function ApplyColor()
                 Color = Color3.fromHSV(h, s, v)
                 Swatch.BackgroundColor3 = Color
                 SVBox.BackgroundColor3 = Color3.fromHSV(h, 1, 1)
-                HexLbl.Text = string.format("#%02X%02X%02X", math.floor(Color.R*255), math.floor(Color.G*255), math.floor(Color.B*255))
-                Library.Flags[text] = {R = Color.R, G = Color.G, B = Color.B}
+
+                -- update RGB boxes only when picker is being dragged not when user typed
+                if not updatingFromPicker then
+                    RBox.Text = tostring(math.floor(Color.R * 255))
+                    GBox.Text = tostring(math.floor(Color.G * 255))
+                    BBox.Text = tostring(math.floor(Color.B * 255))
+                end
+
+                -- store as Color3 so scripters can use it directly
+                Library.Flags[text] = Color
+                if ConfigObjects[text] then
+                    ConfigObjects[text].Value = {R = Color.R, G = Color.G, B = Color.B}
+                end
                 callback(Color)
             end
             ApplyColor()
+
+            -- when user types in RGB boxes update the picker
+            local function OnRGBInput()
+                local r = math.clamp(tonumber(RBox.Text) or 0, 0, 255)
+                local g = math.clamp(tonumber(GBox.Text) or 0, 0, 255)
+                local b = math.clamp(tonumber(BBox.Text) or 0, 0, 255)
+                Color = Color3.fromRGB(r, g, b)
+                h, s, v = Color3.toHSV(Color)
+                SVDot.Position = UDim2.new(s, 0, 1 - v, 0)
+                HueDot.Position = UDim2.new(0.5, 0, h, 0)
+                SVBox.BackgroundColor3 = Color3.fromHSV(h, 1, 1)
+                Swatch.BackgroundColor3 = Color
+                Library.Flags[text] = Color
+                if ConfigObjects[text] then
+                    ConfigObjects[text].Value = {R = Color.R, G = Color.G, B = Color.B}
+                end
+                callback(Color)
+            end
+
+            RBox.FocusLost:Connect(OnRGBInput)
+            GBox.FocusLost:Connect(OnRGBInput)
+            BBox.FocusLost:Connect(OnRGBInput)
 
             -- SV drag
             local svDragging = false
@@ -1066,10 +1215,22 @@ function Library:CreateWindow(Config)
             SVBtn.Size = UDim2.new(1, 0, 1, 0); SVBtn.BackgroundTransparency = 1
             SVBtn.Text = ""; SVBtn.ZIndex = 3; SVBtn.Parent = SVBox
             SVBtn.InputBegan:Connect(function(i)
-                if i.UserInputType == Enum.UserInputType.MouseButton1 then svDragging = true end
+                if i.UserInputType == Enum.UserInputType.MouseButton1 then
+                    svDragging = true
+                    updatingFromPicker = true
+                end
             end)
             UserInputService.InputEnded:Connect(function(i)
-                if i.UserInputType == Enum.UserInputType.MouseButton1 then svDragging = false end
+                if i.UserInputType == Enum.UserInputType.MouseButton1 then
+                    svDragging = false
+                    if updatingFromPicker then
+                        updatingFromPicker = false
+                        -- now sync the RGB boxes since drag is done
+                        RBox.Text = tostring(math.floor(Color.R * 255))
+                        GBox.Text = tostring(math.floor(Color.G * 255))
+                        BBox.Text = tostring(math.floor(Color.B * 255))
+                    end
+                end
             end)
             UserInputService.InputChanged:Connect(function(i)
                 if svDragging and i.UserInputType == Enum.UserInputType.MouseMovement then
@@ -1086,10 +1247,21 @@ function Library:CreateWindow(Config)
             HueBtn.Size = UDim2.new(1, 0, 1, 0); HueBtn.BackgroundTransparency = 1
             HueBtn.Text = ""; HueBtn.ZIndex = 3; HueBtn.Parent = HueBar
             HueBtn.InputBegan:Connect(function(i)
-                if i.UserInputType == Enum.UserInputType.MouseButton1 then hueDragging = true end
+                if i.UserInputType == Enum.UserInputType.MouseButton1 then
+                    hueDragging = true
+                    updatingFromPicker = true
+                end
             end)
             UserInputService.InputEnded:Connect(function(i)
-                if i.UserInputType == Enum.UserInputType.MouseButton1 then hueDragging = false end
+                if i.UserInputType == Enum.UserInputType.MouseButton1 then
+                    if hueDragging then
+                        hueDragging = false
+                        updatingFromPicker = false
+                        RBox.Text = tostring(math.floor(Color.R * 255))
+                        GBox.Text = tostring(math.floor(Color.G * 255))
+                        BBox.Text = tostring(math.floor(Color.B * 255))
+                    end
+                end
             end)
             UserInputService.InputChanged:Connect(function(i)
                 if hueDragging and i.UserInputType == Enum.UserInputType.MouseMovement then
@@ -1103,20 +1275,24 @@ function Library:CreateWindow(Config)
                 pickerOpen = not pickerOpen
                 if pickerOpen then
                     Panel.Visible = true
-                    Tween(Panel, {Size = UDim2.new(1, 0, 0, 148)}, 0.32)
+                    -- 10 top padding + 110 SV box + 8 gap + 28 RGB row + 10 bottom padding
+                    Tween(Panel, {Size = UDim2.new(1, 0, 0, 166)}, 0.32)
                 else
                     Tween(Panel, {Size = UDim2.new(1, 0, 0, 0)}, 0.28)
                     task.wait(0.3); Panel.Visible = false
                 end
             end)
 
-            Library.Flags[text] = {R = Color.R, G = Color.G, B = Color.B}
+            Library.Flags[text] = Color
             ConfigObjects[text] = {Type = "ColorPicker", Value = {R = Color.R, G = Color.G, B = Color.B}, Set = function(val)
                 if type(val) == "table" then
                     Color = Color3.new(val.R, val.G, val.B)
                     h, s, v = Color3.toHSV(Color)
                     SVDot.Position = UDim2.new(s, 0, 1 - v, 0)
                     HueDot.Position = UDim2.new(0.5, 0, h, 0)
+                    RBox.Text = tostring(math.floor(Color.R * 255))
+                    GBox.Text = tostring(math.floor(Color.G * 255))
+                    BBox.Text = tostring(math.floor(Color.B * 255))
                     ApplyColor()
                 end
             end}
@@ -1125,7 +1301,8 @@ function Library:CreateWindow(Config)
         return Elements
     end
 
-    -- config tab
+    -- config tab with proper single notification flow
+    -- loading: shows "Loading X Config" then updates to "X Config Loaded" or error
     local ConfigTab = Window:Tab("Config")
     ConfigTab:Section("manage configs")
 
@@ -1148,32 +1325,54 @@ function Library:CreateWindow(Config)
 
     ConfigTab:Button("Refresh List", function() RefreshConfigs() end)
     ConfigTab:Button("Save Config", function()
-        if ConfigName == "" then Window:Notification("enter a name first", "warning"); return end
+        if ConfigName == "" then Window:Notification("Config", "Enter a name first", "warning"); return end
         Library:SaveConfig(ConfigName, Window.ConfigFolder)
-        Window:Notification("saved " .. ConfigName, "success")
+        Window:Notification("Config", ConfigName .. " Saved", "success")
         RefreshConfigs()
     end)
+
     ConfigTab:Button("Load Config", function()
         if Window.CurrentConfig == "" or Window.CurrentConfig == "None" then
-            Window:Notification("select a config first", "warning"); return
+            Window:Notification("Config", "Select a config first", "warning"); return
         end
-        local path = Window.ConfigFolder .. "/" .. Window.CurrentConfig .. ".json"
-        if Library:LoadConfig(path) then
-            Window:Notification("loaded " .. Window.CurrentConfig, "success")
-        else
-            Window:Notification("config file not found", "error")
+
+        local name = Window.CurrentConfig
+        local path = Window.ConfigFolder .. "/" .. name .. ".json"
+
+        -- single loading notification first
+        Window:Notification("Config", "Loading " .. name .. " Config", "info")
+
+        -- small yield so the loading notif has time to show before we do the work
+        task.wait(0.1)
+
+        local ok, reason = Library:LoadConfig(path)
+
+        if ok then
+            task.wait(2.8)
+            Window:Notification("Config", name .. " Config Loaded", "success")
+        elseif reason == "file_missing" then
+            task.wait(2.8)
+            Window:Notification("Config", "Error To Load " .. name .. " Config", "error")
+        elseif reason == "bad_data" then
+            task.wait(2.8)
+            Window:Notification("Config", "Error To Load " .. name .. " Config", "error")
+        elseif reason == "partial_load" then
+            task.wait(2.8)
+            Window:Notification("Config", "Error To Load " .. name .. " Config", "error")
         end
     end)
+
     ConfigTab:Button("Delete Config", function()
         if Window.CurrentConfig == "" or Window.CurrentConfig == "None" then
-            Window:Notification("select a config first", "warning"); return
+            Window:Notification("Config", "Select a config first", "warning"); return
         end
         local path = Window.ConfigFolder .. "/" .. Window.CurrentConfig .. ".json"
         if isfile(path) then
-            delfile(path); Window:Notification("deleted " .. Window.CurrentConfig, "info")
+            delfile(path)
+            Window:Notification("Config", Window.CurrentConfig .. " Deleted", "info")
             Window.CurrentConfig = ""; RefreshConfigs()
         else
-            Window:Notification("config file not found", "error")
+            Window:Notification("Config", "Config file not found", "error")
         end
     end)
 
@@ -1182,7 +1381,7 @@ function Library:CreateWindow(Config)
     Settings:Section("appearance")
     Settings:Toggle("Rainbow Edge", false, function(v) Library:ToggleRainbow(v) end)
     Settings:Dropdown("Rainbow Type", {"Linear Gradient (Solid Rainbow)", "Animated/Cycling Rainbow", "Smooth Fading Gradient", "Step/Band Rainbow", "Rainbow Pulse", "Radial Rainbow", "Neon/Glowing Rainbow", "Pastel Rainbow", "Vertical/Horizontal Fade"}, function(val) Library:SetRainbowType(val) end)
-    Settings:Dropdown("Theme", {"Light", "Dark", "White", "Purple", "Blue", "Red", "Yellow", "Green"}, function(v) Library:SetTheme(v) end)
+    Settings:Dropdown("Theme", {"Dark", "Light", "White", "Purple", "Blue", "Red", "Yellow", "Green"}, function(v) Library:SetTheme(v) end)
     Settings:Keybind("Menu Keybind", Keybind or Enum.KeyCode.M, function(v) Window:SetKeybind(v) end)
     Settings:Toggle("UI SFX", true, function(v) SFXEnabled = v end)
     Settings:Button("Unload UI", function() Window:Unload() end)
