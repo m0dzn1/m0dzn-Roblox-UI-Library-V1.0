@@ -1,8 +1,8 @@
 -- 1. LOAD THE LIBRARY
-local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/m0dzn1/m0dzn-Roblox-UI-Library-V1.0/refs/heads/main/m0dzn-ui-lib.lua"))()
+local m0dznV1 = loadstring(game:HttpGet("https://raw.githubusercontent.com/m0dzn1/m0dzn-Roblox-UI-Library-V1.0/refs/heads/main/m0dzn-ui-lib.lua"))()
 
 -- 2. CREATE THE WINDOW
-local Window = Library:CreateWindow({
+local Window = m0dznV1:CreateWindow({
     Title = "TEST HUB",                      -- Change the name of your hub here
     Keybind = Enum.KeyCode.RightControl      -- The key to Open/Close the menu
 })
