@@ -1,23 +1,5 @@
---[[ 
-███╗   ███╗ ██████╗ ██████╗ ███████╗███╗   ██╗
-████╗ ████║██╔═████╗██╔══██╗╚══███╔╝████╗  ██║
-██╔████╔██║██║██╔██║██║  ██║  ███╔╝ ██╔██╗ ██║
-██║╚██╔╝██║████╔╝██║██║  ██║ ███╔╝  ██║╚██╗██║
-██║ ╚═╝ ██║╚██████╔╝██████╔╝███████╗██║ ╚████║
-╚═╝     ╚═╝ ╚═════╝ ╚═════╝ ╚══════╝╚═╝  ╚═══╝
-           M0DZN LIBRARY V1.0
-]]
-
-print([[
-script loaded
- ███╗   ███╗  ██████╗  ██████╗  ███████╗ ███╗   ██╗
- ████╗ ████║ ██╔═████╗ ██╔══██╗ ╚══███╔╝ ████╗  ██║
- ██╔████╔██║ ██║██╔██║ ██║  ██║   ███╔╝  ██╔██╗ ██║
- ██║╚██╔╝██║ ████╔╝██║ ██║  ██║  ███╔╝   ██║╚██╗██║
- ██║ ╚═╝ ██║ ╚██████╔╝ ██████╔╝ ███████╗ ██║ ╚████║
- ╚═╝     ╚═╝  ╚═════╝  ╚═════╝  ╚══════╝ ╚═╝  ╚═══╝
-               M0DZN LIBRARY V1.0
-]])
+-- m0dzn ui library v2.0
+-- dark grey theme by default smooth edges full module set
 
 local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
@@ -38,17 +20,16 @@ local SFXEnabled = true
 local Registry = {}
 local ConfigObjects = {}
 
--- all sounds below are uploaded by Roblox so they are always public and will never get blocked
 local Sounds = {
-    Hover        = "rbxassetid://6042053626",  -- soft button hover tick
-    Click        = "rbxassetid://6042054037",  -- clean button click release
-    ToggleOn     = "rbxassetid://6979299092",  -- checkpoint ding for toggle on
-    ToggleOff    = "rbxassetid://6324790483",  -- soft click for toggle off
-    Slide        = "rbxassetid://6324790483",  -- same soft click for slider
-    Notification = "rbxassetid://6647898215",  -- modern notification chime
-    Back         = "rbxassetid://6042053626",  -- reuse hover for back
-    Error        = "rbxassetid://6737582037",  -- glass break for errors
-    Tab          = "rbxassetid://6042054037"   -- clean click for tab switch
+    Hover        = "rbxassetid://4510086912",
+    Click        = "rbxassetid://4510086561",
+    ToggleOn     = "rbxassetid://4510087425",
+    ToggleOff    = "rbxassetid://4510087425",
+    Slide        = "rbxassetid://4510087798",
+    Notification = "rbxassetid://4590657391",
+    Back         = "rbxassetid://4510087236",
+    Error        = "rbxassetid://4510087545",
+    Tab          = "rbxassetid://4510087056"
 }
 
 local function PlaySound(id)
