@@ -5,7 +5,7 @@
 ██║╚██╔╝██║████╔╝██║██║  ██║ ███╔╝  ██║╚██╗██║
 ██║ ╚═╝ ██║╚██████╔╝██████╔╝███████╗██║ ╚████║
 ╚═╝     ╚═╝ ╚═════╝ ╚═════╝ ╚══════╝╚═╝  ╚═══╝
-              M0DZN LIBRARY V1.0
+           M0DZN LIBRARY V1.0
 ]]
 
 print([[
@@ -18,11 +18,11 @@ script loaded
  ╚═╝     ╚═╝  ╚═════╝  ╚═════╝  ╚══════╝ ╚═╝  ╚═══╝
                M0DZN LIBRARY V1.0
 ]])
+
 local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
 local CoreGui = game:GetService("CoreGui")
-local SoundService = game:GetService("SoundService")
 local Players = game:GetService("Players")
 local HttpService = game:GetService("HttpService")
 local LocalPlayer = Players.LocalPlayer
@@ -33,7 +33,6 @@ Library.Flags = {}
 
 local RainbowEnabled = false
 local RainbowType = "Animated/Cycling Rainbow"
-local SFXEnabled = true
 local Registry = {}
 local ConfigObjects = {}
 local ThemeListeners = {}
@@ -41,28 +40,8 @@ local ThemeListeners = {}
 -- modern UI sounds used by popular Roblox UI libraries
 -- swap any ID here with your own from the Roblox toolbox if you want something different
 -- sounds from Roblox catalog that are public domain and actually sound clean and modern
-local Sounds = {
-    Hover        = "rbxassetid://6020793061",  -- very soft UI tick used in Roblox menus
-    Click        = "rbxassetid://6020793167",  -- sharp modern click
-    ToggleOn     = "rbxassetid://6020793161",  -- clean on switch pop
-    ToggleOff    = "rbxassetid://6020793155",  -- clean off switch pop
-    Slide        = "rbxassetid://6020793158",  -- light drag tick
-    Notification = "rbxassetid://6020793170",  -- modern soft chime
-    Back         = "rbxassetid://6020793061",  -- same as hover for back
-    Error        = "rbxassetid://6020793148",  -- low short error thud
-    Tab          = "rbxassetid://6020793164"   -- tab switch click
-}
 
-local function PlaySound(id)
-    if not SFXEnabled then return end
-    task.spawn(function()
-        local s = Instance.new("Sound")
-        s.SoundId = id
-        s.Volume = 0.3
-        s.Parent = SoundService
-        s:Play()
-        game.Debris:AddItem(s, 2)
-    end)
+local function -- sfx system removed
 end
 
 -- dark grey is the default theme now
@@ -185,7 +164,7 @@ function Library:CreateWindow(Config)
 
     local Stroke = Instance.new("UIStroke")
     Stroke.Thickness = 3
-    Stroke.Transparency = 0.5
+    Stroke.Transparency = 0
     Stroke.Parent = MainFrame
     AddToRegistry(Stroke, "Color", "Stroke")
 
@@ -428,11 +407,7 @@ function Library:CreateWindow(Config)
     -- notifType can be "success" "warning" "error" "info" or nil for default
     function Window:Notification(title, body, notifType)
         task.spawn(function()
-            if notifType == "error" then
-                PlaySound(Sounds.Error)
-            else
-                PlaySound(Sounds.Notification)
-            end
+            if notifType == "error" then else end
 
             -- left bar color per type
             local typeColor = Color3.fromRGB(185, 185, 190)  -- default light grey
@@ -452,12 +427,12 @@ function Library:CreateWindow(Config)
             AddToRegistry(Notif, "BackgroundColor3", "Top")
 
             local NAccentBar = Instance.new("Frame")
-            NAccentBar.Size = UDim2.new(0, 3, 0.6, 0)
-            NAccentBar.Position = UDim2.new(0, 0, 0.2, 0)
+            NAccentBar.Size = UDim2.new(0, 4, 1, -8)
+            NAccentBar.Position = UDim2.new(0, 0, 0, 4)
             NAccentBar.BackgroundColor3 = typeColor
             NAccentBar.ZIndex = 101
             NAccentBar.Parent = Notif
-            Instance.new("UICorner", NAccentBar).CornerRadius = UDim.new(1, 0)
+            Instance.new("UICorner", NAccentBar).CornerRadius = UDim.new(0, 4)
 
             local NStroke = Instance.new("UIStroke")
             NStroke.Thickness = 1
@@ -561,9 +536,7 @@ function Library:CreateWindow(Config)
             Page.CanvasSize = UDim2.new(0, 0, 0, PageList.AbsoluteContentSize.Y + 16)
         end)
 
-        TabBtn.MouseButton1Click:Connect(function()
-            PlaySound(Sounds.Tab)
-            for _, v in pairs(PageContainer:GetChildren()) do v.Visible = false end
+        TabBtn.MouseButton1Click:Connect(function() for _, v in pairs(PageContainer:GetChildren()) do v.Visible = false end
             for _, v in pairs(TabContainer:GetChildren()) do
                 if v:IsA("TextButton") then
                     Tween(v, {BackgroundTransparency = 1, TextColor3 = Color3.fromRGB(150, 150, 158)})
@@ -729,9 +702,7 @@ function Library:CreateWindow(Config)
             Instance.new("UICorner", Bar).CornerRadius = UDim.new(1, 0)
             AddToRegistry(Bar, "BackgroundColor3", "Accent")
 
-            Btn.MouseButton1Click:Connect(function()
-                PlaySound(Sounds.Click)
-                Tween(Btn, {Size = UDim2.new(0.97, 0, 0, 40)}, 0.1)
+            Btn.MouseButton1Click:Connect(function() Tween(Btn, {Size = UDim2.new(0.97, 0, 0, 40)}, 0.1)
                 task.wait(0.1)
                 Tween(Btn, {Size = UDim2.new(1, 0, 0, 44)}, 0.15)
                 callback()
@@ -772,7 +743,7 @@ function Library:CreateWindow(Config)
             Library.Flags[text] = Enabled
 
             local function Update()
-                if Enabled then PlaySound(Sounds.ToggleOn) else PlaySound(Sounds.ToggleOff) end
+                if Enabled then else end
                 Tween(Switch, {BackgroundColor3 = Enabled and CurrentTheme.Accent or CurrentTheme.Stroke})
                 Tween(Dot, {Position = Enabled and UDim2.new(1, -19, 0.5, -8) or UDim2.new(0, 3, 0.5, -8)})
                 Library.Flags[text] = Enabled
@@ -853,7 +824,7 @@ function Library:CreateWindow(Config)
 
             local sliding = false
             Bar.InputBegan:Connect(function(i)
-                if i.UserInputType == Enum.UserInputType.MouseButton1 then sliding = true; PlaySound(Sounds.Slide); Drag(i) end
+                if i.UserInputType == Enum.UserInputType.MouseButton1 then sliding = true; Drag(i) end
             end)
             UserInputService.InputEnded:Connect(function(i)
                 if i.UserInputType == Enum.UserInputType.MouseButton1 then sliding = false end
@@ -955,8 +926,7 @@ function Library:CreateWindow(Config)
             RefreshOptions(options)
 
             Btn.MouseButton1Click:Connect(function()
-                Dropped = not Dropped; PlaySound(Sounds.Click)
-                if Dropped then
+                Dropped = not Dropped; if Dropped then
                     Container.Visible = true
                     Tween(Container, {Size = UDim2.new(1, 0, 0, #Container:GetChildren() * 34)}, 0.32)
                     Tween(Icon, {Rotation = 180}, 0.32)
@@ -1032,8 +1002,7 @@ function Library:CreateWindow(Config)
 
             Library.Flags[text] = Key.Name
 
-            ClickBtn.MouseButton1Click:Connect(function()
-                PlaySound(Sounds.Click); KeyLabel.Text = "..."
+            ClickBtn.MouseButton1Click:Connect(function() KeyLabel.Text = "..."
                 local input = UserInputService.InputBegan:Wait()
                 if input.KeyCode.Name ~= "Unknown" then
                     Key = input.KeyCode; KeyLabel.Text = Key.Name
@@ -1071,9 +1040,7 @@ function Library:CreateWindow(Config)
 
             Library.Flags[text] = default
 
-            ValBox.FocusLost:Connect(function()
-                PlaySound(Sounds.Click)
-                Library.Flags[text] = ValBox.Text
+            ValBox.FocusLost:Connect(function() Library.Flags[text] = ValBox.Text
                 ConfigObjects[text].Value = ValBox.Text
                 if callback then callback(ValBox.Text) end
             end)
@@ -1452,7 +1419,6 @@ function Library:CreateWindow(Config)
     Settings:Dropdown("Rainbow Type", {"Linear Gradient (Solid Rainbow)", "Animated/Cycling Rainbow", "Smooth Fading Gradient", "Step/Band Rainbow", "Rainbow Pulse", "Radial Rainbow", "Neon/Glowing Rainbow", "Pastel Rainbow", "Vertical/Horizontal Fade"}, function(val) Library:SetRainbowType(val) end)
     local ThemeDropdown = Settings:Dropdown("Theme", {"Red", "Dark", "Light", "Purple", "Blue", "Yellow", "Green"}, function(v) Library:SetTheme(v) end)
     Settings:Keybind("Menu Keybind", Keybind or Enum.KeyCode.M, function(v) Window:SetKeybind(v) end)
-    Settings:Toggle("UI SFX", true, function(v) SFXEnabled = v end)
     Settings:Button("Unload UI", function() Window:Unload() end)
 
     RefreshConfigs()
