@@ -5,7 +5,7 @@
  ██║╚██╔╝██║ ████╔╝██║ ██║  ██║  ███╔╝   ██║╚██╗██║
  ██║ ╚═╝ ██║ ╚██████╔╝ ██████╔╝ ███████╗ ██║ ╚████║
  ╚═╝     ╚═╝  ╚═════╝  ╚═════╝  ╚══════╝ ╚═╝  ╚═══╝
-                M0DZN LIBRARY V1.0
+               M0DZN LIBRARY V1.0
 ]]
 
 print([[
@@ -16,8 +16,11 @@ script loaded
  ██║╚██╔╝██║ ████╔╝██║ ██║  ██║  ███╔╝   ██║╚██╗██║
  ██║ ╚═╝ ██║ ╚██████╔╝ ██████╔╝ ███████╗ ██║ ╚████║
  ╚═╝     ╚═╝  ╚═════╝  ╚═════╝  ╚══════╝ ╚═╝  ╚═══╝
-                M0DZN LIBRARY V1.0
+               M0DZN LIBRARY V1.0
 ]])
+
+--------------------------------------------------------
+
 local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
@@ -32,6 +35,7 @@ Library.Flags = {}
 
 local RainbowEnabled = false
 local RainbowType = "Animated/Cycling Rainbow"
+local RainbowSpeed = 1.0  -- 1.0 is default speed, range 0.1 to 10
 local Registry = {}
 local ConfigObjects = {}
 local ThemeListeners = {}
@@ -80,6 +84,7 @@ end
 
 function Library:ToggleRainbow(bool) RainbowEnabled = bool end
 function Library:SetRainbowType(val) RainbowType = val end
+function Library:SetRainbowSpeed(val) RainbowSpeed = math.clamp(tonumber(val) or 1, 0.1, 10) end
 
 function Library:SaveConfig(configName, configFolder)
     if not isfolder(configFolder) then makefolder(configFolder) end
@@ -126,6 +131,9 @@ function Library:LoadConfig(path)
 
     return true, "ok"
 end
+
+-- shared notification stack so new ones push old ones up
+local ActiveNotifs = {}
 
 function Library:CreateWindow(Config)
     local Window = {}
@@ -190,9 +198,9 @@ function Library:CreateWindow(Config)
                     Stroke.Color = Color3.new(1,1,1)
                 elseif RainbowType == "Animated/Cycling Rainbow" then
                     Gradient.Enabled = false
-                    Stroke.Color = Color3.fromHSV(t % 5 / 5, 0.8, 1)
+                    Stroke.Color = Color3.fromHSV(t * RainbowSpeed % 5 / 5, 0.8, 1)
                 elseif RainbowType == "Smooth Fading Gradient" then
-                    Gradient.Enabled = true; rot = rot + 1.5; Gradient.Rotation = rot
+                    Gradient.Enabled = true; rot = rot + 1.5 * RainbowSpeed; Gradient.Rotation = rot
                     Gradient.Color = ColorSequence.new({
                         ColorSequenceKeypoint.new(0,   Color3.fromRGB(255,0,0)),
                         ColorSequenceKeypoint.new(0.5, Color3.fromRGB(0,255,255)),
@@ -201,14 +209,14 @@ function Library:CreateWindow(Config)
                     Stroke.Color = Color3.new(1,1,1)
                 elseif RainbowType == "Step/Band Rainbow" then
                     Gradient.Enabled = false
-                    local step = math.floor((t % 2) * 4) / 4
+                    local step = math.floor((t * RainbowSpeed % 2) * 4) / 4
                     Stroke.Color = Color3.fromHSV(step, 0.8, 1)
                 elseif RainbowType == "Rainbow Pulse" then
                     Gradient.Enabled = false
-                    local pulse = (math.sin(t * 2) + 1) / 2
-                    Stroke.Color = Color3.fromHSV(t % 5 / 5, pulse, 1)
+                    local pulse = (math.sin(t * RainbowSpeed * 2) + 1) / 2
+                    Stroke.Color = Color3.fromHSV(t * RainbowSpeed % 5 / 5, pulse, 1)
                 elseif RainbowType == "Radial Rainbow" then
-                    Gradient.Enabled = true; rot = rot + 2; Gradient.Rotation = rot
+                    Gradient.Enabled = true; rot = rot + 2 * RainbowSpeed; Gradient.Rotation = rot
                     Gradient.Color = ColorSequence.new({
                         ColorSequenceKeypoint.new(0,   Color3.fromRGB(255,0,255)),
                         ColorSequenceKeypoint.new(0.5, Color3.fromRGB(0,255,0)),
@@ -217,14 +225,14 @@ function Library:CreateWindow(Config)
                     Stroke.Color = Color3.new(1,1,1)
                 elseif RainbowType == "Neon/Glowing Rainbow" then
                     Gradient.Enabled = false
-                    Stroke.Color = Color3.fromHSV(t % 2 / 2, 0.6, 1)
+                    Stroke.Color = Color3.fromHSV(t * RainbowSpeed % 2 / 2, 0.6, 1)
                 elseif RainbowType == "Pastel Rainbow" then
                     Gradient.Enabled = false
-                    Stroke.Color = Color3.fromHSV(t % 5 / 5, 0.3, 1)
+                    Stroke.Color = Color3.fromHSV(t * RainbowSpeed % 5 / 5, 0.3, 1)
                 elseif RainbowType == "Vertical/Horizontal Fade" then
                     Gradient.Enabled = true; Gradient.Rotation = 90
-                    local c  = Color3.fromHSV(t % 5 / 5, 0.8, 1)
-                    local c2 = Color3.fromHSV((t + 1) % 5 / 5, 0.8, 1)
+                    local c  = Color3.fromHSV(t * RainbowSpeed % 5 / 5, 0.8, 1)
+                    local c2 = Color3.fromHSV((t * RainbowSpeed + 1) % 5 / 5, 0.8, 1)
                     Gradient.Color = ColorSequence.new(c, c2)
                     Stroke.Color = Color3.new(1,1,1)
                 end
@@ -434,6 +442,7 @@ function Library:CreateWindow(Config)
             Notif.BackgroundTransparency = 1
             Notif.Parent = ScreenGui
             Instance.new("UICorner", Notif).CornerRadius = UDim.new(0, 12)
+            Notif.ClipsDescendants = true
             AddToRegistry(Notif, "BackgroundColor3", "Top")
 
             -- vertical left bar - the colored stripe
@@ -469,9 +478,9 @@ function Library:CreateWindow(Config)
             -- countdown label top right
             local NTimer = Instance.new("TextLabel")
             NTimer.ZIndex = 101
-            NTimer.Text = "3.0"
-            NTimer.Size = UDim2.new(0, 36, 0, 18)
-            NTimer.Position = UDim2.new(1, -42, 0, 9)
+            NTimer.Text = "3.0s"
+            NTimer.Size = UDim2.new(0, 44, 0, 18)
+            NTimer.Position = UDim2.new(1, -50, 0, 9)
             NTimer.BackgroundTransparency = 1
             NTimer.Parent = Notif
             NTimer.Font = Enum.Font.GothamBold
@@ -510,16 +519,23 @@ function Library:CreateWindow(Config)
             NBar.BackgroundTransparency = 1
             NStroke.Transparency = 1
 
-            -- slide in from right
-            Tween(Notif, {Position = UDim2.new(1, -298, 1, -84), BackgroundTransparency = 0.06}, 0.3)
+            -- register in stack and reposition all active notifs
+            table.insert(ActiveNotifs, Notif)
+            local function RepositionAll()
+                for i, n in ipairs(ActiveNotifs) do
+                    local yOff = -12 - (i - 1) * 76
+                    Tween(n, {Position = UDim2.new(1, -298, 1, yOff)}, 0.3)
+                end
+            end
+            RepositionAll()
+            -- fade in
+            Tween(Notif, {BackgroundTransparency = 0.06}, 0.3)
             task.wait(0.2)
-            -- fade in all contents after frame is mostly in place
             Tween(NTitle, {TextTransparency = 0}, 0.2)
             Tween(NText, {TextTransparency = 0.3}, 0.2)
             Tween(NTimer, {TextTransparency = 0}, 0.2)
             Tween(NBar, {BackgroundTransparency = 0}, 0.2)
             Tween(NStroke, {Transparency = 0.55}, 0.2)
-            -- start shrinking progress bar
             Tween(NProgress, {Size = UDim2.new(0, 0, 0, 2)}, 3)
 
             -- live countdown
@@ -528,16 +544,24 @@ function Library:CreateWindow(Config)
             countConn = RunService.Heartbeat:Connect(function(dt)
                 timeLeft = timeLeft - dt
                 if timeLeft <= 0 then
-                    NTimer.Text = "0.0"
+                    NTimer.Text = "0.0s"
                     countConn:Disconnect()
                 else
-                    NTimer.Text = string.format("%.1f", timeLeft)
+                    NTimer.Text = string.format("%.1fs", timeLeft)
                 end
             end)
 
             task.wait(3)
             countConn:Disconnect()
-            -- fade out text first then slide out
+            -- remove from stack then reposition remaining
+            for i, n in ipairs(ActiveNotifs) do
+                if n == Notif then table.remove(ActiveNotifs, i); break end
+            end
+            for i, n in ipairs(ActiveNotifs) do
+                local yOff = -12 - (i - 1) * 76
+                Tween(n, {Position = UDim2.new(1, -298, 1, yOff)}, 0.3)
+            end
+            -- fade out then slide away
             Tween(NTitle, {TextTransparency = 1}, 0.15)
             Tween(NText, {TextTransparency = 1}, 0.15)
             Tween(NTimer, {TextTransparency = 1}, 0.15)
@@ -847,12 +871,20 @@ function Library:CreateWindow(Config)
             Lbl.TextXAlignment = Enum.TextXAlignment.Left; Lbl.Parent = Frame
             AddToRegistry(Lbl, "TextColor3", "Text")
 
-            local Num = Instance.new("TextLabel")
-            Num.Text = tostring(Val); Num.Size = UDim2.new(0, 44, 0, 20)
-            Num.Position = UDim2.new(1, -56, 0, 10); Num.BackgroundTransparency = 1
+            local Num = Instance.new("TextBox")
+            Num.Text = tostring(Val); Num.Size = UDim2.new(0, 52, 0, 22)
+            Num.Position = UDim2.new(1, -62, 0, 9)
+            Num.BackgroundTransparency = 0.08
             Num.Font = Enum.Font.GothamBold; Num.TextSize = 12
-            Num.TextXAlignment = Enum.TextXAlignment.Right; Num.Parent = Frame
+            Num.TextXAlignment = Enum.TextXAlignment.Center; Num.Parent = Frame
+            Num.ClearTextOnFocus = false
+            Instance.new("UICorner", Num).CornerRadius = UDim.new(0, 6)
+            AddToRegistry(Num, "BackgroundColor3", "Main")
             AddToRegistry(Num, "TextColor3", "Accent")
+            local NumStroke = Instance.new("UIStroke")
+            NumStroke.Thickness = 1; NumStroke.Transparency = 0.75; NumStroke.Parent = Num
+            AddToRegistry(NumStroke, "Color", "Stroke")
+            Num.Focused:Connect(function() Tween(NumStroke, {Transparency = 0.2}, 0.15) end)
 
             local Track = Instance.new("Frame")
             Track.Size = UDim2.new(1, -30, 0, 5); Track.Position = UDim2.new(0, 16, 0, 46)
@@ -892,6 +924,16 @@ function Library:CreateWindow(Config)
                 local p = math.clamp((input.Position.X - Track.AbsolutePosition.X) / Track.AbsoluteSize.X, 0, 1)
                 Update(math.floor(min + (max - min) * p))
             end
+
+            Num.FocusLost:Connect(function()
+                Tween(NumStroke, {Transparency = 0.75}, 0.15)
+                local typed = tonumber(Num.Text)
+                if typed then
+                    Update(math.clamp(math.floor(typed), min, max))
+                else
+                    Num.Text = tostring(Val)
+                end
+            end)
 
             local sliding = false
             Bar.InputBegan:Connect(function(i)
@@ -1014,8 +1056,19 @@ function Library:CreateWindow(Config)
                 end
             end)
 
-            ConfigObjects[text] = {Type = "Dropdown", Value = Selected, Set = function(val) Select(val) end, Refresh = RefreshOptions}
-            return {Refresh = RefreshOptions}
+            local function ResetDropdown()
+                Dropped = false
+                Selected = options[1] or ""
+                Lbl.Text = text
+                Library.Flags[text] = Selected
+                -- close the container if open
+                Tween(Container, {Size = UDim2.new(1, 0, 0, 0)}, 0.2)
+                Tween(Icon, {Rotation = 0}, 0.2)
+                task.delay(0.22, function() Container.Visible = false end)
+            end
+
+            ConfigObjects[text] = {Type = "Dropdown", Value = Selected, Set = function(val) Select(val) end, Refresh = RefreshOptions, Reset = ResetDropdown}
+            return {Refresh = RefreshOptions, Reset = ResetDropdown}
         end
 
         function Elements:Textbox(text, placeholder, callback)
@@ -1450,8 +1503,8 @@ function Library:CreateWindow(Config)
     ConfigTab:Button("Save Config", function()
         if ConfigName == "" then Window:Notification("Config", "Enter a name first", "warning"); return end
         Library:SaveConfig(ConfigName, Window.ConfigFolder)
-        Window:Notification("Config", ConfigName .. " Saved", "success")
         RefreshConfigs()
+        Window:Notification("Config", ConfigName .. " Saved", "success")
     end)
 
     ConfigTab:Button("Load Config", function()
@@ -1493,8 +1546,13 @@ function Library:CreateWindow(Config)
         local path = ConfigPaths[name] or (Window.ConfigFolder .. "/" .. name .. ".json")
         if isfile(path) then
             delfile(path)
+            Window.CurrentConfig = ""
+            RefreshConfigs()
+            -- reset the dropdown label right away so deleted config disappears immediately
+            if ConfigObjects["Select Config"] and ConfigObjects["Select Config"].Reset then
+                ConfigObjects["Select Config"].Reset()
+            end
             Window:Notification("Config", name .. " Deleted", "info")
-            Window.CurrentConfig = ""; RefreshConfigs()
         else
             Window:Notification("Config", "Config file not found", "error")
         end
@@ -1504,6 +1562,10 @@ function Library:CreateWindow(Config)
     local Settings = Window:Tab("Settings")
     Settings:Section("appearance")
     Settings:Toggle("Rainbow Edge", false, function(v) Library:ToggleRainbow(v) end)
+    Settings:Slider("Rainbow Speed", 1, 100, 10, function(v)
+        -- map 1-100 to 0.1-10 so the slider feels smooth
+        Library:SetRainbowSpeed(v / 10)
+    end)
     Settings:Dropdown("Rainbow Type", {"Linear Gradient (Solid Rainbow)", "Animated/Cycling Rainbow", "Smooth Fading Gradient", "Step/Band Rainbow", "Rainbow Pulse", "Radial Rainbow", "Neon/Glowing Rainbow", "Pastel Rainbow", "Vertical/Horizontal Fade"}, function(val) Library:SetRainbowType(val) end)
     local ThemeDropdown = Settings:Dropdown("Theme", {"Red", "Dark", "Light", "Purple", "Blue", "Yellow", "Green"}, function(v) Library:SetTheme(v) end)
     Settings:Keybind("Menu Keybind", Keybind or Enum.KeyCode.M, function(v) Window:SetKeybind(v) end)
