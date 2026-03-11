@@ -1,11 +1,11 @@
 --[[ 
-███╗   ███╗ ██████╗ ██████╗ ███████╗███╗   ██╗
-████╗ ████║██╔═████╗██╔══██╗╚══███╔╝████╗  ██║
-██╔████╔██║██║██╔██║██║  ██║  ███╔╝ ██╔██╗ ██║
-██║╚██╔╝██║████╔╝██║██║  ██║ ███╔╝  ██║╚██╗██║
-██║ ╚═╝ ██║╚██████╔╝██████╔╝███████╗██║ ╚████║
-╚═╝     ╚═╝ ╚═════╝ ╚═════╝ ╚══════╝╚═╝  ╚═══╝
-           M0DZN LIBRARY V1.0
+ ███╗   ███╗  ██████╗  ██████╗  ███████╗ ███╗   ██╗
+ ████╗ ████║ ██╔═████╗ ██╔══██╗ ╚══███╔╝ ████╗  ██║
+ ██╔████╔██║ ██║██╔██║ ██║  ██║   ███╔╝  ██╔██╗ ██║
+ ██║╚██╔╝██║ ████╔╝██║ ██║  ██║  ███╔╝   ██║╚██╗██║
+ ██║ ╚═╝ ██║ ╚██████╔╝ ██████╔╝ ███████╗ ██║ ╚████║
+ ╚═╝     ╚═╝  ╚═════╝  ╚═════╝  ╚══════╝ ╚═╝  ╚═══╝
+               M0DZN LIBRARY V1.0
 ]]
 
 print([[
@@ -16,7 +16,7 @@ script loaded
  ██║╚██╔╝██║ ████╔╝██║ ██║  ██║  ███╔╝   ██║╚██╗██║
  ██║ ╚═╝ ██║ ╚██████╔╝ ██████╔╝ ███████╗ ██║ ╚████║
  ╚═╝     ╚═╝  ╚═════╝  ╚═════╝  ╚══════╝ ╚═╝  ╚═══╝
-           M0DZN LIBRARY V1.0
+               M0DZN LIBRARY V1.0
 ]])
 
 local TweenService = game:GetService("TweenService")
@@ -163,8 +163,8 @@ function Library:CreateWindow(Config)
     AddToRegistry(MainFrame, "BackgroundColor3", "Main")
 
     local Stroke = Instance.new("UIStroke")
-    Stroke.Thickness = 3
-    Stroke.Transparency = 0.5
+    Stroke.Thickness = 1.5
+    Stroke.Transparency = 0
     Stroke.Parent = MainFrame
     AddToRegistry(Stroke, "Color", "Stroke")
 
@@ -348,7 +348,11 @@ function Library:CreateWindow(Config)
     PageContainer.Parent = Content
 
     -- open animation on spawn
-    Tween(MainFrame, {Size = UDim2.new(0, 650, 0, 430)}, 0.65)
+    -- spawn open: fade in + scale up from slightly smaller
+    MainFrame.BackgroundTransparency = 1
+    MainFrame.Size = UDim2.new(0, 620, 0, 400)
+    MainFrame.Visible = true
+    Tween(MainFrame, {Size = UDim2.new(0, 650, 0, 430), BackgroundTransparency = 0}, 0.4)
 
     -- drag logic
     local dragging, dragInput, dragStart, startPos
@@ -371,81 +375,81 @@ function Library:CreateWindow(Config)
         end
     end)
 
-    -- keybind to show/hide with animation
-    -- cooldown lock so spamming the key doesnt break animation or let you click mid tween
+    -- keybind hide/show with fade + scale
+    -- no cooldown - pressing fast cancels the current tween and starts the new one immediately
     local isOpen = true
-    local isAnimating = false
     local openSize = UDim2.new(0, 650, 0, 430)
+
+    local function ShowGUI()
+        isOpen = true
+        MainFrame.Visible = true
+        MainFrame.Active = true
+        -- cancel any running tween by starting a new one right away
+        Tween(MainFrame, {Size = openSize, BackgroundTransparency = 0}, 0.3)
+    end
+
+    local function HideGUI()
+        isOpen = false
+        MainFrame.Active = false
+        Tween(MainFrame, {Size = UDim2.new(0, 640, 0, 415), BackgroundTransparency = 1}, 0.25)
+        task.delay(0.27, function()
+            if not isOpen then
+                MainFrame.Visible = false
+            end
+        end)
+    end
 
     UserInputService.InputBegan:Connect(function(input, gpe)
         if not gpe and Keybind and input.KeyCode == Keybind then
-            -- if already animating just ignore the keypress completely
-            if isAnimating then return end
-            isAnimating = true
-
-            if isOpen then
-                -- disable all input on the frame so nothing is clickable during close
-                MainFrame.Active = false
-                Tween(MainFrame, {Size = UDim2.new(0, 650, 0, 0)}, 0.45)
-                task.wait(0.48)
-                MainFrame.Visible = false
-            else
-                MainFrame.Visible = true
-                MainFrame.Size = UDim2.new(0, 650, 0, 0)
-                Tween(MainFrame, {Size = openSize}, 0.5)
-                task.wait(0.52)
-                -- re-enable input only after the open animation fully finishes
-                MainFrame.Active = true
-            end
-
-            isOpen = not isOpen
-            isAnimating = false
+            if isOpen then HideGUI() else ShowGUI() end
         end
     end)
 
-    -- notification toast with title and body support
-    -- notifType can be "success" "warning" "error" "info" or nil for default
+    -- notification toast
+    -- types: nil = default grey, "success" = green, "warning" = yellow, "error" = red, "info" = cyan
     function Window:Notification(title, body, notifType)
         task.spawn(function()
-            if notifType == "error" then else end
-
-            -- left bar color per type
-            local typeColor = Color3.fromRGB(185, 185, 190)  -- default light grey
-            if notifType == "success" then typeColor = Color3.fromRGB(45, 200, 85)
-            elseif notifType == "warning" then typeColor = Color3.fromRGB(225, 185, 25)
-            elseif notifType == "error"   then typeColor = Color3.fromRGB(210, 45, 45)
-            elseif notifType == "info"    then typeColor = Color3.fromRGB(55, 130, 245)
+            -- color for the left vertical bar and accents
+            local typeColor = Color3.fromRGB(185, 185, 190)      -- default light grey
+            if notifType == "success" then typeColor = Color3.fromRGB(45, 210, 90)
+            elseif notifType == "warning" then typeColor = Color3.fromRGB(230, 190, 25)
+            elseif notifType == "error"   then typeColor = Color3.fromRGB(215, 50, 50)
+            elseif notifType == "info"    then typeColor = Color3.fromRGB(0, 210, 220)
             end
 
+            -- start off screen to the right and fully transparent
             local Notif = Instance.new("Frame")
             Notif.ZIndex = 100
-            Notif.Size = UDim2.new(0, 272, 0, 62)
-            Notif.Position = UDim2.new(1, 20, 1, -82)
+            Notif.Size = UDim2.new(0, 280, 0, 64)
+            Notif.Position = UDim2.new(1, 20, 1, -84)
+            Notif.BackgroundTransparency = 1
             Notif.Parent = ScreenGui
-            Notif.BackgroundTransparency = 0.04
-            Instance.new("UICorner", Notif).CornerRadius = UDim.new(0, 14)
+            Instance.new("UICorner", Notif).CornerRadius = UDim.new(0, 12)
             AddToRegistry(Notif, "BackgroundColor3", "Top")
 
-            local NAccentBar = Instance.new("Frame")
-            NAccentBar.Size = UDim2.new(0, 4, 1, -8)
-            NAccentBar.Position = UDim2.new(0, 0, 0, 4)
-            NAccentBar.BackgroundColor3 = typeColor
-            NAccentBar.ZIndex = 101
-            NAccentBar.Parent = Notif
-            Instance.new("UICorner", NAccentBar).CornerRadius = UDim.new(0, 4)
+            -- vertical left bar - the colored stripe
+            local NBar = Instance.new("Frame")
+            NBar.Size = UDim2.new(0, 4, 1, -12)
+            NBar.Position = UDim2.new(0, 6, 0, 6)
+            NBar.BackgroundColor3 = typeColor
+            NBar.BorderSizePixel = 0
+            NBar.ZIndex = 102
+            NBar.Parent = Notif
+            Instance.new("UICorner", NBar).CornerRadius = UDim.new(0, 3)
 
+            -- border stroke colored with type color
             local NStroke = Instance.new("UIStroke")
             NStroke.Thickness = 1
-            NStroke.Parent = Notif
-            NStroke.Transparency = 0.6
+            NStroke.Transparency = 0.55
             NStroke.Color = typeColor
+            NStroke.Parent = Notif
 
-            -- title line
+            -- title
             local NTitle = Instance.new("TextLabel")
             NTitle.ZIndex = 101
             NTitle.Text = title or ""
-            NTitle.Size = UDim2.new(1, -60, 0, 18)
-            NTitle.Position = UDim2.new(0, 16, 0, 8)
+            NTitle.Size = UDim2.new(1, -65, 0, 18)
+            NTitle.Position = UDim2.new(0, 20, 0, 9)
             NTitle.BackgroundTransparency = 1
             NTitle.Parent = Notif
             NTitle.Font = Enum.Font.GothamBold
@@ -453,12 +457,12 @@ function Library:CreateWindow(Config)
             NTitle.TextXAlignment = Enum.TextXAlignment.Left
             AddToRegistry(NTitle, "TextColor3", "Text")
 
-            -- live countdown timer top right corner like 3.0 2.9 2.8
+            -- countdown label top right
             local NTimer = Instance.new("TextLabel")
             NTimer.ZIndex = 101
             NTimer.Text = "3.0"
             NTimer.Size = UDim2.new(0, 36, 0, 18)
-            NTimer.Position = UDim2.new(1, -46, 0, 8)
+            NTimer.Position = UDim2.new(1, -42, 0, 9)
             NTimer.BackgroundTransparency = 1
             NTimer.Parent = Notif
             NTimer.Font = Enum.Font.GothamBold
@@ -466,33 +470,36 @@ function Library:CreateWindow(Config)
             NTimer.TextXAlignment = Enum.TextXAlignment.Right
             NTimer.TextColor3 = typeColor
 
-            -- body line
+            -- body text
             local NText = Instance.new("TextLabel")
             NText.ZIndex = 101
             NText.Text = body or ""
-            NText.Size = UDim2.new(1, -22, 0, 16)
-            NText.Position = UDim2.new(0, 16, 0, 28)
+            NText.Size = UDim2.new(1, -28, 0, 16)
+            NText.Position = UDim2.new(0, 20, 0, 30)
             NText.BackgroundTransparency = 1
             NText.Parent = Notif
             NText.Font = Enum.Font.GothamMedium
             NText.TextSize = 11
             NText.TextXAlignment = Enum.TextXAlignment.Left
-            NText.TextTransparency = 0.25
+            NText.TextTransparency = 0.3
             AddToRegistry(NText, "TextColor3", "Text")
 
-            local NBar = Instance.new("Frame")
-            NBar.Size = UDim2.new(1, 0, 0, 2)
-            NBar.Position = UDim2.new(0, 0, 1, -2)
-            NBar.ZIndex = 101
-            NBar.BorderSizePixel = 0
-            NBar.BackgroundColor3 = typeColor
-            NBar.Parent = Notif
-            Instance.new("UICorner", NBar).CornerRadius = UDim.new(1, 0)
-            Tween(NBar, {Size = UDim2.new(0, 0, 0, 2)}, 3)
+            -- progress bar at the bottom
+            local NProgress = Instance.new("Frame")
+            NProgress.Size = UDim2.new(1, 0, 0, 2)
+            NProgress.Position = UDim2.new(0, 0, 1, -2)
+            NProgress.BorderSizePixel = 0
+            NProgress.BackgroundColor3 = typeColor
+            NProgress.ZIndex = 101
+            NProgress.Parent = Notif
+            Instance.new("UICorner", NProgress).CornerRadius = UDim.new(1, 0)
 
-            Tween(Notif, {Position = UDim2.new(1, -292, 1, -82)}, 0.5)
+            -- slide in from right + fade in at same time
+            Tween(Notif, {Position = UDim2.new(1, -298, 1, -84), BackgroundTransparency = 0.04}, 0.35)
+            -- start shrinking progress bar immediately
+            Tween(NProgress, {Size = UDim2.new(0, 0, 0, 2)}, 3)
 
-            -- countdown from 3.0 to 0.0 updating every 0.1s
+            -- live countdown
             local timeLeft = 3.0
             local countConn
             countConn = RunService.Heartbeat:Connect(function(dt)
@@ -507,8 +514,9 @@ function Library:CreateWindow(Config)
 
             task.wait(3)
             countConn:Disconnect()
-            Tween(Notif, {Position = UDim2.new(1, 20, 1, -82)}, 0.5)
-            task.wait(0.55)
+            -- slide out to right + fade out together
+            Tween(Notif, {Position = UDim2.new(1, 20, 1, -84), BackgroundTransparency = 1}, 0.3)
+            task.wait(0.35)
             Notif:Destroy()
         end)
     end
@@ -516,8 +524,9 @@ function Library:CreateWindow(Config)
     function Window:SetKeybind(key) Keybind = key end
 
     function Window:Unload()
-        Tween(MainFrame, {Size = UDim2.new(0, 650, 0, 0)}, 0.45)
-        task.wait(0.48)
+        MainFrame.Active = false
+        Tween(MainFrame, {Size = UDim2.new(0, 620, 0, 400), BackgroundTransparency = 1}, 0.35)
+        task.wait(0.38)
         ScreenGui:Destroy()
     end
 
@@ -737,6 +746,12 @@ function Library:CreateWindow(Config)
             end)
             Btn.MouseEnter:Connect(function() Tween(Btn, {BackgroundTransparency = 0.0}, 0.18) end)
             Btn.MouseLeave:Connect(function() Tween(Btn, {BackgroundTransparency = 0.04}, 0.18) end)
+
+            table.insert(ThemeListeners, function()
+                Btn.BackgroundColor3 = CurrentTheme.Top
+                Btn.TextColor3 = CurrentTheme.Text
+                Bar.BackgroundColor3 = CurrentTheme.Accent
+            end)
         end
 
         function Elements:Toggle(text, default, callback)
@@ -861,6 +876,12 @@ function Library:CreateWindow(Config)
                 if sliding and i.UserInputType == Enum.UserInputType.MouseMovement then Drag(i) end
             end)
             ConfigObjects[text] = {Type = "Slider", Value = Val, Set = function(val) Update(val) end}
+
+            table.insert(ThemeListeners, function()
+                Fill.BackgroundColor3 = CurrentTheme.Accent
+                Track.BackgroundColor3 = CurrentTheme.Stroke
+                Num.TextColor3 = CurrentTheme.Accent
+            end)
         end
 
         function Elements:Dropdown(text, options, callback)
