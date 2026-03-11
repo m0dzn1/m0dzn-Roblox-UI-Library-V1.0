@@ -5,7 +5,7 @@
  ██║╚██╔╝██║ ████╔╝██║ ██║  ██║  ███╔╝   ██║╚██╗██║
  ██║ ╚═╝ ██║ ╚██████╔╝ ██████╔╝ ███████╗ ██║ ╚████║
  ╚═╝     ╚═╝  ╚═════╝  ╚═════╝  ╚══════╝ ╚═╝  ╚═══╝
-               M0DZN LIBRARY V1.0
+                M0DZN LIBRARY V1.0
 ]]
 
 print([[
@@ -16,9 +16,8 @@ script loaded
  ██║╚██╔╝██║ ████╔╝██║ ██║  ██║  ███╔╝   ██║╚██╗██║
  ██║ ╚═╝ ██║ ╚██████╔╝ ██████╔╝ ███████╗ ██║ ╚████║
  ╚═╝     ╚═╝  ╚═════╝  ╚═════╝  ╚══════╝ ╚═╝  ╚═══╝
-               M0DZN LIBRARY V1.0
+                M0DZN LIBRARY V1.0
 ]])
-
 local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
@@ -347,12 +346,11 @@ function Library:CreateWindow(Config)
     PageContainer.BackgroundTransparency = 1
     PageContainer.Parent = Content
 
-    -- open animation on spawn
-    -- spawn open: fade in + scale up from slightly smaller
-    MainFrame.BackgroundTransparency = 1
-    MainFrame.Size = UDim2.new(0, 620, 0, 400)
+    -- spawn open: bounce scale from 0 up to full size, looks clean without needing transparency cascade
+    MainFrame.Size = UDim2.new(0, 0, 0, 0)
     MainFrame.Visible = true
-    Tween(MainFrame, {Size = UDim2.new(0, 650, 0, 430), BackgroundTransparency = 0}, 0.4)
+    MainFrame.BackgroundTransparency = 0
+    TweenService:Create(MainFrame, TweenInfo.new(0.5, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {Size = UDim2.new(0, 650, 0, 430)}):Play()
 
     -- drag logic
     local dragging, dragInput, dragStart, startPos
@@ -384,17 +382,18 @@ function Library:CreateWindow(Config)
         isOpen = true
         MainFrame.Visible = true
         MainFrame.Active = true
-        -- cancel any running tween by starting a new one right away
-        Tween(MainFrame, {Size = openSize, BackgroundTransparency = 0}, 0.3)
+        MainFrame.BackgroundTransparency = 0
+        TweenService:Create(MainFrame, TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {Size = openSize}):Play()
     end
 
     local function HideGUI()
         isOpen = false
         MainFrame.Active = false
-        Tween(MainFrame, {Size = UDim2.new(0, 640, 0, 415), BackgroundTransparency = 1}, 0.25)
-        task.delay(0.27, function()
+        TweenService:Create(MainFrame, TweenInfo.new(0.3, Enum.EasingStyle.Back, Enum.EasingDirection.In), {Size = UDim2.new(0, 0, 0, 0)}):Play()
+        task.delay(0.32, function()
             if not isOpen then
                 MainFrame.Visible = false
+                MainFrame.Size = UDim2.new(0, 0, 0, 0)
             end
         end)
     end
@@ -406,11 +405,21 @@ function Library:CreateWindow(Config)
     end)
 
     -- notification toast
-    -- types: nil = default grey, "success" = green, "warning" = yellow, "error" = red, "info" = cyan
+    -- supports both call styles:
+    --   new style: Window:Notification("Title", "Body text", "success")
+    --   old style: Window:Notification("some text", "success")
+    -- if the second arg is a type keyword it gets treated as notifType automatically
+    local NotifTypes = {success=true, warning=true, error=true, info=true}
     function Window:Notification(title, body, notifType)
         task.spawn(function()
+            -- handle old 2 arg call style where body is actually the type
+            if body and NotifTypes[body] and notifType == nil then
+                notifType = body
+                body = nil
+            end
+
             -- color for the left vertical bar and accents
-            local typeColor = Color3.fromRGB(185, 185, 190)      -- default light grey
+            local typeColor = Color3.fromRGB(185, 185, 190)
             if notifType == "success" then typeColor = Color3.fromRGB(45, 210, 90)
             elseif notifType == "warning" then typeColor = Color3.fromRGB(230, 190, 25)
             elseif notifType == "error"   then typeColor = Color3.fromRGB(215, 50, 50)
@@ -494,9 +503,23 @@ function Library:CreateWindow(Config)
             NProgress.Parent = Notif
             Instance.new("UICorner", NProgress).CornerRadius = UDim.new(1, 0)
 
-            -- slide in from right + fade in at same time
-            Tween(Notif, {Position = UDim2.new(1, -298, 1, -84), BackgroundTransparency = 0.04}, 0.35)
-            -- start shrinking progress bar immediately
+            -- start text invisible so they fade in after the frame arrives
+            NTitle.TextTransparency = 1
+            NText.TextTransparency = 1
+            NTimer.TextTransparency = 1
+            NBar.BackgroundTransparency = 1
+            NStroke.Transparency = 1
+
+            -- slide in from right
+            Tween(Notif, {Position = UDim2.new(1, -298, 1, -84), BackgroundTransparency = 0.06}, 0.3)
+            task.wait(0.2)
+            -- fade in all contents after frame is mostly in place
+            Tween(NTitle, {TextTransparency = 0}, 0.2)
+            Tween(NText, {TextTransparency = 0.3}, 0.2)
+            Tween(NTimer, {TextTransparency = 0}, 0.2)
+            Tween(NBar, {BackgroundTransparency = 0}, 0.2)
+            Tween(NStroke, {Transparency = 0.55}, 0.2)
+            -- start shrinking progress bar
             Tween(NProgress, {Size = UDim2.new(0, 0, 0, 2)}, 3)
 
             -- live countdown
@@ -514,9 +537,14 @@ function Library:CreateWindow(Config)
 
             task.wait(3)
             countConn:Disconnect()
-            -- slide out to right + fade out together
-            Tween(Notif, {Position = UDim2.new(1, 20, 1, -84), BackgroundTransparency = 1}, 0.3)
-            task.wait(0.35)
+            -- fade out text first then slide out
+            Tween(NTitle, {TextTransparency = 1}, 0.15)
+            Tween(NText, {TextTransparency = 1}, 0.15)
+            Tween(NTimer, {TextTransparency = 1}, 0.15)
+            Tween(NBar, {BackgroundTransparency = 1}, 0.15)
+            task.wait(0.1)
+            Tween(Notif, {Position = UDim2.new(1, 20, 1, -84), BackgroundTransparency = 1}, 0.25)
+            task.wait(0.3)
             Notif:Destroy()
         end)
     end
@@ -525,7 +553,7 @@ function Library:CreateWindow(Config)
 
     function Window:Unload()
         MainFrame.Active = false
-        Tween(MainFrame, {Size = UDim2.new(0, 620, 0, 400), BackgroundTransparency = 1}, 0.35)
+        TweenService:Create(MainFrame, TweenInfo.new(0.35, Enum.EasingStyle.Back, Enum.EasingDirection.In), {Size = UDim2.new(0, 0, 0, 0)}):Play()
         task.wait(0.38)
         ScreenGui:Destroy()
     end
@@ -1397,13 +1425,23 @@ function Library:CreateWindow(Config)
     local ConfigList = {}
     local Dropdown = ConfigTab:Dropdown("Select Config", {"None"}, function(val) Window.CurrentConfig = val end)
 
+    -- store full paths so delete and load always use the exact path from listfiles
+    local ConfigPaths = {}
+
     local function RefreshConfigs()
         if not isfolder(Window.RootFolder) then makefolder(Window.RootFolder) end
         if not isfolder(Window.ConfigFolder) then makefolder(Window.ConfigFolder) end
         ConfigList = {"None"}
+        ConfigPaths = {}
         for _, file in pairs(listfiles(Window.ConfigFolder)) do
-            local name = file:gsub(Window.ConfigFolder .. "\\", ""):gsub(Window.ConfigFolder .. "/", ""):gsub(".json", "")
-            if name ~= "" then table.insert(ConfigList, name) end
+            -- strip all possible path separators and the .json extension
+            local name = file
+            name = name:gsub(".*[\/]", "")
+            name = name:gsub("%.json$", "")
+            if name ~= "" then
+                table.insert(ConfigList, name)
+                ConfigPaths[name] = file
+            end
         end
         Dropdown.Refresh(ConfigList)
     end
@@ -1422,7 +1460,7 @@ function Library:CreateWindow(Config)
         end
 
         local name = Window.CurrentConfig
-        local path = Window.ConfigFolder .. "/" .. name .. ".json"
+        local path = ConfigPaths[name] or (Window.ConfigFolder .. "/" .. name .. ".json")
 
         -- single loading notification first
         Window:Notification("Config", "Loading " .. name .. " Config", "info")
@@ -1451,10 +1489,11 @@ function Library:CreateWindow(Config)
         if Window.CurrentConfig == "" or Window.CurrentConfig == "None" then
             Window:Notification("Config", "Select a config first", "warning"); return
         end
-        local path = Window.ConfigFolder .. "/" .. Window.CurrentConfig .. ".json"
+        local name = Window.CurrentConfig
+        local path = ConfigPaths[name] or (Window.ConfigFolder .. "/" .. name .. ".json")
         if isfile(path) then
             delfile(path)
-            Window:Notification("Config", Window.CurrentConfig .. " Deleted", "info")
+            Window:Notification("Config", name .. " Deleted", "info")
             Window.CurrentConfig = ""; RefreshConfigs()
         else
             Window:Notification("Config", "Config file not found", "error")
