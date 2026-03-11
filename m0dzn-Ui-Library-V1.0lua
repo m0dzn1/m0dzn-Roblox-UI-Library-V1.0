@@ -19,8 +19,6 @@ script loaded
                M0DZN LIBRARY V1.0
 ]])
 
---------------------------------------------------------
-
 local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
@@ -56,7 +54,7 @@ local Themes = {
 }
 
 -- default theme is Red
-local CurrentTheme = Themes.Red
+local CurrentTheme = Themes.Yellow
 
 local function AddToRegistry(obj, prop, themeKey)
     table.insert(Registry, {Object = obj, Property = prop, Type = themeKey})
@@ -173,7 +171,7 @@ function Library:CreateWindow(Config)
     Stroke.Thickness = 1.5
     Stroke.Transparency = 0
     Stroke.Parent = MainFrame
-    AddToRegistry(Stroke, "Color", "Stroke")
+    -- NOT added to registry so theme changes don't override rainbow colors
 
     local Gradient = Instance.new("UIGradient")
     Gradient.Parent = Stroke
@@ -184,6 +182,7 @@ function Library:CreateWindow(Config)
         local rot = 0
         while ScreenGui.Parent do
             if RainbowEnabled then
+                if Stroke.Thickness ~= 6 then Stroke.Thickness = 6; Stroke.Transparency = 0 end
                 local t = tick()
                 if RainbowType == "Linear Gradient (Solid Rainbow)" then
                     Gradient.Enabled = true; Gradient.Rotation = 0
@@ -238,12 +237,15 @@ function Library:CreateWindow(Config)
                 end
             else
                 Gradient.Enabled = false
+                Stroke.Thickness = 0
+                Stroke.Transparency = 1
                 Stroke.Color = CurrentTheme.Stroke
             end
             RunService.RenderStepped:Wait()
         end
     end)
 
+    -- ── Topbar ──────────────────────────────────────────────────────────────
     local Topbar = Instance.new("Frame")
     Topbar.Size = UDim2.new(1, 0, 0, 52)
     Topbar.BackgroundTransparency = 1
@@ -253,23 +255,71 @@ function Library:CreateWindow(Config)
     local TitleIcon = Instance.new("Frame")
     TitleIcon.Size = UDim2.new(0, 8, 0, 8)
     TitleIcon.Position = UDim2.new(0, 18, 0.5, -4)
-    TitleIcon.BorderSizePixel = 0
-    TitleIcon.ZIndex = 5
-    TitleIcon.Parent = Topbar
+    TitleIcon.BorderSizePixel = 0; TitleIcon.ZIndex = 5; TitleIcon.Parent = Topbar
     Instance.new("UICorner", TitleIcon).CornerRadius = UDim.new(0, 2)
     AddToRegistry(TitleIcon, "BackgroundColor3", "Accent")
 
     local TitleLabel = Instance.new("TextLabel")
     TitleLabel.Text = Title
-    TitleLabel.Size = UDim2.new(0.7, 0, 0, 28)
+    TitleLabel.Size = UDim2.new(0.55, 0, 0, 28)
     TitleLabel.Position = UDim2.new(0, 34, 0.5, -14)
     TitleLabel.BackgroundTransparency = 1
-    TitleLabel.Font = Enum.Font.GothamBold
-    TitleLabel.TextSize = 15
+    TitleLabel.Font = Enum.Font.GothamBold; TitleLabel.TextSize = 15
     TitleLabel.TextXAlignment = Enum.TextXAlignment.Left
-    TitleLabel.ZIndex = 5
-    TitleLabel.Parent = Topbar
+    TitleLabel.ZIndex = 5; TitleLabel.Parent = Topbar
     AddToRegistry(TitleLabel, "TextColor3", "Text")
+
+    -- helper: inline SVG-as-DrawingLib image via EditableImage isn't available,
+    -- so we render symbols with Unicode text in ImageButtons styled as icon buttons
+    local function MakeTopBtn(symbol, xFromRight, tooltip)
+        local Btn = Instance.new("TextButton")
+        Btn.Size = UDim2.new(0, 28, 0, 28)
+        Btn.Position = UDim2.new(1, xFromRight, 0.5, -14)
+        Btn.BackgroundTransparency = 0.85
+        Btn.Text = symbol
+        Btn.Font = Enum.Font.GothamBold; Btn.TextSize = 14
+        Btn.ZIndex = 6; Btn.Parent = Topbar
+        Instance.new("UICorner", Btn).CornerRadius = UDim.new(0, 8)
+        AddToRegistry(Btn, "BackgroundColor3", "Top")
+        AddToRegistry(Btn, "TextColor3", "Text")
+        Btn.MouseEnter:Connect(function() Tween(Btn, {BackgroundTransparency = 0.5}, 0.12) end)
+        Btn.MouseLeave:Connect(function() Tween(Btn, {BackgroundTransparency = 0.85}, 0.12) end)
+        return Btn
+    end
+
+    -- ① Collapse (hide content, keep titlebar) — uses – / □ unicode
+    local CollapseBtn = MakeTopBtn("–", -36, "Collapse")
+
+    -- ② Minimize/Maximize (small / full size) — uses ↗ / ↙ unicode arrows
+    local MinBtn = MakeTopBtn("↗", -70, "Minimize")
+
+    -- ③ Mobile hide/show button — floating pill that appears when GUI is hidden
+    -- created later after we know openSize, referenced here
+    -- floating pill button (mobile show/hide) — created here so DPI can resize it
+    local FloatBtn = Instance.new("TextButton")
+    FloatBtn.Size = UDim2.new(0, 48, 0, 48)
+    FloatBtn.Position = UDim2.new(1, -64, 1, -64)
+    FloatBtn.BackgroundTransparency = 0.1
+    FloatBtn.Text = string.upper(string.sub(Title, 1, 1))
+    FloatBtn.Font = Enum.Font.GothamBold; FloatBtn.TextSize = 20
+    FloatBtn.ZIndex = 200; FloatBtn.Visible = false
+    FloatBtn.Parent = ScreenGui
+    Instance.new("UICorner", FloatBtn).CornerRadius = UDim.new(0, 16)
+    AddToRegistry(FloatBtn, "BackgroundColor3", "Accent")
+    AddToRegistry(FloatBtn, "TextColor3", "Main")
+    local FStroke = Instance.new("UIStroke"); FStroke.Thickness = 2; FStroke.Transparency = 0.6
+    FStroke.Parent = FloatBtn
+    AddToRegistry(FStroke, "Color", "Stroke")
+    -- X close button on pill
+    local FClose = Instance.new("TextButton")
+    FClose.Size = UDim2.new(0, 18, 0, 18)
+    FClose.Position = UDim2.new(1, -2, 0, -2)
+    FClose.AnchorPoint = Vector2.new(1, 0)
+    FClose.BackgroundColor3 = Color3.fromRGB(215, 50, 50)
+    FClose.Text = "✕"; FClose.Font = Enum.Font.GothamBold; FClose.TextSize = 9
+    FClose.ZIndex = 201; FClose.Parent = FloatBtn
+    Instance.new("UICorner", FClose).CornerRadius = UDim.new(1, 0)
+    FClose.MouseButton1Click:Connect(function() Window:Unload() end)
 
     local Content = Instance.new("Frame")
     Content.Size = UDim2.new(1, -20, 1, -68)
@@ -354,57 +404,163 @@ function Library:CreateWindow(Config)
     PageContainer.BackgroundTransparency = 1
     PageContainer.Parent = Content
 
-    -- spawn open: bounce scale from 0 up to full size, looks clean without needing transparency cascade
+    -- DPI-aware sizing: scale window to fit any screen
+    local VP = workspace.CurrentCamera.ViewportSize
+    local baseW, baseH = 1280, 720
+    local scaleF = math.min(VP.X / baseW, VP.Y / baseH)
+    scaleF = math.clamp(scaleF, 0.55, 1.4)
+    local guiW = math.floor(650 * scaleF)
+    local guiH = math.floor(430 * scaleF)
+    openSize  = UDim2.new(0, guiW, 0, guiH)
+    fullH     = guiH
+    collapseH = math.floor(52 * scaleF)
+    miniSize  = UDim2.new(0, math.floor(260 * scaleF), 0, math.floor(52 * scaleF))
+
+    -- scale float button to DPI
+    local fbSize = math.floor(48 * scaleF)
+    FloatBtn.Size = UDim2.new(0, fbSize, 0, fbSize)
+    FloatBtn.TextSize = math.floor(20 * scaleF)
+    FloatBtn.Position = UDim2.new(1, -(fbSize + 16), 1, -(fbSize + 16))
+    for _, ch in pairs(FloatBtn:GetChildren()) do
+        if ch:IsA("UICorner") then ch.CornerRadius = UDim.new(0, math.floor(16 * scaleF)) end
+    end
+
+    -- spawn open: bounce scale from 0 up to full size
     MainFrame.Size = UDim2.new(0, 0, 0, 0)
     MainFrame.Visible = true
     MainFrame.BackgroundTransparency = 0
-    TweenService:Create(MainFrame, TweenInfo.new(0.5, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {Size = UDim2.new(0, 650, 0, 430)}):Play()
+    TweenService:Create(MainFrame, TweenInfo.new(0.5, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {Size = openSize}):Play()
 
-    -- drag logic
+    -- ── Drag (mouse + touch) ────────────────────────────────────────────────
     local dragging, dragInput, dragStart, startPos
+    local function isDragStart(t) return t == Enum.UserInputType.MouseButton1 or t == Enum.UserInputType.Touch end
+    local function isDragMove(t)  return t == Enum.UserInputType.MouseMovement or t == Enum.UserInputType.Touch end
     Topbar.InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 then
-            dragging = true; dragStart = input.Position; startPos = MainFrame.Position
+        if isDragStart(input.UserInputType) then
+            dragging = true; dragStart = input.Position; startPos = MainFrame.Position; dragInput = input
         end
     end)
     Topbar.InputChanged:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseMovement then dragInput = input end
+        if isDragMove(input.UserInputType) then dragInput = input end
     end)
     UserInputService.InputEnded:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 then dragging = false end
+        if isDragStart(input.UserInputType) then dragging = false end
     end)
     RunService.RenderStepped:Connect(function()
         if dragging and dragInput then
             local delta = dragInput.Position - dragStart
             local target = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
-            MainFrame.Position = MainFrame.Position:Lerp(target, 0.2)
+            MainFrame.Position = MainFrame.Position:Lerp(target, 0.25)
         end
     end)
 
-    -- keybind hide/show with fade + scale
-    -- no cooldown - pressing fast cancels the current tween and starts the new one immediately
+    -- ── DPI + size state ─────────────────────────────────────────────────────
     local isOpen = true
-    local openSize = UDim2.new(0, 650, 0, 430)
+    local openSize = UDim2.new(0, 650, 0, 430) -- overwritten after DPI calc below
+
+    -- ── ① Collapse: hide content keep titlebar ──────────────────────────────
+    -- collapseH is just the topbar height, fullH is the normal open height
+    local collapseH, fullH = 52, 430  -- updated after DPI
+    local isCollapsed = false
+
+    local function SetCollapsed(c)
+        isCollapsed = c
+        CollapseBtn.Text = c and "□" or "–"
+        local targetH = c and math.floor(collapseH * (openSize.Y.Offset / 430))
+                            or openSize.Y.Offset
+        TweenService:Create(MainFrame, TweenInfo.new(0.35, Enum.EasingStyle.Back, Enum.EasingDirection.Out),
+            {Size = UDim2.new(0, openSize.X.Offset, 0, targetH)}):Play()
+        Window:Notification(c and "Collapsed" or "Expanded", c and "Content hidden" or "Content visible",
+            c and "warning" or "success")
+    end
+    CollapseBtn.MouseButton1Click:Connect(function() SetCollapsed(not isCollapsed) end)
+
+    -- ── ② Minimize/Maximize ─────────────────────────────────────────────────
+    local miniSize   -- set after DPI calc
+    local isMinimized = false
+
+    local function SetMinimized(m)
+        isMinimized = m
+        -- ↗ = expand arrows pointing away from center (maximized state indicator)
+        -- ↙ = collapse arrows pointing toward center (minimized state indicator)
+        MinBtn.Text = m and "↙" or "↗"
+        local target = m and miniSize or openSize
+        TweenService:Create(MainFrame, TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.Out),
+            {Size = target}):Play()
+        Window:Notification(m and "Minimized" or "Maximized", m and "Window shrunk" or "Window restored",
+            m and "warning" or "success")
+    end
+    MinBtn.MouseButton1Click:Connect(function() SetMinimized(not isMinimized) end)
+
+    -- ── ③ Full hide / floating pill ─────────────────────────────────────────
+    -- float btn drag
+    local fDrag, fDragInput, fDragStart, fDragStartPos = false, nil, nil, nil
+    FloatBtn.InputBegan:Connect(function(i)
+        if isDragStart(i.UserInputType) then
+            fDrag = true; fDragInput = i; fDragStart = i.Position; fDragStartPos = FloatBtn.Position
+        end
+    end)
+    FloatBtn.InputChanged:Connect(function(i)
+        if isDragMove(i.UserInputType) then fDragInput = i end
+    end)
+    UserInputService.InputEnded:Connect(function(i)
+        if isDragStart(i.UserInputType) then fDrag = false end
+    end)
+    RunService.RenderStepped:Connect(function()
+        if fDrag and fDragInput then
+            local delta = fDragInput.Position - fDragStart
+            FloatBtn.Position = UDim2.new(
+                fDragStartPos.X.Scale, fDragStartPos.X.Offset + delta.X,
+                fDragStartPos.Y.Scale, fDragStartPos.Y.Offset + delta.Y)
+        end
+    end)
 
     local function ShowGUI()
         isOpen = true
-        MainFrame.Visible = true
-        MainFrame.Active = true
-        MainFrame.BackgroundTransparency = 0
-        TweenService:Create(MainFrame, TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {Size = openSize}):Play()
+        -- animate FROM float button position
+        local vp = workspace.CurrentCamera.ViewportSize
+        local bx = FloatBtn.AbsolutePosition.X + 24
+        local by = FloatBtn.AbsolutePosition.Y + 24
+        MainFrame.Position = UDim2.new(0, bx, 0, by)
+        MainFrame.Size = UDim2.new(0, 0, 0, 0)
+        MainFrame.Visible = true; MainFrame.Active = true
+        -- animate to center
+        TweenService:Create(MainFrame, TweenInfo.new(0.45, Enum.EasingStyle.Back, Enum.EasingDirection.Out),
+            {Size = openSize, Position = UDim2.new(0.5, 0, 0.5, 0)}):Play()
+        FloatBtn.Visible = false
+        Window:Notification("UI Opened", "Welcome back", "success")
     end
 
     local function HideGUI()
         isOpen = false
         MainFrame.Active = false
-        TweenService:Create(MainFrame, TweenInfo.new(0.3, Enum.EasingStyle.Back, Enum.EasingDirection.In), {Size = UDim2.new(0, 0, 0, 0)}):Play()
-        task.delay(0.32, function()
+        -- animate TO float button position
+        local bx = FloatBtn.AbsolutePosition.X + 24
+        local by = FloatBtn.AbsolutePosition.Y + 24
+        TweenService:Create(MainFrame, TweenInfo.new(0.35, Enum.EasingStyle.Back, Enum.EasingDirection.In),
+            {Size = UDim2.new(0, 0, 0, 0), Position = UDim2.new(0, bx, 0, by)}):Play()
+        task.delay(0.38, function()
             if not isOpen then
                 MainFrame.Visible = false
-                MainFrame.Size = UDim2.new(0, 0, 0, 0)
+                FloatBtn.Visible = true
             end
         end)
+        Window:Notification("UI Hidden", "Tap the pill to reopen", "warning")
     end
+
+    FloatBtn.MouseButton1Click:Connect(function()
+        if not fDrag then ShowGUI() end
+    end)
+
+    -- X button in topbar closes to float btn (same as HideGUI)
+    local CloseBtn = MakeTopBtn("✕", -36 - 34 - 4, "Hide")
+    CloseBtn.TextColor3 = Color3.fromRGB(215, 50, 50)
+    CloseBtn.MouseButton1Click:Connect(function() HideGUI() end)
+
+    -- re-order right buttons: Close(-36) | Collapse(-70) | Minimize(-106)
+    CloseBtn.Position = UDim2.new(1, -36, 0.5, -14)
+    CollapseBtn.Position = UDim2.new(1, -70, 0.5, -14)
+    MinBtn.Position = UDim2.new(1, -106, 0.5, -14)
 
     UserInputService.InputBegan:Connect(function(input, gpe)
         if not gpe and Keybind and input.KeyCode == Keybind then
@@ -434,82 +590,87 @@ function Library:CreateWindow(Config)
             elseif notifType == "info"    then typeColor = Color3.fromRGB(0, 210, 220)
             end
 
-            -- start off screen to the right and fully transparent
+            -- scale notification size based on screen resolution so it fits any device
+            local vp = workspace.CurrentCamera.ViewportSize
+            local baseW = 1920; local baseH = 1080
+            local scaleX = vp.X / baseW; local scaleY = vp.Y / baseH
+            local scale  = math.clamp(math.min(scaleX, scaleY), 0.45, 1.4)
+            local nW     = math.floor(300 * scale)
+            local nH     = body and body ~= "" and math.floor(72 * scale) or math.floor(52 * scale)
+            local padX   = math.floor(16 * scale); local padY = math.floor(10 * scale)
+            local barH   = math.max(2, math.floor(2 * scale))
+            local spacing= math.floor((nH + 8) * scale)
+
             local Notif = Instance.new("Frame")
             Notif.ZIndex = 100
-            Notif.Size = UDim2.new(0, 280, 0, 64)
-            Notif.Position = UDim2.new(1, 20, 1, -84)
+            Notif.Size = UDim2.new(0, nW, 0, nH)
+            Notif.Position = UDim2.new(1, 20, 1, -math.floor(nH + 12))
             Notif.BackgroundTransparency = 1
             Notif.Parent = ScreenGui
             Instance.new("UICorner", Notif).CornerRadius = UDim.new(0, 12)
             Notif.ClipsDescendants = true
             AddToRegistry(Notif, "BackgroundColor3", "Top")
 
-            -- vertical left bar - the colored stripe
             local NBar = Instance.new("Frame")
-            NBar.Size = UDim2.new(0, 4, 1, -12)
-            NBar.Position = UDim2.new(0, 6, 0, 6)
-            NBar.BackgroundColor3 = typeColor
-            NBar.BorderSizePixel = 0
-            NBar.ZIndex = 102
-            NBar.Parent = Notif
+            NBar.Size = UDim2.new(0, math.max(3, math.floor(4*scale)), 1, -math.floor(12*scale))
+            NBar.Position = UDim2.new(0, math.floor(6*scale), 0, math.floor(6*scale))
+            NBar.BackgroundColor3 = typeColor; NBar.BorderSizePixel = 0; NBar.ZIndex = 102; NBar.Parent = Notif
             Instance.new("UICorner", NBar).CornerRadius = UDim.new(0, 3)
 
-            -- border stroke colored with type color
             local NStroke = Instance.new("UIStroke")
-            NStroke.Thickness = 1
-            NStroke.Transparency = 0.55
-            NStroke.Color = typeColor
-            NStroke.Parent = Notif
+            NStroke.Thickness = 1; NStroke.Transparency = 0.55; NStroke.Color = typeColor; NStroke.Parent = Notif
 
-            -- title
+            -- title row: bold label left, timer right
             local NTitle = Instance.new("TextLabel")
-            NTitle.ZIndex = 101
-            NTitle.Text = title or ""
-            NTitle.Size = UDim2.new(1, -65, 0, 18)
-            NTitle.Position = UDim2.new(0, 20, 0, 9)
-            NTitle.BackgroundTransparency = 1
-            NTitle.Parent = Notif
+            NTitle.ZIndex = 101; NTitle.Text = title or ""
+            NTitle.Size = UDim2.new(1, -math.floor(60*scale), 0, math.floor(18*scale))
+            NTitle.Position = UDim2.new(0, math.floor(padX+8), 0, padY)
+            NTitle.BackgroundTransparency = 1; NTitle.Parent = Notif
             NTitle.Font = Enum.Font.GothamBold
-            NTitle.TextSize = 12
+            NTitle.TextSize = math.max(9, math.floor(12*scale))
             NTitle.TextXAlignment = Enum.TextXAlignment.Left
             AddToRegistry(NTitle, "TextColor3", "Text")
 
-            -- countdown label top right
             local NTimer = Instance.new("TextLabel")
-            NTimer.ZIndex = 101
-            NTimer.Text = "3.0s"
-            NTimer.Size = UDim2.new(0, 44, 0, 18)
-            NTimer.Position = UDim2.new(1, -50, 0, 9)
-            NTimer.BackgroundTransparency = 1
-            NTimer.Parent = Notif
+            NTimer.ZIndex = 101; NTimer.Text = "3.0s"
+            NTimer.Size = UDim2.new(0, math.floor(44*scale), 0, math.floor(18*scale))
+            NTimer.Position = UDim2.new(1, -math.floor(50*scale), 0, padY)
+            NTimer.BackgroundTransparency = 1; NTimer.Parent = Notif
             NTimer.Font = Enum.Font.GothamBold
-            NTimer.TextSize = 11
+            NTimer.TextSize = math.max(8, math.floor(11*scale))
             NTimer.TextXAlignment = Enum.TextXAlignment.Right
             NTimer.TextColor3 = typeColor
 
-            -- body text
+            -- description row: only shown when body has content
             local NText = Instance.new("TextLabel")
-            NText.ZIndex = 101
-            NText.Text = body or ""
-            NText.Size = UDim2.new(1, -28, 0, 16)
-            NText.Position = UDim2.new(0, 20, 0, 30)
-            NText.BackgroundTransparency = 1
-            NText.Parent = Notif
+            NText.ZIndex = 101; NText.Text = body or ""
+            NText.Size = UDim2.new(1, -math.floor(padX*2+8), 0, math.floor(18*scale))
+            NText.Position = UDim2.new(0, math.floor(padX+8), 0, padY + math.floor(20*scale))
+            NText.BackgroundTransparency = 1; NText.Parent = Notif
             NText.Font = Enum.Font.GothamMedium
-            NText.TextSize = 11
+            NText.TextSize = math.max(8, math.floor(11*scale))
             NText.TextXAlignment = Enum.TextXAlignment.Left
-            NText.TextTransparency = 0.3
+            NText.TextTransparency = body and body ~= "" and 0.3 or 1
             AddToRegistry(NText, "TextColor3", "Text")
 
-            -- progress bar at the bottom
+            -- type badge pill next to timer
+            local NBadge = Instance.new("TextLabel")
+            NBadge.ZIndex = 102
+            NBadge.Text = notifType and (notifType:sub(1,1):upper()..notifType:sub(2)) or "Notif"
+            NBadge.Size = UDim2.new(0, math.floor(52*scale), 0, math.floor(16*scale))
+            NBadge.Position = UDim2.new(1, -math.floor(60*scale), 0, padY + math.floor(20*scale))
+            NBadge.BackgroundColor3 = typeColor; NBadge.BackgroundTransparency = 0.75
+            NBadge.Parent = Notif
+            NBadge.Font = Enum.Font.GothamBold
+            NBadge.TextSize = math.max(7, math.floor(9*scale))
+            NBadge.TextColor3 = typeColor
+            Instance.new("UICorner", NBadge).CornerRadius = UDim.new(1, 0)
+
             local NProgress = Instance.new("Frame")
-            NProgress.Size = UDim2.new(1, 0, 0, 2)
-            NProgress.Position = UDim2.new(0, 0, 1, -2)
-            NProgress.BorderSizePixel = 0
-            NProgress.BackgroundColor3 = typeColor
-            NProgress.ZIndex = 101
-            NProgress.Parent = Notif
+            NProgress.Size = UDim2.new(1, 0, 0, barH)
+            NProgress.Position = UDim2.new(0, 0, 1, -barH)
+            NProgress.BorderSizePixel = 0; NProgress.BackgroundColor3 = typeColor
+            NProgress.ZIndex = 101; NProgress.Parent = Notif
             Instance.new("UICorner", NProgress).CornerRadius = UDim.new(1, 0)
 
             -- start text invisible so they fade in after the frame arrives
@@ -519,24 +680,25 @@ function Library:CreateWindow(Config)
             NBar.BackgroundTransparency = 1
             NStroke.Transparency = 1
 
-            -- register in stack and reposition all active notifs
+            -- register in stack and reposition all using their own sizes
             table.insert(ActiveNotifs, Notif)
             local function RepositionAll()
-                for i, n in ipairs(ActiveNotifs) do
-                    local yOff = -12 - (i - 1) * 76
-                    Tween(n, {Position = UDim2.new(1, -298, 1, yOff)}, 0.3)
+                local yAcc = -12
+                for i = #ActiveNotifs, 1, -1 do
+                    local n = ActiveNotifs[i]
+                    Tween(n, {Position = UDim2.new(1, -(nW+18), 1, yAcc)}, 0.3)
+                    yAcc = yAcc - (n.AbsoluteSize.Y + 10)
                 end
             end
             RepositionAll()
-            -- fade in
             Tween(Notif, {BackgroundTransparency = 0.06}, 0.3)
             task.wait(0.2)
             Tween(NTitle, {TextTransparency = 0}, 0.2)
-            Tween(NText, {TextTransparency = 0.3}, 0.2)
+            Tween(NText, {TextTransparency = body and body ~= "" and 0.3 or 1}, 0.2)
             Tween(NTimer, {TextTransparency = 0}, 0.2)
             Tween(NBar, {BackgroundTransparency = 0}, 0.2)
             Tween(NStroke, {Transparency = 0.55}, 0.2)
-            Tween(NProgress, {Size = UDim2.new(0, 0, 0, 2)}, 3)
+            Tween(NProgress, {Size = UDim2.new(0, 0, 0, barH)}, 3)
 
             -- live countdown
             local timeLeft = 3.0
@@ -553,21 +715,22 @@ function Library:CreateWindow(Config)
 
             task.wait(3)
             countConn:Disconnect()
-            -- remove from stack then reposition remaining
             for i, n in ipairs(ActiveNotifs) do
                 if n == Notif then table.remove(ActiveNotifs, i); break end
             end
-            for i, n in ipairs(ActiveNotifs) do
-                local yOff = -12 - (i - 1) * 76
-                Tween(n, {Position = UDim2.new(1, -298, 1, yOff)}, 0.3)
+            local yAcc = -12
+            for i = #ActiveNotifs, 1, -1 do
+                local n = ActiveNotifs[i]
+                Tween(n, {Position = UDim2.new(1, -(nW+18), 1, yAcc)}, 0.3)
+                yAcc = yAcc - (n.AbsoluteSize.Y + 10)
             end
-            -- fade out then slide away
             Tween(NTitle, {TextTransparency = 1}, 0.15)
             Tween(NText, {TextTransparency = 1}, 0.15)
             Tween(NTimer, {TextTransparency = 1}, 0.15)
+            Tween(NBadge, {TextTransparency = 1, BackgroundTransparency = 1}, 0.15)
             Tween(NBar, {BackgroundTransparency = 1}, 0.15)
             task.wait(0.1)
-            Tween(Notif, {Position = UDim2.new(1, 20, 1, -84), BackgroundTransparency = 1}, 0.25)
+            Tween(Notif, {Position = UDim2.new(1, 20, 1, -(nH+12)), BackgroundTransparency = 1}, 0.25)
             task.wait(0.3)
             Notif:Destroy()
         end)
@@ -577,8 +740,9 @@ function Library:CreateWindow(Config)
 
     function Window:Unload()
         MainFrame.Active = false
+        Window:Notification("UI Unloaded", "Library has been destroyed", "error")
         TweenService:Create(MainFrame, TweenInfo.new(0.35, Enum.EasingStyle.Back, Enum.EasingDirection.In), {Size = UDim2.new(0, 0, 0, 0)}):Play()
-        task.wait(0.38)
+        task.wait(1.2)
         ScreenGui:Destroy()
     end
 
@@ -791,10 +955,12 @@ function Library:CreateWindow(Config)
             Instance.new("UICorner", Bar).CornerRadius = UDim.new(1, 0)
             AddToRegistry(Bar, "BackgroundColor3", "Accent")
 
-            Btn.MouseButton1Click:Connect(function() Tween(Btn, {Size = UDim2.new(0.97, 0, 0, 40)}, 0.1)
+            Btn.MouseButton1Click:Connect(function()
+                Tween(Btn, {Size = UDim2.new(0.97, 0, 0, 40)}, 0.1)
                 task.wait(0.1)
                 Tween(Btn, {Size = UDim2.new(1, 0, 0, 44)}, 0.15)
                 callback()
+                Window:Notification(text, "Activated", "success")
             end)
             Btn.MouseEnter:Connect(function() Tween(Btn, {BackgroundTransparency = 0.0}, 0.18) end)
             Btn.MouseLeave:Connect(function() Tween(Btn, {BackgroundTransparency = 0.04}, 0.18) end)
@@ -846,7 +1012,10 @@ function Library:CreateWindow(Config)
                 callback(Enabled)
             end
 
-            ClickBtn.MouseButton1Click:Connect(function() Enabled = not Enabled; Update() end)
+            ClickBtn.MouseButton1Click:Connect(function()
+                Enabled = not Enabled; Update()
+                Window:Notification(text, Enabled and "Enabled" or "Disabled", Enabled and "success" or "error")
+            end)
             ConfigObjects[text] = {Type = "Toggle", Value = Enabled, Set = function(val)
                 Enabled = val; Library.Flags[text] = val
                 Tween(Switch, {BackgroundColor3 = Enabled and CurrentTheme.Accent or CurrentTheme.Stroke})
@@ -937,13 +1106,20 @@ function Library:CreateWindow(Config)
 
             local sliding = false
             Bar.InputBegan:Connect(function(i)
-                if i.UserInputType == Enum.UserInputType.MouseButton1 then sliding = true; Drag(i) end
+                if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then
+                    sliding = true; Drag(i)
+                end
             end)
             UserInputService.InputEnded:Connect(function(i)
-                if i.UserInputType == Enum.UserInputType.MouseButton1 then sliding = false end
+                if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then
+                    if sliding then
+                        sliding = false
+                        Window:Notification(text, tostring(Val), "info")
+                    end
+                end
             end)
             UserInputService.InputChanged:Connect(function(i)
-                if sliding and i.UserInputType == Enum.UserInputType.MouseMovement then Drag(i) end
+                if sliding and (i.UserInputType == Enum.UserInputType.MouseMovement or i.UserInputType == Enum.UserInputType.Touch) then Drag(i) end
             end)
             ConfigObjects[text] = {Type = "Slider", Value = Val, Set = function(val) Update(val) end}
 
@@ -1010,6 +1186,7 @@ function Library:CreateWindow(Config)
                 Tween(Container, {Size = UDim2.new(1, 0, 0, 0)}, 0.28)
                 Tween(Icon, {Rotation = 0}, 0.28)
                 task.wait(0.3); Container.Visible = false
+                Window:Notification(text, opt, "info")
             end
 
             -- track the option buttons so we can re-color them when theme changes
@@ -1101,6 +1278,9 @@ function Library:CreateWindow(Config)
                 Library.Flags[text] = Box.Text
                 if ConfigObjects[text] then ConfigObjects[text].Value = Box.Text end
                 callback(Box.Text)
+                if Box.Text ~= "" then
+                    Window:Notification(text, Box.Text, "info")
+                end
             end)
             ConfigObjects[text] = {Type = "Textbox", Value = "", Set = function(val)
                 Box.Text = val; Library.Flags[text] = val; callback(val)
@@ -1330,21 +1510,14 @@ function Library:CreateWindow(Config)
             local GBox = MakeRGBBox("G", 0.33)
             local BBox = MakeRGBBox("B", 0.66)
 
-            local updatingFromPicker = false
-
             local function ApplyColor()
                 Color = Color3.fromHSV(h, s, v)
                 Swatch.BackgroundColor3 = Color
                 SVBox.BackgroundColor3 = Color3.fromHSV(h, 1, 1)
-
-                -- update RGB boxes only when picker is being dragged not when user typed
-                if not updatingFromPicker then
-                    RBox.Text = tostring(math.floor(Color.R * 255))
-                    GBox.Text = tostring(math.floor(Color.G * 255))
-                    BBox.Text = tostring(math.floor(Color.B * 255))
-                end
-
-                -- store as Color3 so scripters can use it directly
+                -- always update RGB boxes in realtime
+                RBox.Text = tostring(math.floor(Color.R * 255))
+                GBox.Text = tostring(math.floor(Color.G * 255))
+                BBox.Text = tostring(math.floor(Color.B * 255))
                 Library.Flags[text] = Color
                 if ConfigObjects[text] then
                     ConfigObjects[text].Value = {R = Color.R, G = Color.G, B = Color.B}
@@ -1381,25 +1554,17 @@ function Library:CreateWindow(Config)
             SVBtn.Size = UDim2.new(1, 0, 1, 0); SVBtn.BackgroundTransparency = 1
             SVBtn.Text = ""; SVBtn.ZIndex = 3; SVBtn.Parent = SVBox
             SVBtn.InputBegan:Connect(function(i)
-                if i.UserInputType == Enum.UserInputType.MouseButton1 then
-                    svDragging = true
-                    updatingFromPicker = true
+                if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then
+                    svDragging = true; updatingFromPicker = true
                 end
             end)
             UserInputService.InputEnded:Connect(function(i)
-                if i.UserInputType == Enum.UserInputType.MouseButton1 then
-                    svDragging = false
-                    if updatingFromPicker then
-                        updatingFromPicker = false
-                        -- now sync the RGB boxes since drag is done
-                        RBox.Text = tostring(math.floor(Color.R * 255))
-                        GBox.Text = tostring(math.floor(Color.G * 255))
-                        BBox.Text = tostring(math.floor(Color.B * 255))
-                    end
+                if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then
+                    svDragging = false; updatingFromPicker = false
                 end
             end)
             UserInputService.InputChanged:Connect(function(i)
-                if svDragging and i.UserInputType == Enum.UserInputType.MouseMovement then
+                if svDragging and (i.UserInputType == Enum.UserInputType.MouseMovement or i.UserInputType == Enum.UserInputType.Touch) then
                     s = math.clamp((i.Position.X - SVBox.AbsolutePosition.X) / SVBox.AbsoluteSize.X, 0, 1)
                     v = 1 - math.clamp((i.Position.Y - SVBox.AbsolutePosition.Y) / SVBox.AbsoluteSize.Y, 0, 1)
                     SVDot.Position = UDim2.new(s, 0, 1 - v, 0)
@@ -1413,24 +1578,17 @@ function Library:CreateWindow(Config)
             HueBtn.Size = UDim2.new(1, 0, 1, 0); HueBtn.BackgroundTransparency = 1
             HueBtn.Text = ""; HueBtn.ZIndex = 3; HueBtn.Parent = HueBar
             HueBtn.InputBegan:Connect(function(i)
-                if i.UserInputType == Enum.UserInputType.MouseButton1 then
-                    hueDragging = true
-                    updatingFromPicker = true
+                if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then
+                    hueDragging = true; updatingFromPicker = true
                 end
             end)
             UserInputService.InputEnded:Connect(function(i)
-                if i.UserInputType == Enum.UserInputType.MouseButton1 then
-                    if hueDragging then
-                        hueDragging = false
-                        updatingFromPicker = false
-                        RBox.Text = tostring(math.floor(Color.R * 255))
-                        GBox.Text = tostring(math.floor(Color.G * 255))
-                        BBox.Text = tostring(math.floor(Color.B * 255))
-                    end
+                if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then
+                    hueDragging = false; updatingFromPicker = false
                 end
             end)
             UserInputService.InputChanged:Connect(function(i)
-                if hueDragging and i.UserInputType == Enum.UserInputType.MouseMovement then
+                if hueDragging and (i.UserInputType == Enum.UserInputType.MouseMovement or i.UserInputType == Enum.UserInputType.Touch) then
                     h = math.clamp((i.Position.Y - HueBar.AbsolutePosition.Y) / HueBar.AbsoluteSize.Y, 0, 1)
                     HueDot.Position = UDim2.new(0.5, 0, h, 0)
                     ApplyColor()
@@ -1441,11 +1599,14 @@ function Library:CreateWindow(Config)
                 pickerOpen = not pickerOpen
                 if pickerOpen then
                     Panel.Visible = true
-                    -- 10 top padding + 110 SV box + 8 gap + 28 RGB row + 10 bottom padding
                     Tween(Panel, {Size = UDim2.new(1, 0, 0, 166)}, 0.32)
                 else
                     Tween(Panel, {Size = UDim2.new(1, 0, 0, 0)}, 0.28)
                     task.wait(0.3); Panel.Visible = false
+                    local r = math.floor(Color.R * 255)
+                    local g = math.floor(Color.G * 255)
+                    local b = math.floor(Color.B * 255)
+                    Window:Notification(text, r..", "..g..", "..b, "info")
                 end
             end)
 
@@ -1574,7 +1735,7 @@ function Library:CreateWindow(Config)
     RefreshConfigs()
 
     -- force apply the default theme right away so everything renders with correct colors
-    Library:SetTheme("Red")
+    Library:SetTheme("Yellow")
 
     return Window
 end
