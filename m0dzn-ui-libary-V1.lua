@@ -16,7 +16,7 @@ script loaded
  ██║╚██╔╝██║ ████╔╝██║ ██║  ██║  ███╔╝   ██║╚██╗██║
  ██║ ╚═╝ ██║ ╚██████╔╝ ██████╔╝ ███████╗ ██║ ╚████║
  ╚═╝     ╚═╝  ╚═════╝  ╚═════╝  ╚══════╝ ╚═╝  ╚═══╝
-               M0DZN LIBRARY V1.0
+           M0DZN LIBRARY V1.0
 ]])
 
 local TweenService = game:GetService("TweenService")
@@ -39,11 +39,6 @@ local ThemeListeners = {}
 
 -- modern UI sounds used by popular Roblox UI libraries
 -- swap any ID here with your own from the Roblox toolbox if you want something different
--- sounds from Roblox catalog that are public domain and actually sound clean and modern
-
-local function -- sfx system removed
-end
-
 -- dark grey is the default theme now
 -- dark theme changed from dark red to grey and light grey
 local Themes = {
@@ -146,10 +141,15 @@ function Library:CreateWindow(Config)
     ScreenGui.Name = "M0dznLib"
     ScreenGui.Parent = CoreGui
     ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-    if syn and syn.protect_gui then
-        syn.protect_gui(ScreenGui)
-    elseif gethui then
-        ScreenGui.Parent = gethui()
+    local ok, _ = pcall(function()
+        if syn and syn.protect_gui then
+            syn.protect_gui(ScreenGui)
+        elseif gethui then
+            ScreenGui.Parent = gethui()
+        end
+    end)
+    if not ok then
+        -- executor doesnt support protect_gui so we just leave it in CoreGui
     end
 
     local MainFrame = Instance.new("Frame")
