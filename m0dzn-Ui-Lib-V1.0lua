@@ -9,7 +9,7 @@
 ]]
 
 print([[
-script loaded
+script loaded.
  ███╗   ███╗  ██████╗  ██████╗  ███████╗ ███╗   ██╗
  ████╗ ████║ ██╔═████╗ ██╔══██╗ ╚══███╔╝ ████╗  ██║
  ██╔████╔██║ ██║██╔██║ ██║  ██║   ███╔╝  ██╔██╗ ██║
@@ -269,29 +269,97 @@ function Library:CreateWindow(Config)
     TitleLabel.ZIndex = 5; TitleLabel.Parent = Topbar
     AddToRegistry(TitleLabel, "TextColor3", "Text")
 
-    -- helper: inline SVG-as-DrawingLib image via EditableImage isn't available,
-    -- so we render symbols with Unicode text in ImageButtons styled as icon buttons
-    local function MakeTopBtn(symbol, xFromRight, tooltip)
+    -- icon system: write SVG files to executor file system on first run
+    -- then load them as image content. Falls back to Unicode if writefile not available.
+    local IconCache = {}
+    local function WriteIconIfNeeded(name, svgData)
+        local path = "m0dzn_icons/" .. name .. ".svg"
+        pcall(function()
+            if not isfolder("m0dzn_icons") then makefolder("m0dzn_icons") end
+            if not isfile(path) then writefile(path, svgData) end
+        end)
+        return path
+    end
+
+    -- SVG icon definitions (16x16 white on transparent)
+    local SVGIcons = {
+        -- minus bar (collapse / hide content)
+        collapse_open  = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><rect x="2" y="7" width="12" height="2" rx="1" fill="white"/></svg>',
+        -- square (restore content)
+        collapse_close = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><rect x="2" y="2" width="12" height="12" rx="2" fill="none" stroke="white" stroke-width="1.8"/></svg>',
+        -- two arrows pointing outward (minimize / shrink)
+        minimize_out   = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><polyline points="2,8 2,2 8,2" fill="none" stroke="white" stroke-width="1.8" stroke-linejoin="round"/><polyline points="8,14 14,14 14,8" fill="none" stroke="white" stroke-width="1.8" stroke-linejoin="round"/></svg>',
+        -- two arrows pointing inward (maximize / restore)
+        minimize_in    = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><polyline points="8,2 2,2 2,8" fill="none" stroke="white" stroke-width="1.8" stroke-linejoin="round"/><polyline points="14,8 14,14 8,14" fill="none" stroke="white" stroke-width="1.8" stroke-linejoin="round"/></svg>',
+        -- X close
+        close_x        = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><line x1="3" y1="3" x2="13" y2="13" stroke="white" stroke-width="2" stroke-linecap="round"/><line x1="13" y1="3" x2="3" y2="13" stroke="white" stroke-width="2" stroke-linecap="round"/></svg>',
+    }
+    for name, svg in pairs(SVGIcons) do
+        IconCache[name] = WriteIconIfNeeded(name, svg)
+    end
+
+    -- make an ImageButton that loads icon from file, falls back to text
+    local function MakeIconBtn(iconName, fallbackText, xFromRight)
         local Btn = Instance.new("TextButton")
         Btn.Size = UDim2.new(0, 28, 0, 28)
         Btn.Position = UDim2.new(1, xFromRight, 0.5, -14)
         Btn.BackgroundTransparency = 0.85
-        Btn.Text = symbol
-        Btn.Font = Enum.Font.GothamBold; Btn.TextSize = 14
+        Btn.Text = ""
         Btn.ZIndex = 6; Btn.Parent = Topbar
         Instance.new("UICorner", Btn).CornerRadius = UDim.new(0, 8)
         AddToRegistry(Btn, "BackgroundColor3", "Top")
-        AddToRegistry(Btn, "TextColor3", "Text")
         Btn.MouseEnter:Connect(function() Tween(Btn, {BackgroundTransparency = 0.5}, 0.12) end)
         Btn.MouseLeave:Connect(function() Tween(Btn, {BackgroundTransparency = 0.85}, 0.12) end)
+
+        -- image overlay
+        local Img = Instance.new("ImageLabel")
+        Img.Size = UDim2.new(0, 16, 0, 16)
+        Img.Position = UDim2.new(0.5, -8, 0.5, -8)
+        Img.BackgroundTransparency = 1
+        Img.ZIndex = 7; Img.Parent = Btn
+
+        -- try file:// URI first, fallback to unicode text
+        local loaded = false
+        pcall(function()
+            local path = IconCache[iconName]
+            if path and isfile(path) then
+                Img.Image = "file:///" .. path
+                loaded = true
+            end
+        end)
+        if not loaded then
+            Img.Image = ""
+            local Lbl = Instance.new("TextLabel")
+            Lbl.Size = UDim2.new(1,0,1,0); Lbl.BackgroundTransparency = 1
+            Lbl.Text = fallbackText; Lbl.Font = Enum.Font.GothamBold; Lbl.TextSize = 14
+            Lbl.TextXAlignment = Enum.TextXAlignment.Center; Lbl.ZIndex = 7; Lbl.Parent = Btn
+            AddToRegistry(Lbl, "TextColor3", "Text")
+        end
+
+        -- expose icon swap so we can change icon on state change
+        Btn._img = Img
+        Btn._setIcon = function(name2, fallback2)
+            local ok2 = false
+            pcall(function()
+                local p2 = IconCache[name2]
+                if p2 and isfile(p2) then Img.Image = "file:///" .. p2; ok2 = true end
+            end)
+            if not ok2 then
+                Img.Image = ""
+                -- update existing fallback label if present
+                for _, ch in pairs(Btn:GetChildren()) do
+                    if ch:IsA("TextLabel") then ch.Text = fallback2 end
+                end
+            end
+        end
         return Btn
     end
 
-    -- ① Collapse (hide content, keep titlebar) — uses – / □ unicode
-    local CollapseBtn = MakeTopBtn("–", -36, "Collapse")
+    -- ① Collapse (hide content, keep titlebar) — minus / square icons
+    local CollapseBtn = MakeIconBtn("collapse_open", "–", -36)
 
-    -- ② Minimize/Maximize (small / full size) — uses ↗ / ↙ unicode arrows
-    local MinBtn = MakeTopBtn("↗", -70, "Minimize")
+    -- ② Minimize/Maximize — outward/inward arrows
+    local MinBtn = MakeIconBtn("minimize_out", "↗", -70)
 
     -- ③ Mobile hide/show button — floating pill that appears when GUI is hidden
     -- created later after we know openSize, referenced here
@@ -404,26 +472,19 @@ function Library:CreateWindow(Config)
     PageContainer.BackgroundTransparency = 1
     PageContainer.Parent = Content
 
-    -- DPI-aware sizing: scale window to fit any screen
+    -- position centered on screen (no size scaling per user request)
     local VP = workspace.CurrentCamera.ViewportSize
-    local baseW, baseH = 1280, 720
-    local scaleF = math.min(VP.X / baseW, VP.Y / baseH)
-    scaleF = math.clamp(scaleF, 0.55, 1.4)
-    local guiW = math.floor(650 * scaleF)
-    local guiH = math.floor(430 * scaleF)
-    openSize  = UDim2.new(0, guiW, 0, guiH)
-    fullH     = guiH
-    collapseH = math.floor(52 * scaleF)
-    miniSize  = UDim2.new(0, math.floor(260 * scaleF), 0, math.floor(52 * scaleF))
+    openSize  = UDim2.new(0, 650, 0, 430)
+    fullH     = 430
+    collapseH = 52
+    miniSize  = UDim2.new(0, 260, 0, 52)
 
-    -- scale float button to DPI
-    local fbSize = math.floor(48 * scaleF)
+    -- float button: position bottom-right using absolute screen coords
+    local fbSize = 48
     FloatBtn.Size = UDim2.new(0, fbSize, 0, fbSize)
-    FloatBtn.TextSize = math.floor(20 * scaleF)
-    FloatBtn.Position = UDim2.new(1, -(fbSize + 16), 1, -(fbSize + 16))
-    for _, ch in pairs(FloatBtn:GetChildren()) do
-        if ch:IsA("UICorner") then ch.CornerRadius = UDim.new(0, math.floor(16 * scaleF)) end
-    end
+    FloatBtn.TextSize = 20
+    local vp_fb = workspace.CurrentCamera.ViewportSize
+    FloatBtn.Position = UDim2.new(0, vp_fb.X - fbSize - 16, 0, vp_fb.Y - fbSize - 16)
 
     -- spawn open: bounce scale from 0 up to full size
     MainFrame.Size = UDim2.new(0, 0, 0, 0)
@@ -465,7 +526,7 @@ function Library:CreateWindow(Config)
 
     local function SetCollapsed(c)
         isCollapsed = c
-        CollapseBtn.Text = c and "□" or "–"
+        if CollapseBtn._setIcon then CollapseBtn._setIcon(c and "collapse_close" or "collapse_open", c and "□" or "–") end
         local targetH = c and math.floor(collapseH * (openSize.Y.Offset / 430))
                             or openSize.Y.Offset
         TweenService:Create(MainFrame, TweenInfo.new(0.35, Enum.EasingStyle.Back, Enum.EasingDirection.Out),
@@ -483,7 +544,7 @@ function Library:CreateWindow(Config)
         isMinimized = m
         -- ↗ = expand arrows pointing away from center (maximized state indicator)
         -- ↙ = collapse arrows pointing toward center (minimized state indicator)
-        MinBtn.Text = m and "↙" or "↗"
+        if MinBtn._setIcon then MinBtn._setIcon(m and "minimize_in" or "minimize_out", m and "↙" or "↗") end
         local target = m and miniSize or openSize
         TweenService:Create(MainFrame, TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.Out),
             {Size = target}):Play()
@@ -553,8 +614,12 @@ function Library:CreateWindow(Config)
     end)
 
     -- X button in topbar closes to float btn (same as HideGUI)
-    local CloseBtn = MakeTopBtn("✕", -36 - 34 - 4, "Hide")
-    CloseBtn.TextColor3 = Color3.fromRGB(215, 50, 50)
+    local CloseBtn = MakeIconBtn("close_x", "✕", -36 - 34 - 4)
+    -- tint the X image red
+    pcall(function() CloseBtn._img.ImageColor3 = Color3.fromRGB(215, 50, 50) end)
+    for _, ch in pairs(CloseBtn:GetChildren()) do
+        if ch:IsA("TextLabel") then ch.TextColor3 = Color3.fromRGB(215, 50, 50) end
+    end
     CloseBtn.MouseButton1Click:Connect(function() HideGUI() end)
 
     -- re-order right buttons: Close(-36) | Collapse(-70) | Minimize(-106)
@@ -601,10 +666,16 @@ function Library:CreateWindow(Config)
             local barH   = math.max(2, math.floor(2 * scale))
             local spacing= math.floor((nH + 8) * scale)
 
+            -- use absolute pixel positions so notifs stay inside screen on any device
+            local vp2 = workspace.CurrentCamera.ViewportSize
+            local nStartX = vp2.X + 20           -- start off-screen right
+            local nLandX  = vp2.X - nW - 18      -- final resting X inside screen
+            local nBaseY  = vp2.Y - nH - 12      -- bottom margin
+
             local Notif = Instance.new("Frame")
             Notif.ZIndex = 100
             Notif.Size = UDim2.new(0, nW, 0, nH)
-            Notif.Position = UDim2.new(1, 20, 1, -math.floor(nH + 12))
+            Notif.Position = UDim2.new(0, nStartX, 0, nBaseY)
             Notif.BackgroundTransparency = 1
             Notif.Parent = ScreenGui
             Instance.new("UICorner", Notif).CornerRadius = UDim.new(0, 12)
@@ -680,14 +751,17 @@ function Library:CreateWindow(Config)
             NBar.BackgroundTransparency = 1
             NStroke.Transparency = 1
 
-            -- register in stack and reposition all using their own sizes
+            -- register in stack and reposition all using absolute screen coords
             table.insert(ActiveNotifs, Notif)
             local function RepositionAll()
-                local yAcc = -12
+                local vpr = workspace.CurrentCamera.ViewportSize
+                local yBot = vpr.Y - 12
                 for i = #ActiveNotifs, 1, -1 do
                     local n = ActiveNotifs[i]
-                    Tween(n, {Position = UDim2.new(1, -(nW+18), 1, yAcc)}, 0.3)
-                    yAcc = yAcc - (n.AbsoluteSize.Y + 10)
+                    local nh = n.AbsoluteSize.Y > 0 and n.AbsoluteSize.Y or nH
+                    yBot = yBot - nh
+                    Tween(n, {Position = UDim2.new(0, vpr.X - nW - 18, 0, yBot)}, 0.3)
+                    yBot = yBot - 10
                 end
             end
             RepositionAll()
@@ -718,11 +792,14 @@ function Library:CreateWindow(Config)
             for i, n in ipairs(ActiveNotifs) do
                 if n == Notif then table.remove(ActiveNotifs, i); break end
             end
-            local yAcc = -12
+            local vpr2 = workspace.CurrentCamera.ViewportSize
+            local yBot2 = vpr2.Y - 12
             for i = #ActiveNotifs, 1, -1 do
                 local n = ActiveNotifs[i]
-                Tween(n, {Position = UDim2.new(1, -(nW+18), 1, yAcc)}, 0.3)
-                yAcc = yAcc - (n.AbsoluteSize.Y + 10)
+                local nh2 = n.AbsoluteSize.Y > 0 and n.AbsoluteSize.Y or nH
+                yBot2 = yBot2 - nh2
+                Tween(n, {Position = UDim2.new(0, vpr2.X - nW - 18, 0, yBot2)}, 0.3)
+                yBot2 = yBot2 - 10
             end
             Tween(NTitle, {TextTransparency = 1}, 0.15)
             Tween(NText, {TextTransparency = 1}, 0.15)
@@ -730,7 +807,8 @@ function Library:CreateWindow(Config)
             Tween(NBadge, {TextTransparency = 1, BackgroundTransparency = 1}, 0.15)
             Tween(NBar, {BackgroundTransparency = 1}, 0.15)
             task.wait(0.1)
-            Tween(Notif, {Position = UDim2.new(1, 20, 1, -(nH+12)), BackgroundTransparency = 1}, 0.25)
+            local vpr3 = workspace.CurrentCamera.ViewportSize
+            Tween(Notif, {Position = UDim2.new(0, vpr3.X + 20, 0, Notif.Position.Y.Offset), BackgroundTransparency = 1}, 0.25)
             task.wait(0.3)
             Notif:Destroy()
         end)
