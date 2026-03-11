@@ -164,7 +164,7 @@ function Library:CreateWindow(Config)
 
     local Stroke = Instance.new("UIStroke")
     Stroke.Thickness = 3
-    Stroke.Transparency = 0
+    Stroke.Transparency = 0.5
     Stroke.Parent = MainFrame
     AddToRegistry(Stroke, "Color", "Stroke")
 
@@ -444,7 +444,7 @@ function Library:CreateWindow(Config)
             local NTitle = Instance.new("TextLabel")
             NTitle.ZIndex = 101
             NTitle.Text = title or ""
-            NTitle.Size = UDim2.new(1, -22, 0, 18)
+            NTitle.Size = UDim2.new(1, -60, 0, 18)
             NTitle.Position = UDim2.new(0, 16, 0, 8)
             NTitle.BackgroundTransparency = 1
             NTitle.Parent = Notif
@@ -452,6 +452,19 @@ function Library:CreateWindow(Config)
             NTitle.TextSize = 12
             NTitle.TextXAlignment = Enum.TextXAlignment.Left
             AddToRegistry(NTitle, "TextColor3", "Text")
+
+            -- live countdown timer top right corner like 3.0 2.9 2.8
+            local NTimer = Instance.new("TextLabel")
+            NTimer.ZIndex = 101
+            NTimer.Text = "3.0"
+            NTimer.Size = UDim2.new(0, 36, 0, 18)
+            NTimer.Position = UDim2.new(1, -46, 0, 8)
+            NTimer.BackgroundTransparency = 1
+            NTimer.Parent = Notif
+            NTimer.Font = Enum.Font.GothamBold
+            NTimer.TextSize = 11
+            NTimer.TextXAlignment = Enum.TextXAlignment.Right
+            NTimer.TextColor3 = typeColor
 
             -- body line
             local NText = Instance.new("TextLabel")
@@ -478,7 +491,22 @@ function Library:CreateWindow(Config)
             Tween(NBar, {Size = UDim2.new(0, 0, 0, 2)}, 3)
 
             Tween(Notif, {Position = UDim2.new(1, -292, 1, -82)}, 0.5)
+
+            -- countdown from 3.0 to 0.0 updating every 0.1s
+            local timeLeft = 3.0
+            local countConn
+            countConn = RunService.Heartbeat:Connect(function(dt)
+                timeLeft = timeLeft - dt
+                if timeLeft <= 0 then
+                    NTimer.Text = "0.0"
+                    countConn:Disconnect()
+                else
+                    NTimer.Text = string.format("%.1f", timeLeft)
+                end
+            end)
+
             task.wait(3)
+            countConn:Disconnect()
             Tween(Notif, {Position = UDim2.new(1, 20, 1, -82)}, 0.5)
             task.wait(0.55)
             Notif:Destroy()
