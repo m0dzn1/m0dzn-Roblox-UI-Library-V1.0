@@ -1,217 +1,224 @@
-# M0DZN UI LIBRARY V1.0
+# 🖤 m0dzn UI Library — V2.0
 
-A clean, modern, and fully customizable UI library for Roblox. Light grey theme by default, smooth rounded corners, full config system, and 9 rainbow modes.
-
-## EXAMPLE
-
-![image alt](https://raw.githubusercontent.com/m0dzn1/m0dzn-Roblox-UI-Library-V1.0/refs/heads/main/Example.png)
+A clean, dark, fully themeable UI library for Roblox scripts. Built with smooth animations, a real config system, live color picker, and 9 rainbow border modes. Default theme is **Red**.
 
 ---
 
-## loading the library
+## 📸 Preview
+
+![preview](https://raw.githubusercontent.com/m0dzn1/m0dzn-Roblox-UI-Library-V1.0/refs/heads/main/Example.png)
+
+---
+
+## 🚀 Load the Library
 
 ```lua
-local m0dznV1 = loadstring(game:HttpGet("https://raw.githubusercontent.com/m0dzn1/m0dzn-Roblox-UI-Library-V1.0/refs/heads/main/m0dzn-ui-libary-V1.0lua"))()
+local Library = loadstring(game:HttpGet("YOUR_RAW_URL_HERE"))()
 ```
 
 ---
 
-## creating a window
+## 🪟 Create a Window
 
 ```lua
-local Window = m0dznV1:CreateWindow({
-    Title = "TEST HUB",
-    Keybind = Enum.KeyCode.M  -- default is M, press to show/hide with animation
+local Window = Library:CreateWindow({
+    Title = "My Hub",
+    Keybind = Enum.KeyCode.M  -- press M to show/hide
 })
 
-local MainTab = Window:Tab("Main")
+local Main = Window:Tab("Main")
 ```
 
 ---
 
-## functions and documentation
+## 📋 Elements
 
-### 1. Section
-
-Groups related elements together with a small label above them.
-
+### Section
+Adds a small label to group things together.
 ```lua
-MainTab:Section("Combat Features")
+Main:Section("Combat")
 ```
 
-### 2. Label
-
-A single static line of text. Good for info or sub-titles.
-
+### Label
+A single line of static text.
 ```lua
-MainTab:Label("speed is currently modified")
+Main:Label("walkspeed is currently active")
 ```
 
-### 3. Paragraph
-
-A block of longer text with a title and a body. Auto-resizes to fit.
-
+### Paragraph
+A text block with a title and a body. Auto-resizes.
 ```lua
-MainTab:Paragraph("about this script", "this hub was made by m0dzn. use the config tab to save your settings.")
+Main:Paragraph("About", "made by m0dzn. use the config tab to save your settings.")
 ```
 
-### 4. Button
-
-Runs a function once when clicked.
-
+### Button
+Runs a function when clicked.
 ```lua
-MainTab:Button("Click Me", function()
-    print("clicked!")
+Main:Button("Teleport Home", function()
+    -- your code here
 end)
 ```
 
-### 5. Toggle
-
-An on/off switch. Good for loops and features you want to enable or disable.
-
+### Toggle
+An on/off switch. Perfect for loops and features.
 ```lua
-MainTab:Toggle("Auto Farm", false, function(State)
+Main:Toggle("Auto Farm", false, function(State)
     getgenv().AutoFarm = State
     while getgenv().AutoFarm do
-        print("farming...")
         task.wait(1)
     end
 end)
 ```
 
-### 6. Slider
-
-Lets the user pick a number within a range.
-
+### Slider
+Lets the user pick a number in a range.
 ```lua
--- text, min, max, default, callback
-MainTab:Slider("WalkSpeed", 16, 200, 16, function(Value)
+-- label, min, max, default, callback
+Main:Slider("WalkSpeed", 16, 500, 16, function(Value)
     game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = Value
 end)
 ```
 
-### 7. Dropdown
-
-A list of options to choose one from.
-
+### Dropdown
+A list where you pick one option.
 ```lua
-MainTab:Dropdown("Select Weapon", {"Sword", "Gun", "Knife"}, function(Option)
-    print("selected:", Option)
+Main:Dropdown("Team", {"Red", "Blue", "Green"}, function(Option)
+    print("picked:", Option)
 end)
 ```
 
-### 8. Textbox
-
-An input box where the user can type text or numbers.
-
+### Textbox
+A text input field.
 ```lua
-MainTab:Textbox("Enter Message", "type here...", function(Text)
-    print("typed:", Text)
+Main:Textbox("Player Name", "type here...", function(Text)
+    print("entered:", Text)
 end)
 ```
 
-### 9. Keybind
-
-Lets the user assign a key to something.
-
+### Keybind
+Lets the user rebind a key.
 ```lua
-MainTab:Keybind("Fly Key", Enum.KeyCode.F, function(Key)
-    print("keybind set to:", Key.Name)
+Main:Keybind("Fly Key", Enum.KeyCode.F, function(Key)
+    print("new key:", Key.Name)
 end)
 ```
 
-### 10. Value
-
-A small inline input box, good for specific numbers like hitbox size.
-
+### Value
+A small inline number input.
 ```lua
-MainTab:Value("Hitbox Size", "10", function(Value)
-    _G.HeadSize = tonumber(Value)
+Main:Value("Hitbox Size", 10, function(Value)
+    _G.HitboxSize = tonumber(Value)
 end)
 ```
 
-### 11. Color Picker
-
-An HSV color picker with a saturation/value square, hue bar, and hex preview.
-
+### Color Picker
+An HSV picker with a saturation/value square, rainbow hue bar, and R G B inputs. Returns a real `Color3` so you can use it directly.
 ```lua
-MainTab:ColorPicker("ESP Color", Color3.fromRGB(255, 100, 100), function(Color)
+Main:ColorPicker("ESP Color", Color3.fromRGB(255, 100, 100), function(Color)
     _G.ESPColor = Color
+    -- use like: Part.Color = Color
+    -- or: Part.BrickColor = BrickColor.new(Color)
 end)
 ```
 
 ---
 
-## notifications
+## 🔔 Notifications
 
-Notifications appear in the bottom right corner and slide in with a progress bar. There are 5 types.
+Notifications slide in from the bottom right with a fade, a colored left bar, a countdown timer, and a progress bar at the bottom.
+
+| Type | Color | Call |
+|------|-------|------|
+| Default | 🩶 Light Grey | `Window:Notification("Title", "Body")` |
+| Success | 🟢 Green | `Window:Notification("Title", "Body", "success")` |
+| Warning | 🟡 Yellow | `Window:Notification("Title", "Body", "warning")` |
+| Error | 🔴 Red | `Window:Notification("Title", "Body", "error")` |
+| Info | 🩵 Cyan | `Window:Notification("Title", "Body", "info")` |
 
 ```lua
-Window:Notification("something happened")                  -- default
-Window:Notification("saved successfully", "success")       -- green
-Window:Notification("check your settings", "warning")      -- yellow
-Window:Notification("something went wrong", "error")       -- red
-Window:Notification("here is some info", "info")           -- blue
+Window:Notification("Saved", "Config saved successfully", "success")
+Window:Notification("Watch out", "High ping detected", "warning")
+Window:Notification("Error", "Failed to load config", "error")
+Window:Notification("Info", "Script version 2.0", "info")
+Window:Notification("Hey", "Something just happened")  -- default grey
+```
+
+The left vertical bar and border color match the notification type. The countdown in the top right corner counts from `3.0` down to `0.0` in real time.
+
+---
+
+## ⌨️ Keybind
+
+Press the keybind (default `M`) to show or hide the UI. The animation fades and scales — press it fast and it snaps instantly, no delay.
+
+You can change it in the Settings tab or call:
+```lua
+Window:SetKeybind(Enum.KeyCode.RightShift)
 ```
 
 ---
 
-## keybind behavior
+## 🗑️ Unload
 
-Press the keybind (default `M`) to open or close the UI. Both directions have a smooth animation — the window shrinks down when hiding and expands when showing.
-
----
-
-## unloading
-
-`Window:Unload()` plays the close animation first, then destroys the UI completely.
-
+Plays a fade-out animation then destroys the UI completely.
 ```lua
 Window:Unload()
+-- or
+Window:Destroy()  -- same thing
 ```
 
-`Window:Destroy()` does the same thing (kept for compatibility).
-
 ---
 
-## settings and customization
+## ⚙️ Settings Tab
 
-The **Settings tab** is added automatically. Options:
+Added automatically. Options inside:
 
-1. **Rainbow Edge** — animated RGB border around the window
-2. **Rainbow Type** — style of the rainbow animation (9 options)
-3. **Theme** — full color scheme change (Light, Dark, White, Purple, Blue, Red, Yellow, Green)
-4. **Menu Keybind** — change the open/close key
-5. **UI SFX** — toggle sound effects on or off
-6. **Unload UI** — removes the UI with an animation
+- 🌈 **Rainbow Edge** — animated RGB border around the window
+- 🎨 **Rainbow Type** — 9 animation styles (cycling, gradient, pulse, pastel, etc.)
+- 🖌️ **Theme** — full real-time color scheme switch
+- ⌨️ **Menu Keybind** — change the show/hide key
+- ❌ **Unload UI** — closes and removes the UI
 
-### rainbow modes
+### Themes
+`Red` (default) · `Dark` · `Light` · `Purple` · `Blue` · `Yellow` · `Green`
 
+### Rainbow Modes
 1. Linear Gradient
-2. Animated/Cycling
+2. Animated / Cycling
 3. Smooth Fading Gradient
-4. Step/Band
+4. Step / Band
 5. Rainbow Pulse
 6. Radial
-7. Neon/Glowing
+7. Neon / Glowing
 8. Pastel
-9. Vertical/Horizontal Fade
-
-### themes
-
-Light (default), Dark, White, Purple, Blue, Red, Yellow, Green
+9. Vertical / Horizontal Fade
 
 ---
 
-## config system
+## 💾 Config Tab
 
-The **Config tab** is added automatically. It saves and loads the state of all toggles, sliders, dropdowns, keybinds, and value inputs.
+Added automatically. Saves and loads all toggle, slider, dropdown, keybind, and value states.
 
-1. **Config Name** — type the name for your save file
-2. **Select Config** — pick a saved config from the list
-3. **Refresh List** — updates the dropdown with the latest saved files
-4. **Save Config** — saves all current settings to a file
-5. **Load Config** — loads a saved file and updates all elements
-6. **Delete Config** — deletes the selected config file
+1. **Config Name** — type the name you want to save as
+2. **Select Config** — pick a saved config from the dropdown
+3. **Refresh List** — refreshes the dropdown with your saved files
+4. **Save Config** — writes current settings to a file
+5. **Load Config** — loads the file and updates every element live
+6. **Delete Config** — removes the selected file
 
-Files are stored in a folder named after your `Window.Title`.
+---
+
+## 📦 Flags
+
+Every element writes its current value to `Library.Flags` so you can read it from anywhere.
+
+```lua
+print(Library.Flags["WalkSpeed"])    -- number
+print(Library.Flags["Auto Farm"])    -- true/false
+print(Library.Flags["ESP Color"])    -- Color3
+print(Library.Flags["Fly Key"])      -- key name string
+```
+
+---
+
+Made by **m0dzn** 🖤
