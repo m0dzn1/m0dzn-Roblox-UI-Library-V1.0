@@ -11,7 +11,7 @@ A clean, modern, and fully customizable UI library for Roblox. Light grey theme 
 ## loading the library
 
 ```lua
-local m0dznV1 = loadstring(game:HttpGet("https://raw.githubusercontent.com/m0dzn1/m0dzn-Roblox-UI-Library-V1.0/refs/heads/main/m0dzn-ui-libary-V1.lua"))()
+local m0dznV1 = loadstring(game:HttpGet("https://raw.githubusercontent.com/m0dzn1/m0dzn-Roblox-UI-Library-V1.0/refs/heads/main/m0dzn-ui-libary-V1.0lua"))()
 ```
 
 ---
