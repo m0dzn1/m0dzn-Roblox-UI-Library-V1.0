@@ -47,7 +47,7 @@ Common choices: `Enum.KeyCode.M`, `Enum.KeyCode.RightShift`, `Enum.KeyCode.Inser
 
 There are two ways to set a theme.
 
-### Option A — Pick a built-in
+### Method 1 — Pick a built-in
 
 Pass the name of any built-in theme as a string:
 
@@ -58,7 +58,7 @@ local Window = Library:CreateWindow({
 })
 ```
 
-### Option B — Define your own colors
+### Method 2 — Define your own colors
 
 Pass a table with RGB values. You only need to fill in the slots you want to change — anything you leave out falls back to the current default.
 
