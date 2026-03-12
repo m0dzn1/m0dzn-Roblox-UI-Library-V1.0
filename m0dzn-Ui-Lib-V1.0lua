@@ -168,8 +168,8 @@ function Library:CreateWindow(Config)
     AddToRegistry(MainFrame, "BackgroundColor3", "Main")
 
     local Stroke = Instance.new("UIStroke")
-    Stroke.Thickness = 1.5
-    Stroke.Transparency = 0
+    Stroke.Thickness = 0
+    Stroke.Transparency = 1
     Stroke.Parent = MainFrame
     -- NOT added to registry so theme changes don't override rainbow colors
 
@@ -336,9 +336,8 @@ function Library:CreateWindow(Config)
             AddToRegistry(Lbl, "TextColor3", "Text")
         end
 
-        -- expose icon swap so we can change icon on state change
-        Btn._img = Img
-        Btn._setIcon = function(name2, fallback2)
+        -- return a plain Lua table (NOT set on the Instance) to avoid "not a valid member" error
+        local function setIcon(name2, fallback2)
             local ok2 = false
             pcall(function()
                 local p2 = IconCache[name2]
@@ -346,13 +345,12 @@ function Library:CreateWindow(Config)
             end)
             if not ok2 then
                 Img.Image = ""
-                -- update existing fallback label if present
                 for _, ch in pairs(Btn:GetChildren()) do
                     if ch:IsA("TextLabel") then ch.Text = fallback2 end
                 end
             end
         end
-        return Btn
+        return {btn = Btn, setIcon = setIcon}
     end
 
     -- ① Collapse (hide content, keep titlebar) — minus / square icons
@@ -526,7 +524,7 @@ function Library:CreateWindow(Config)
 
     local function SetCollapsed(c)
         isCollapsed = c
-        if CollapseBtn._setIcon then CollapseBtn._setIcon(c and "collapse_close" or "collapse_open", c and "□" or "–") end
+        CollapseBtn.setIcon(c and "collapse_close" or "collapse_open", c and "□" or "–")
         local targetH = c and math.floor(collapseH * (openSize.Y.Offset / 430))
                             or openSize.Y.Offset
         TweenService:Create(MainFrame, TweenInfo.new(0.35, Enum.EasingStyle.Back, Enum.EasingDirection.Out),
@@ -534,7 +532,7 @@ function Library:CreateWindow(Config)
         Window:Notification(c and "Collapsed" or "Expanded", c and "Content hidden" or "Content visible",
             c and "warning" or "success")
     end
-    CollapseBtn.MouseButton1Click:Connect(function() SetCollapsed(not isCollapsed) end)
+    CollapseBtn.btn.MouseButton1Click:Connect(function() SetCollapsed(not isCollapsed) end)
 
     -- ── ② Minimize/Maximize ─────────────────────────────────────────────────
     local miniSize   -- set after DPI calc
@@ -544,14 +542,14 @@ function Library:CreateWindow(Config)
         isMinimized = m
         -- ↗ = expand arrows pointing away from center (maximized state indicator)
         -- ↙ = collapse arrows pointing toward center (minimized state indicator)
-        if MinBtn._setIcon then MinBtn._setIcon(m and "minimize_in" or "minimize_out", m and "↙" or "↗") end
+        MinBtn.setIcon(m and "minimize_in" or "minimize_out", m and "↙" or "↗")
         local target = m and miniSize or openSize
         TweenService:Create(MainFrame, TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.Out),
             {Size = target}):Play()
         Window:Notification(m and "Minimized" or "Maximized", m and "Window shrunk" or "Window restored",
             m and "warning" or "success")
     end
-    MinBtn.MouseButton1Click:Connect(function() SetMinimized(not isMinimized) end)
+    MinBtn.btn.MouseButton1Click:Connect(function() SetMinimized(not isMinimized) end)
 
     -- ── ③ Full hide / floating pill ─────────────────────────────────────────
     -- float btn drag
@@ -616,16 +614,18 @@ function Library:CreateWindow(Config)
     -- X button in topbar closes to float btn (same as HideGUI)
     local CloseBtn = MakeIconBtn("close_x", "✕", -36 - 34 - 4)
     -- tint the X image red
-    pcall(function() CloseBtn._img.ImageColor3 = Color3.fromRGB(215, 50, 50) end)
-    for _, ch in pairs(CloseBtn:GetChildren()) do
-        if ch:IsA("TextLabel") then ch.TextColor3 = Color3.fromRGB(215, 50, 50) end
-    end
-    CloseBtn.MouseButton1Click:Connect(function() HideGUI() end)
+    pcall(function()
+        for _, ch in pairs(CloseBtn.btn:GetChildren()) do
+            if ch:IsA("ImageLabel") then ch.ImageColor3 = Color3.fromRGB(215,50,50) end
+            if ch:IsA("TextLabel") then ch.TextColor3 = Color3.fromRGB(215,50,50) end
+        end
+    end)
+    CloseBtn.btn.MouseButton1Click:Connect(function() HideGUI() end)
 
     -- re-order right buttons: Close(-36) | Collapse(-70) | Minimize(-106)
-    CloseBtn.Position = UDim2.new(1, -36, 0.5, -14)
-    CollapseBtn.Position = UDim2.new(1, -70, 0.5, -14)
-    MinBtn.Position = UDim2.new(1, -106, 0.5, -14)
+    CloseBtn.btn.Position = UDim2.new(1, -36, 0.5, -14)
+    CollapseBtn.btn.Position = UDim2.new(1, -70, 0.5, -14)
+    MinBtn.btn.Position = UDim2.new(1, -106, 0.5, -14)
 
     UserInputService.InputBegan:Connect(function(input, gpe)
         if not gpe and Keybind and input.KeyCode == Keybind then
