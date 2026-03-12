@@ -9,7 +9,7 @@
 ]]
 
 print([[
-script loaded.
+script loaded
  ███╗   ███╗   ██████╗   ██████╗   ███████╗  ███╗   ██╗
  ████╗ ████║  ██╔═████╗  ██╔══██╗  ╚══███╔╝  ████╗  ██║
  ██╔████╔██║  ██║██╔██║  ██║  ██║    ███╔╝   ██╔██╗ ██║
@@ -279,7 +279,7 @@ function Library:CreateWindow(Config)
         end
     end)
 
-    -- Topbar
+    -- ── Topbar ──────────────────────────────────────────────────────────────
     local Topbar = Instance.new("Frame")
     Topbar.Size = UDim2.new(1, 0, 0, 52)
     Topbar.BackgroundTransparency = 1
@@ -387,13 +387,13 @@ function Library:CreateWindow(Config)
         return {btn = Btn, setIcon = setIcon}
     end
 
-    -- Collapse (hide content, keep titlebar) — minus / square icons
+    -- ① Collapse (hide content, keep titlebar) — minus / square icons
     local CollapseBtn = MakeIconBtn("collapse_open", "–", -36)
 
-    -- Minimize/Maximize — outward/inward arrows
+    -- ② Minimize/Maximize — outward/inward arrows
     local MinBtn = MakeIconBtn("minimize_out", "↗", -70)
 
-    -- Mobile hide/show button — floating pill that appears when GUI is hidden
+    -- ③ Mobile hide/show button — floating pill that appears when GUI is hidden
     -- created later after we know openSize, referenced here
     -- floating pill button (mobile show/hide) — created here so DPI can resize it
     local FloatBtn = Instance.new("TextButton")
@@ -1844,14 +1844,30 @@ function Library:CreateWindow(Config)
         Library:SetRainbowSpeed(v / 10)
     end)
     Settings:Dropdown("Rainbow Type", {"Linear Gradient (Solid Rainbow)", "Animated/Cycling Rainbow", "Smooth Fading Gradient", "Step/Band Rainbow", "Rainbow Pulse", "Radial Rainbow", "Neon/Glowing Rainbow", "Pastel Rainbow", "Vertical/Horizontal Fade"}, function(val) Library:SetRainbowType(val) end)
-    local ThemeDropdown = Settings:Dropdown("Theme", {"Red", "Dark", "Light", "Purple", "Blue", "Yellow", "Green"}, function(v) Library:SetTheme(v) end)
+    -- build theme list dynamically so custom themes show up too
+    local builtinThemes = {"Red", "Dark", "Light", "Purple", "Blue", "Yellow", "Green"}
+    local themeList = {}
+    for _, n in ipairs(builtinThemes) do table.insert(themeList, n) end
+    for name, _ in pairs(Themes) do
+        local isBuiltin = false
+        for _, b in ipairs(builtinThemes) do if b == name then isBuiltin = true; break end end
+        if not isBuiltin then table.insert(themeList, name) end
+    end
+    local ThemeDropdown = Settings:Dropdown("Theme", themeList, function(v) Library:SetTheme(v) end)
     Settings:Keybind("Menu Keybind", Keybind or Enum.KeyCode.M, function(v) Window:SetKeybind(v) end)
     Settings:Button("Unload UI", function() Window:Unload() end)
 
     RefreshConfigs()
 
-    -- force apply the default theme right away so everything renders with correct colors
-    Library:SetTheme("Yellow")
+    -- apply whichever theme is current (respects Config.Theme set above, defaults to Yellow)
+    do
+        for _, r in pairs(Registry) do
+            if r.Object and r.Object.Parent then
+                pcall(function() r.Object[r.Property] = CurrentTheme[r.Type] end)
+            end
+        end
+        for _, fn in pairs(ThemeListeners) do pcall(fn) end
+    end
 
     return Window
 end
