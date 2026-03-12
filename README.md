@@ -147,28 +147,6 @@ The left vertical bar and border color match the notification type. The countdow
 
 ---
 
-## ⌨️ Keybind
-
-Press the keybind (default `M`) to show or hide the UI. The animation fades and scales — press it fast and it snaps instantly, no delay.
-
-You can change it in the Settings tab or call:
-```lua
-Window:SetKeybind(Enum.KeyCode.RightShift)
-```
-
----
-
-## 🗑️ Unload
-
-Plays a fade-out animation then destroys the UI completely.
-```lua
-Window:Unload()
--- or
-Window:Destroy()  -- same thing
-```
-
----
-
 ## ⚙️ Settings Tab
 
 Added automatically. Options inside:
@@ -221,4 +199,4 @@ print(Library.Flags["Fly Key"])      -- key name string
 
 ---
 
-Made by **m0dzn** 🖤
+
