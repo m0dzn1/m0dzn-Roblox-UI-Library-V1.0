@@ -9,7 +9,7 @@
 ]]
 
 print([[
-script loaded
+script loaded.
  ███╗   ███╗   ██████╗   ██████╗   ███████╗  ███╗   ██╗
  ████╗ ████║  ██╔═████╗  ██╔══██╗  ╚══███╔╝  ████╗  ██║
  ██╔████╔██║  ██║██╔██║  ██║  ██║    ███╔╝   ██╔██╗ ██║
@@ -138,6 +138,37 @@ function Library:CreateWindow(Config)
     local Title = Config.Title or "m0dzn ui"
     local Keybind = Config.Keybind or Enum.KeyCode.M
 
+    -- custom theme via Config.Theme table
+    -- scripter can pass Theme = { Name="MyTheme", Main=RGB, Top=RGB, Text=RGB, Accent=RGB, Stroke=RGB }
+    -- OR Theme = "Yellow" to pick a built-in by name
+    if Config.Theme then
+        if type(Config.Theme) == "string" then
+            -- named built-in theme
+            if Themes[Config.Theme] then
+                CurrentTheme = Themes[Config.Theme]
+            end
+        elseif type(Config.Theme) == "table" then
+            -- custom RGB theme defined inline
+            local t = Config.Theme
+            local function toC3(v)
+                if type(v) == "table" then return Color3.fromRGB(v[1] or 0, v[2] or 0, v[3] or 0)
+                elseif type(v) == "userdata" then return v
+                else return Color3.new(0,0,0) end
+            end
+            local customTheme = {
+                Main   = t.Main   and toC3(t.Main)   or CurrentTheme.Main,
+                Top    = t.Top    and toC3(t.Top)    or CurrentTheme.Top,
+                Text   = t.Text   and toC3(t.Text)   or CurrentTheme.Text,
+                Accent = t.Accent and toC3(t.Accent) or CurrentTheme.Accent,
+                Stroke = t.Stroke and toC3(t.Stroke) or CurrentTheme.Stroke,
+            }
+            -- register into Themes table so :SetTheme works later if needed
+            local customName = t.Name or "Custom"
+            Themes[customName] = customTheme
+            CurrentTheme = customTheme
+        end
+    end
+
     Window.RootFolder = Title
     Window.ConfigFolder = Title .. "/Config"
     Window.CurrentConfig = ""
@@ -171,7 +202,8 @@ function Library:CreateWindow(Config)
     Stroke.Thickness = 1.5
     Stroke.Transparency = 0
     Stroke.Parent = MainFrame
-    -- NOT added to registry so theme changes don't override rainbow colors
+    AddToRegistry(Stroke, "Color", "Stroke")
+    -- thickness/transparency managed by rainbow loop
 
     local Gradient = Instance.new("UIGradient")
     Gradient.Parent = Stroke
@@ -182,7 +214,7 @@ function Library:CreateWindow(Config)
         local rot = 0
         while ScreenGui.Parent do
             if RainbowEnabled then
-                if Stroke.Thickness ~= 6 then Stroke.Thickness = 6; Stroke.Transparency = 0 end
+                if Stroke.Thickness ~= 6 then Stroke.Thickness = 6; Stroke.Transparency = 0; Stroke.Color = Color3.new(1,1,1) end
                 local t = tick()
                 if RainbowType == "Linear Gradient (Solid Rainbow)" then
                     Gradient.Enabled = true; Gradient.Rotation = 0
@@ -237,15 +269,17 @@ function Library:CreateWindow(Config)
                 end
             else
                 Gradient.Enabled = false
-                Stroke.Thickness = 0
-                Stroke.Transparency = 1
-                Stroke.Color = CurrentTheme.Stroke
+                if Stroke.Thickness ~= 1.5 then
+                    Stroke.Thickness = 1.5
+                    Stroke.Transparency = 0
+                    Stroke.Color = CurrentTheme.Stroke
+                end
             end
             RunService.RenderStepped:Wait()
         end
     end)
 
-    -- ── Topbar ──────────────────────────────────────────────────────────────
+    -- Topbar
     local Topbar = Instance.new("Frame")
     Topbar.Size = UDim2.new(1, 0, 0, 52)
     Topbar.BackgroundTransparency = 1
@@ -353,13 +387,13 @@ function Library:CreateWindow(Config)
         return {btn = Btn, setIcon = setIcon}
     end
 
-    -- ① Collapse (hide content, keep titlebar) — minus / square icons
+    -- Collapse (hide content, keep titlebar) — minus / square icons
     local CollapseBtn = MakeIconBtn("collapse_open", "–", -36)
 
-    -- ② Minimize/Maximize — outward/inward arrows
+    -- Minimize/Maximize — outward/inward arrows
     local MinBtn = MakeIconBtn("minimize_out", "↗", -70)
 
-    -- ③ Mobile hide/show button — floating pill that appears when GUI is hidden
+    -- Mobile hide/show button — floating pill that appears when GUI is hidden
     -- created later after we know openSize, referenced here
     -- floating pill button (mobile show/hide) — created here so DPI can resize it
     local FloatBtn = Instance.new("TextButton")
@@ -655,16 +689,11 @@ function Library:CreateWindow(Config)
             elseif notifType == "info"    then typeColor = Color3.fromRGB(0, 210, 220)
             end
 
-            -- scale notification size based on screen resolution so it fits any device
-            local vp = workspace.CurrentCamera.ViewportSize
-            local baseW = 1920; local baseH = 1080
-            local scaleX = vp.X / baseW; local scaleY = vp.Y / baseH
-            local scale  = math.clamp(math.min(scaleX, scaleY), 0.45, 1.4)
-            local nW     = math.floor(300 * scale)
-            local nH     = body and body ~= "" and math.floor(72 * scale) or math.floor(52 * scale)
-            local padX   = math.floor(16 * scale); local padY = math.floor(10 * scale)
-            local barH   = math.max(2, math.floor(2 * scale))
-            local spacing= math.floor((nH + 8) * scale)
+            -- fixed notification size so it's always readable on any screen
+            local nW   = 320
+            local nH   = body and body ~= "" and 76 or 54
+            local padX = 16; local padY = 10
+            local barH = 3
 
             -- use absolute pixel positions so notifs stay inside screen on any device
             local vp2 = workspace.CurrentCamera.ViewportSize
@@ -683,8 +712,8 @@ function Library:CreateWindow(Config)
             AddToRegistry(Notif, "BackgroundColor3", "Top")
 
             local NBar = Instance.new("Frame")
-            NBar.Size = UDim2.new(0, math.max(3, math.floor(4*scale)), 1, -math.floor(12*scale))
-            NBar.Position = UDim2.new(0, math.floor(6*scale), 0, math.floor(6*scale))
+            NBar.Size = UDim2.new(0, 4, 1, -12)
+            NBar.Position = UDim2.new(0, 6, 0, 6)
             NBar.BackgroundColor3 = typeColor; NBar.BorderSizePixel = 0; NBar.ZIndex = 102; NBar.Parent = Notif
             Instance.new("UICorner", NBar).CornerRadius = UDim.new(0, 3)
 
@@ -694,32 +723,32 @@ function Library:CreateWindow(Config)
             -- title row: bold label left, timer right
             local NTitle = Instance.new("TextLabel")
             NTitle.ZIndex = 101; NTitle.Text = title or ""
-            NTitle.Size = UDim2.new(1, -math.floor(60*scale), 0, math.floor(18*scale))
-            NTitle.Position = UDim2.new(0, math.floor(padX+8), 0, padY)
+            NTitle.Size = UDim2.new(1, -68, 0, 18)
+            NTitle.Position = UDim2.new(0, padX+8, 0, padY)
             NTitle.BackgroundTransparency = 1; NTitle.Parent = Notif
             NTitle.Font = Enum.Font.GothamBold
-            NTitle.TextSize = math.max(9, math.floor(12*scale))
+            NTitle.TextSize = 13
             NTitle.TextXAlignment = Enum.TextXAlignment.Left
             AddToRegistry(NTitle, "TextColor3", "Text")
 
             local NTimer = Instance.new("TextLabel")
             NTimer.ZIndex = 101; NTimer.Text = "3.0s"
-            NTimer.Size = UDim2.new(0, math.floor(44*scale), 0, math.floor(18*scale))
-            NTimer.Position = UDim2.new(1, -math.floor(50*scale), 0, padY)
+            NTimer.Size = UDim2.new(0, 46, 0, 18)
+            NTimer.Position = UDim2.new(1, -52, 0, padY)
             NTimer.BackgroundTransparency = 1; NTimer.Parent = Notif
             NTimer.Font = Enum.Font.GothamBold
-            NTimer.TextSize = math.max(8, math.floor(11*scale))
+            NTimer.TextSize = 11
             NTimer.TextXAlignment = Enum.TextXAlignment.Right
             NTimer.TextColor3 = typeColor
 
             -- description row: only shown when body has content
             local NText = Instance.new("TextLabel")
             NText.ZIndex = 101; NText.Text = body or ""
-            NText.Size = UDim2.new(1, -math.floor(padX*2+8), 0, math.floor(18*scale))
-            NText.Position = UDim2.new(0, math.floor(padX+8), 0, padY + math.floor(20*scale))
+            NText.Size = UDim2.new(1, -40, 0, 18)
+            NText.Position = UDim2.new(0, padX+8, 0, padY + 22)
             NText.BackgroundTransparency = 1; NText.Parent = Notif
             NText.Font = Enum.Font.GothamMedium
-            NText.TextSize = math.max(8, math.floor(11*scale))
+            NText.TextSize = 11
             NText.TextXAlignment = Enum.TextXAlignment.Left
             NText.TextTransparency = body and body ~= "" and 0.3 or 1
             AddToRegistry(NText, "TextColor3", "Text")
@@ -728,12 +757,12 @@ function Library:CreateWindow(Config)
             local NBadge = Instance.new("TextLabel")
             NBadge.ZIndex = 102
             NBadge.Text = notifType and (notifType:sub(1,1):upper()..notifType:sub(2)) or "Notif"
-            NBadge.Size = UDim2.new(0, math.floor(52*scale), 0, math.floor(16*scale))
-            NBadge.Position = UDim2.new(1, -math.floor(60*scale), 0, padY + math.floor(20*scale))
+            NBadge.Size = UDim2.new(0, 52, 0, 16)
+            NBadge.Position = UDim2.new(1, -60, 0, padY + 22)
             NBadge.BackgroundColor3 = typeColor; NBadge.BackgroundTransparency = 0.75
             NBadge.Parent = Notif
             NBadge.Font = Enum.Font.GothamBold
-            NBadge.TextSize = math.max(7, math.floor(9*scale))
+            NBadge.TextSize = 9
             NBadge.TextColor3 = typeColor
             Instance.new("UICorner", NBadge).CornerRadius = UDim.new(1, 0)
 
@@ -854,10 +883,18 @@ function Library:CreateWindow(Config)
         local Page = Instance.new("ScrollingFrame")
         Page.Size = UDim2.new(1, 0, 1, 0)
         Page.BackgroundTransparency = 1
-        Page.ScrollBarThickness = 2
+        Page.ScrollBarThickness = 3
         Page.ScrollBarImageColor3 = CurrentTheme.Accent
+        Page.ScrollBarImageTransparency = 0.4
+        -- transparent background behind scrollbar so no grey box
+        Page.ScrollingFrameImageColor3 = Color3.new(0,0,0)
         Page.Visible = false
         Page.Parent = PageContainer
+        -- equal padding on both sides so elements don't touch the scrollbar
+        local PagePad = Instance.new("UIPadding")
+        PagePad.PaddingRight = UDim.new(0, 8)
+        PagePad.PaddingLeft = UDim.new(0, 0)
+        PagePad.Parent = Page
 
         local PageList = Instance.new("UIListLayout")
         PageList.Padding = UDim.new(0, 8)
@@ -906,6 +943,7 @@ function Library:CreateWindow(Config)
         -- register a theme listener so this tab button and scrollbar update when theme changes
         table.insert(ThemeListeners, function()
             Page.ScrollBarImageColor3 = CurrentTheme.Accent
+                Page.ScrollBarImageTransparency = 0.4
             if TabBar.BackgroundTransparency == 0 then
                 -- this is the active tab so update its text and bg
                 TabBtn.TextColor3 = CurrentTheme.Text
