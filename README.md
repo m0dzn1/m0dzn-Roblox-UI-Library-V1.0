@@ -1,4 +1,4 @@
-# 🖤 m0dzn UI Library — V2.0
+# 🤑 m0dzn UI Library — V1.0
 
 A clean, dark, fully themeable UI library for Roblox scripts. Built with smooth animations, a real config system, live color picker, and 9 rainbow border modes. Default theme is **Red**.
 
