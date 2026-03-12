@@ -1,16 +1,10 @@
-# 🤑 m0dzn UI Library — V1.0
+# 🤑🤑 m0dzn UI Library — V1.0
 
-A clean, dark, fully themeable UI library for Roblox scripts. Built with smooth animations, a real config system, live color picker, and 9 rainbow border modes. Default theme is **Red**.
-
----
-
-## 📸 Preview
-
-![preview](https://raw.githubusercontent.com/m0dzn1/m0dzn-Roblox-UI-Library-V1.0/refs/heads/main/Example.png)
+A clean, fully themeable UI library for Roblox scripts. Smooth animations, real config system, live color picker, 9 rainbow border modes. Default theme is **Yellow**.
 
 ---
 
-## 🚀 Load the Library
+## 🚀 Load
 
 ```lua
 local Library = loadstring(game:HttpGet("YOUR_RAW_URL_HERE"))()
@@ -20,13 +14,89 @@ local Library = loadstring(game:HttpGet("YOUR_RAW_URL_HERE"))()
 
 ## 🪟 Create a Window
 
+The simplest setup:
+
 ```lua
 local Window = Library:CreateWindow({
-    Title = "My Hub",
-    Keybind = Enum.KeyCode.M  -- press M to show/hide
+    Title   = "My Hub",
+    Keybind = Enum.KeyCode.M,
 })
-
 local Main = Window:Tab("Main")
+```
+
+Both `Keybind` and `Theme` are optional — they just let you customise the experience for whoever uses your script.
+
+---
+
+## ⌨️ Custom Keybind
+
+Pass any `Enum.KeyCode` value as `Keybind`. The user can also change it live in the Settings tab, but whatever you put here is the starting keybind.
+
+```lua
+local Window = Library:CreateWindow({
+    Title   = "My Hub",
+    Keybind = Enum.KeyCode.RightShift,  -- change to any key
+})
+```
+
+Common choices: `Enum.KeyCode.M`, `Enum.KeyCode.RightShift`, `Enum.KeyCode.Insert`, `Enum.KeyCode.F4`
+
+---
+
+## 🎨 Custom Theme
+
+There are two ways to set a theme.
+
+### Option A — Pick a built-in
+
+Pass the name of any built-in theme as a string:
+
+```lua
+local Window = Library:CreateWindow({
+    Title  = "My Hub",
+    Theme  = "Purple",  -- Yellow · Red · Dark · Light · Purple · Blue · Green
+})
+```
+
+### Option B — Define your own colors
+
+Pass a table with RGB values. You only need to fill in the slots you want to change — anything you leave out falls back to the current default.
+
+```lua
+local Window = Library:CreateWindow({
+    Title  = "My Hub",
+    Theme  = {
+        Name   = "Ocean",           -- internal name, used by :SetTheme() later
+        Main   = {10,  18,  30},    -- window background
+        Top    = {18,  28,  45},    -- topbar + element tile backgrounds
+        Text   = {220, 235, 255},   -- all text labels
+        Accent = {60,  160, 255},   -- toggles ON, slider fill, accent bars
+        Stroke = {35,  55,  90},    -- borders, dividers, toggle OFF color
+    },
+})
+```
+
+You can also pass a real `Color3` instead of an RGB table if you prefer:
+
+```lua
+Accent = Color3.fromRGB(60, 160, 255),
+```
+
+### Color slot reference
+
+| Slot | What it colors |
+|------|---------------|
+| `Main` | Window background |
+| `Top` | Topbar + all element tile backgrounds |
+| `Text` | Every label, button text, dropdown text |
+| `Accent` | Toggle ON, slider fill + number, dropdown arrow, section labels, left accent bars |
+| `Stroke` | Toggle OFF, slider track, all border strokes, dividers |
+
+### Switch theme at runtime
+
+```lua
+Library:SetTheme("Purple")   -- switch to any built-in
+Library:SetTheme("Ocean")    -- or any theme you registered in Theme.Name
 ```
 
 ---
@@ -34,77 +104,62 @@ local Main = Window:Tab("Main")
 ## 📋 Elements
 
 ### Section
-Adds a small label to group things together.
 ```lua
 Main:Section("Combat")
 ```
 
 ### Label
-A single line of static text.
 ```lua
-Main:Label("walkspeed is currently active")
+Main:Label("walkspeed is active")
 ```
 
 ### Paragraph
-A text block with a title and a body. Auto-resizes.
 ```lua
-Main:Paragraph("About", "made by m0dzn. use the config tab to save your settings.")
+Main:Paragraph("About", "made by m0dzn.")
 ```
 
 ### Button
-Runs a function when clicked.
 ```lua
-Main:Button("Teleport Home", function()
-    -- your code here
-end)
+Main:Button("Teleport", function() end)
 ```
 
 ### Toggle
-An on/off switch. Perfect for loops and features.
 ```lua
 Main:Toggle("Auto Farm", false, function(State)
     getgenv().AutoFarm = State
-    while getgenv().AutoFarm do
-        task.wait(1)
-    end
 end)
 ```
 
 ### Slider
-Lets the user pick a number in a range.
+Click the number box on the right to type a value directly.
 ```lua
--- label, min, max, default, callback
 Main:Slider("WalkSpeed", 16, 500, 16, function(Value)
     game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = Value
 end)
 ```
 
 ### Dropdown
-A list where you pick one option.
 ```lua
 Main:Dropdown("Team", {"Red", "Blue", "Green"}, function(Option)
-    print("picked:", Option)
+    print(Option)
 end)
 ```
 
 ### Textbox
-A text input field.
 ```lua
-Main:Textbox("Player Name", "type here...", function(Text)
-    print("entered:", Text)
+Main:Textbox("Name", "type here...", function(Text)
+    print(Text)
 end)
 ```
 
 ### Keybind
-Lets the user rebind a key.
 ```lua
 Main:Keybind("Fly Key", Enum.KeyCode.F, function(Key)
-    print("new key:", Key.Name)
+    print(Key.Name)
 end)
 ```
 
 ### Value
-A small inline number input.
 ```lua
 Main:Value("Hitbox Size", 10, function(Value)
     _G.HitboxSize = tonumber(Value)
@@ -112,12 +167,10 @@ end)
 ```
 
 ### Color Picker
-An HSV picker with a saturation/value square, rainbow hue bar, and R G B inputs. Returns a real `Color3` so you can use it directly.
+RGB inputs update in realtime while dragging. Touch supported.
 ```lua
 Main:ColorPicker("ESP Color", Color3.fromRGB(255, 100, 100), function(Color)
     _G.ESPColor = Color
-    -- use like: Part.Color = Color
-    -- or: Part.BrickColor = BrickColor.new(Color)
 end)
 ```
 
@@ -125,78 +178,69 @@ end)
 
 ## 🔔 Notifications
 
-Notifications slide in from the bottom right with a fade, a colored left bar, a countdown timer, and a progress bar at the bottom.
+Stack from the bottom-right corner, pushing older ones up. Each has a title, optional body, colored left bar, countdown timer, and a progress bar.
 
-| Type | Color | Call |
-|------|-------|------|
-| Default | 🩶 Light Grey | `Window:Notification("Title", "Body")` |
+| Type | Color | Example |
+|------|-------|---------|
+| Default | 🩶 Grey | `Window:Notification("Title", "Body")` |
 | Success | 🟢 Green | `Window:Notification("Title", "Body", "success")` |
 | Warning | 🟡 Yellow | `Window:Notification("Title", "Body", "warning")` |
 | Error | 🔴 Red | `Window:Notification("Title", "Body", "error")` |
 | Info | 🩵 Cyan | `Window:Notification("Title", "Body", "info")` |
 
+Short 2-arg style still works:
 ```lua
-Window:Notification("Saved", "Config saved successfully", "success")
-Window:Notification("Watch out", "High ping detected", "warning")
-Window:Notification("Error", "Failed to load config", "error")
-Window:Notification("Info", "Script version 2.0", "info")
-Window:Notification("Hey", "Something just happened")  -- default grey
+Window:Notification("Done", "success")
 ```
 
-The left vertical bar and border color match the notification type. The countdown in the top right corner counts from `3.0` down to `0.0` in real time.
+Notifications fire automatically on every element action.
+
+---
+
+## 🪟 Window Controls (Topbar)
+
+| Button | Action |
+|--------|--------|
+| `—` / `□` | Collapse — hides content, keeps the titlebar |
+| `↗` / `↙` | Minimize — shrinks to a small bar, click to restore |
+| `✕` | Close — hides the window, shows the floating pill |
+
+Icons are loaded from SVG files written to `m0dzn_icons/` on first run. Falls back to Unicode if the executor doesn't support `file://` URIs.
+
+---
+
+## 📱 Floating Pill
+
+Shows up after closing the window. Draggable anywhere on screen (PC + mobile touch). Tap to reopen with an animation. Has a small `✕` to fully unload.
 
 ---
 
 ## ⚙️ Settings Tab
 
-Added automatically. Options inside:
-
-- 🌈 **Rainbow Edge** — animated RGB border around the window
-- 🎨 **Rainbow Type** — 9 animation styles (cycling, gradient, pulse, pastel, etc.)
-- 🖌️ **Theme** — full real-time color scheme switch
-- ⌨️ **Menu Keybind** — change the show/hide key
-- ❌ **Unload UI** — closes and removes the UI
-
-### Themes
-`Red` (default) · `Dark` · `Light` · `Purple` · `Blue` · `Yellow` · `Green`
-
-### Rainbow Modes
-1. Linear Gradient
-2. Animated / Cycling
-3. Smooth Fading Gradient
-4. Step / Band
-5. Rainbow Pulse
-6. Radial
-7. Neon / Glowing
-8. Pastel
-9. Vertical / Horizontal Fade
+- 🌈 **Rainbow Edge** — animated RGB border (off = normal border)
+- 🎨 **Rainbow Type** — 9 styles
+- 🚀 **Rainbow Speed** — 1–100 (10 = default)
+- 🖌️ **Theme** — live theme switcher
+- ⌨️ **Menu Keybind** — change show/hide key
+- ❌ **Unload UI**
 
 ---
 
 ## 💾 Config Tab
 
-Added automatically. Saves and loads all toggle, slider, dropdown, keybind, and value states.
+Type a name  **Save Config**. Later: pick from dropdown  **Load Config** or **Delete Config**. Dropdown resets in realtime after delete.
 
-1. **Config Name** — type the name you want to save as
-2. **Select Config** — pick a saved config from the dropdown
-3. **Refresh List** — refreshes the dropdown with your saved files
-4. **Save Config** — writes current settings to a file
-5. **Load Config** — loads the file and updates every element live
-6. **Delete Config** — removes the selected file
+Files at: `YourTitle/Config/name.json`
 
 ---
 
 ## 📦 Flags
 
-Every element writes its current value to `Library.Flags` so you can read it from anywhere.
-
 ```lua
-print(Library.Flags["WalkSpeed"])    -- number
-print(Library.Flags["Auto Farm"])    -- true/false
-print(Library.Flags["ESP Color"])    -- Color3
-print(Library.Flags["Fly Key"])      -- key name string
+Library.Flags["WalkSpeed"]  -- number
+Library.Flags["Auto Farm"]  -- bool
+Library.Flags["ESP Color"]  -- Color3
+Library.Flags["Fly Key"]    -- string
 ```
 
 ---
-
-
