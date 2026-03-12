@@ -230,8 +230,6 @@ Shows up after closing the window. Draggable anywhere on screen (PC + mobile tou
 
 Type a name  **Save Config**. Later: pick from dropdown  **Load Config** or **Delete Config**. Dropdown resets in realtime after delete.
 
-Files at: `YourTitle/Config/name.json`
-
 ---
 
 ## 📦 Flags
