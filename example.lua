@@ -1,5 +1,5 @@
 -- load the m0dzn v1 ui library
-local m0dznv1 = loadstring(game:HttpGet("https://raw.githubusercontent.com/m0dzn1/m0dzn-Roblox-UI-Library-V1.0/refs/heads/main/m0dzn-ui-lib-V1.lua"))()
+local m0dznv1 = loadstring(game:HttpGet("https://raw.githubusercontent.com/m0dzn1/m0dzn-Roblox-UI-Library-V1.0/refs/heads/main/m0dzn-ui-lib-v1.lua"))()
 
 local Window = m0dznv1:CreateWindow({
     Title = "TEST HUB",
