@@ -9,9 +9,8 @@
 ]]
 
 print([[
-script loaded.
+script loaded
 ]])
-
 local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
@@ -1014,7 +1013,8 @@ function Library:CreateWindow(Config)
             return F
         end
 
-        function Elements:Button(text, callback)
+        -- silent = true skips the automatic InternalNotif on click (used by config tab buttons)
+        function Elements:Button(text, callback, silent)
             local Btn = Instance.new("TextButton")
             Btn.Size = UDim2.new(1, 0, 0, 44)
             Btn.Text = "    " .. text
@@ -1042,8 +1042,12 @@ function Library:CreateWindow(Config)
                 Tween(Btn, {Size = UDim2.new(0.97, 0, 0, 40)}, 0.1)
                 task.wait(0.1)
                 Tween(Btn, {Size = UDim2.new(1, 0, 0, 44)}, 0.15)
+                -- fire internal notif FIRST so if callback calls Window:Notification it gets killed
+                -- silent=true skips this (used by config tab so it can control its own notifs)
+                if not silent then
+                    InternalNotif(text, nil, "success")
+                end
                 callback()
-                InternalNotif(text, "Activated", "success")
             end)
             Btn.MouseEnter:Connect(function() Tween(Btn, {BackgroundTransparency = 0.0}, 0.18) end)
             Btn.MouseLeave:Connect(function() Tween(Btn, {BackgroundTransparency = 0.04}, 0.18) end)
@@ -1095,8 +1099,10 @@ function Library:CreateWindow(Config)
             end
 
             ClickBtn.MouseButton1Click:Connect(function()
-                Enabled = not Enabled; Update()
-                InternalNotif(text, Enabled and "Enabled" or "Disabled", Enabled and "success" or "error")
+                Enabled = not Enabled
+                -- fire notif before Update so if callback has Window:Notification it kills this one
+                InternalNotif(text, nil, Enabled and "success" or "error")
+                Update()
             end)
             ConfigObjects[text] = {Type = "Toggle", Value = Enabled, Set = function(val)
                 Enabled = val; Library.Flags[text] = val
@@ -1244,7 +1250,7 @@ function Library:CreateWindow(Config)
                     if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then
                         if sliding then
                             sliding = false
-                            InternalNotif(text, tostring(Val), "info")
+                            InternalNotif(text, nil, "info")
                         end
                     end
                 end)
@@ -1314,11 +1320,12 @@ function Library:CreateWindow(Config)
                 Dropped = false; Selected = opt
                 Lbl.Text = text .. "   —   " .. opt
                 Library.Flags[text] = opt; ConfigObjects[text].Value = opt
+                -- fire notif before callback so scripter's Window:Notification kills this one
+                InternalNotif(text, nil, "info")
                 callback(opt)
                 Tween(Container, {Size = UDim2.new(1, 0, 0, 0)}, 0.28)
                 Tween(Icon, {Rotation = 0}, 0.28)
                 task.wait(0.3); Container.Visible = false
-                InternalNotif(text, opt, "info")
             end
 
             local OptionButtons = {}
@@ -1406,10 +1413,10 @@ function Library:CreateWindow(Config)
                 Tween(BoxStroke, {Transparency = 0.75}, 0.2)
                 Library.Flags[text] = Box.Text
                 if ConfigObjects[text] then ConfigObjects[text].Value = Box.Text end
-                callback(Box.Text)
                 if Box.Text ~= "" then
-                    InternalNotif(text, Box.Text, "info")
+                    InternalNotif(text, nil, "info")
                 end
+                callback(Box.Text)
             end)
             ConfigObjects[text] = {Type = "Textbox", Value = "", Set = function(val)
                 Box.Text = val; Library.Flags[text] = val; callback(val)
@@ -1446,8 +1453,8 @@ function Library:CreateWindow(Config)
                 if input.KeyCode.Name ~= "Unknown" then
                     Key = input.KeyCode; KeyLabel.Text = Key.Name
                     Library.Flags[text] = Key.Name; ConfigObjects[text].Value = Key.Name
+                    InternalNotif(text, nil, "info")
                     callback(Key)
-                    InternalNotif("Keybind", "Changed to " .. Key.Name)
                 else
                     KeyLabel.Text = Key.Name
                 end
@@ -1717,10 +1724,7 @@ function Library:CreateWindow(Config)
                 else
                     Tween(Panel, {Size = UDim2.new(1, 0, 0, 0)}, 0.28)
                     task.wait(0.3); Panel.Visible = false
-                    local r = math.floor(Color.R * 255)
-                    local g = math.floor(Color.G * 255)
-                    local b = math.floor(Color.B * 255)
-                    InternalNotif(text, r..", "..g..", "..b, "info")
+                    InternalNotif(text, nil, "info")
                 end
             end)
 
@@ -1770,46 +1774,36 @@ function Library:CreateWindow(Config)
         Dropdown.Refresh(ConfigList)
     end
 
-    ConfigTab:Button("Refresh List", function() RefreshConfigs() end)
+    ConfigTab:Button("Refresh List", function() RefreshConfigs() end, true)
     ConfigTab:Button("Save Config", function()
-        if ConfigName == "" then InternalNotif("Config", "Enter a name first", "warning"); return end
+        if ConfigName == "" then return end
         Library:SaveConfig(ConfigName, Window.ConfigFolder)
         RefreshConfigs()
-        InternalNotif("Config", ConfigName .. " Saved", "success")
-    end)
+    end, true)
 
     ConfigTab:Button("Load Config", function()
-        if Window.CurrentConfig == "" or Window.CurrentConfig == "None" then
-            InternalNotif("Config", "Select a config first", "warning"); return
-        end
+        if Window.CurrentConfig == "" or Window.CurrentConfig == "None" then return end
 
         local name = Window.CurrentConfig
         local path = ConfigPaths[name] or (Window.ConfigFolder .. "/" .. name .. ".json")
 
-        InternalNotif("Config", "Loading " .. name .. " Config", "info")
+        -- "Loading {name} Config" — default grey notif (no type)
+        SpawnNotif("Loading " .. name .. " Config", nil, nil, "internal")
         task.wait(0.1)
 
         local ok, reason = Library:LoadConfig(path)
 
+        task.wait(2.8)
         if ok then
-            task.wait(2.8)
-            InternalNotif("Config", name .. " Config Loaded", "success")
-        elseif reason == "file_missing" then
-            task.wait(2.8)
-            InternalNotif("Config", "Error To Load " .. name .. " Config", "error")
-        elseif reason == "bad_data" then
-            task.wait(2.8)
-            InternalNotif("Config", "Error To Load " .. name .. " Config", "error")
-        elseif reason == "partial_load" then
-            task.wait(2.8)
-            InternalNotif("Config", "Error To Load " .. name .. " Config", "error")
+            -- "{name} Config Loaded" — green success notif
+            SpawnNotif(name .. " Config Loaded", nil, "success", "internal")
+        else
+            SpawnNotif("Failed to load " .. name, nil, "error", "internal")
         end
-    end)
+    end, true)
 
     ConfigTab:Button("Delete Config", function()
-        if Window.CurrentConfig == "" or Window.CurrentConfig == "None" then
-            InternalNotif("Config", "Select a config first", "warning"); return
-        end
+        if Window.CurrentConfig == "" or Window.CurrentConfig == "None" then return end
         local name = Window.CurrentConfig
         local path = ConfigPaths[name] or (Window.ConfigFolder .. "/" .. name .. ".json")
         if isfile(path) then
@@ -1819,11 +1813,8 @@ function Library:CreateWindow(Config)
             if ConfigObjects["Select Config"] and ConfigObjects["Select Config"].Reset then
                 ConfigObjects["Select Config"].Reset()
             end
-            InternalNotif("Config", name .. " Deleted", "info")
-        else
-            InternalNotif("Config", "Config file not found", "error")
         end
-    end)
+    end, true)
 
     local Settings = Window:Tab("Settings")
     Settings:Section("appearance")
@@ -1843,7 +1834,7 @@ function Library:CreateWindow(Config)
     end
     local ThemeDropdown = Settings:Dropdown("Theme", themeList, function(v) Library:SetTheme(v) end)
     Settings:Keybind("Menu Keybind", Keybind or Enum.KeyCode.M, function(v) Window:SetKeybind(v) end)
-    Settings:Button("Unload UI", function() Window:Unload() end)
+    Settings:Button("Unload UI", function() Window:Unload() end, true)
 
     RefreshConfigs()
 
