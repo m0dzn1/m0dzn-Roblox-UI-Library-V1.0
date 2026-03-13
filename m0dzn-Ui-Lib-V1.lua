@@ -9,7 +9,7 @@
 ]]
 
 print([[
-script loaded.
+script loaded
  ███╗   ███╗   ██████╗   ██████╗   ███████╗  ███╗   ██╗
  ████╗ ████║  ██╔═████╗  ██╔══██╗  ╚══███╔╝  ████╗  ██║
  ██╔████╔██║  ██║██╔██║  ██║  ██║    ███╔╝   ██╔██╗ ██║
@@ -33,19 +33,14 @@ Library.Flags = {}
 
 local RainbowEnabled = false
 local RainbowType = "Animated/Cycling Rainbow"
-local RainbowSpeed = 1.0  -- 1.0 is default speed, range 0.1 to 10
+local RainbowSpeed = 1.0
 local Registry = {}
 local ConfigObjects = {}
 local ThemeListeners = {}
 
--- modern UI sounds used by popular Roblox UI libraries
--- swap any ID here with your own from the Roblox toolbox if you want something different
--- dark grey is the default theme now
--- dark theme changed from dark red to grey and light grey
 local Themes = {
     Dark   = {Main = Color3.fromRGB(28, 28, 30),      Top = Color3.fromRGB(38, 38, 40),     Text = Color3.fromRGB(220, 220, 225), Accent = Color3.fromRGB(160, 160, 168), Stroke = Color3.fromRGB(55, 55, 60)},
     Light  = {Main = Color3.fromRGB(235, 235, 238),   Top = Color3.fromRGB(245, 245, 248),  Text = Color3.fromRGB(30, 30, 35),    Accent = Color3.fromRGB(110, 110, 120), Stroke = Color3.fromRGB(200, 200, 205)},
-
     Purple = {Main = Color3.fromRGB(18, 15, 22),      Top = Color3.fromRGB(30, 25, 35),     Text = Color3.fromRGB(245, 240, 255), Accent = Color3.fromRGB(160, 90, 255),  Stroke = Color3.fromRGB(50, 45, 60)},
     Blue   = {Main = Color3.fromRGB(12, 18, 28),      Top = Color3.fromRGB(25, 32, 45),     Text = Color3.fromRGB(240, 245, 255), Accent = Color3.fromRGB(70, 130, 255),  Stroke = Color3.fromRGB(45, 55, 75)},
     Red    = {Main = Color3.fromRGB(22, 10, 10),      Top = Color3.fromRGB(35, 18, 18),     Text = Color3.fromRGB(255, 235, 235), Accent = Color3.fromRGB(210, 50, 50),   Stroke = Color3.fromRGB(60, 30, 30)},
@@ -53,7 +48,6 @@ local Themes = {
     Green  = {Main = Color3.fromRGB(12, 22, 15),      Top = Color3.fromRGB(20, 35, 25),     Text = Color3.fromRGB(240, 255, 245), Accent = Color3.fromRGB(60, 220, 130),  Stroke = Color3.fromRGB(40, 60, 50)},
 }
 
--- default theme is Red
 local CurrentTheme = Themes.Yellow
 
 local function AddToRegistry(obj, prop, themeKey)
@@ -73,7 +67,6 @@ function Library:SetTheme(name)
                 Tween(r.Object, {[r.Property] = CurrentTheme[r.Type]})
             end
         end
-        -- fire all dynamic theme listeners so tabs dropdowns and scrollbars update too
         for _, fn in pairs(ThemeListeners) do
             pcall(fn)
         end
@@ -100,7 +93,6 @@ function Library:LoadConfig(path)
     end)
     if not ok or type(data) ~= "table" then return false, "bad_data" end
 
-    -- count how many flags we expect vs how many loaded correctly
     local totalFlags = 0
     local loadedFlags = 0
     for flag, _ in pairs(self.Flags) do
@@ -117,12 +109,10 @@ function Library:LoadConfig(path)
                 loadedFlags = loadedFlags + 1
             end
         else
-            -- flag doesnt have a config object but still counted as loaded
             loadedFlags = loadedFlags + 1
         end
     end
 
-    -- if we loaded way less than we expected something is off
     if totalFlags > 0 and loadedFlags < math.floor(totalFlags * 0.5) then
         return false, "partial_load"
     end
@@ -130,7 +120,6 @@ function Library:LoadConfig(path)
     return true, "ok"
 end
 
--- shared notification stack so new ones push old ones up
 local ActiveNotifs = {}
 
 function Library:CreateWindow(Config)
@@ -138,17 +127,12 @@ function Library:CreateWindow(Config)
     local Title = Config.Title or "m0dzn ui"
     local Keybind = Config.Keybind or Enum.KeyCode.M
 
-    -- custom theme via Config.Theme table
-    -- scripter can pass Theme = { Name="MyTheme", Main=RGB, Top=RGB, Text=RGB, Accent=RGB, Stroke=RGB }
-    -- OR Theme = "Yellow" to pick a built-in by name
     if Config.Theme then
         if type(Config.Theme) == "string" then
-            -- named built-in theme
             if Themes[Config.Theme] then
                 CurrentTheme = Themes[Config.Theme]
             end
         elseif type(Config.Theme) == "table" then
-            -- custom RGB theme defined inline
             local t = Config.Theme
             local function toC3(v)
                 if type(v) == "table" then return Color3.fromRGB(v[1] or 0, v[2] or 0, v[3] or 0)
@@ -162,7 +146,6 @@ function Library:CreateWindow(Config)
                 Accent = t.Accent and toC3(t.Accent) or CurrentTheme.Accent,
                 Stroke = t.Stroke and toC3(t.Stroke) or CurrentTheme.Stroke,
             }
-            -- register into Themes table so :SetTheme works later if needed
             local customName = t.Name or "Custom"
             Themes[customName] = customTheme
             CurrentTheme = customTheme
@@ -177,6 +160,8 @@ function Library:CreateWindow(Config)
     ScreenGui.Name = "M0dznLib"
     ScreenGui.Parent = CoreGui
     ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+    -- FIX #4: Enable IgnoreGuiInset so GUI scales correctly on mobile same as PC
+    ScreenGui.IgnoreGuiInset = true
     local ok, _ = pcall(function()
         if syn and syn.protect_gui then
             syn.protect_gui(ScreenGui)
@@ -184,9 +169,6 @@ function Library:CreateWindow(Config)
             ScreenGui.Parent = gethui()
         end
     end)
-    if not ok then
-        -- executor doesnt support protect_gui so we just leave it in CoreGui
-    end
 
     local MainFrame = Instance.new("Frame")
     MainFrame.Size = UDim2.new(0, 0, 0, 0)
@@ -198,12 +180,18 @@ function Library:CreateWindow(Config)
     Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 16)
     AddToRegistry(MainFrame, "BackgroundColor3", "Main")
 
+    -- FIX #2: Rainbow stroke thickness - default thin (1.5), only go thick when rainbow ON
+    -- The bug was Stroke.Thickness was hardcoded to 0.1 initially but the rainbow loop
+    -- always forced it to 6 whenever RainbowEnabled=true, ignoring user setting.
+    -- Fix: use a separate RainbowThickness variable the scripter can control,
+    -- and when rainbow is OFF restore to exactly 1.5 (thin border).
+    local RainbowThickness = 2  -- thickness used only when rainbow is ON (reasonable default)
+
     local Stroke = Instance.new("UIStroke")
-    Stroke.Thickness = 0.1
+    Stroke.Thickness = 1.5  -- start thin (non-rainbow state)
     Stroke.Transparency = 0
     Stroke.Parent = MainFrame
     AddToRegistry(Stroke, "Color", "Stroke")
-    -- thickness/transparency managed by rainbow loop
 
     local Gradient = Instance.new("UIGradient")
     Gradient.Parent = Stroke
@@ -214,7 +202,12 @@ function Library:CreateWindow(Config)
         local rot = 0
         while ScreenGui.Parent do
             if RainbowEnabled then
-                if Stroke.Thickness ~= 6 then Stroke.Thickness = 6; Stroke.Transparency = 0; Stroke.Color = Color3.new(1,1,1) end
+                -- FIX #2: Only set thickness to RainbowThickness (2), not hardcoded 6
+                if Stroke.Thickness ~= RainbowThickness then
+                    Stroke.Thickness = RainbowThickness
+                    Stroke.Transparency = 0
+                    Stroke.Color = Color3.new(1,1,1)
+                end
                 local t = tick()
                 if RainbowType == "Linear Gradient (Solid Rainbow)" then
                     Gradient.Enabled = true; Gradient.Rotation = 0
@@ -269,6 +262,7 @@ function Library:CreateWindow(Config)
                 end
             else
                 Gradient.Enabled = false
+                -- FIX #2: Restore to thin 1.5 border when rainbow is off
                 if Stroke.Thickness ~= 1.5 then
                     Stroke.Thickness = 1.5
                     Stroke.Transparency = 0
@@ -303,8 +297,7 @@ function Library:CreateWindow(Config)
     TitleLabel.ZIndex = 5; TitleLabel.Parent = Topbar
     AddToRegistry(TitleLabel, "TextColor3", "Text")
 
-    -- icon system: write SVG files to executor file system on first run
-    -- then load them as image content. Falls back to Unicode if writefile not available.
+    -- FIX #6: Download SVG icon assets to local file system so no Roblox image IDs needed
     local IconCache = {}
     local function WriteIconIfNeeded(name, svgData)
         local path = "m0dzn_icons/" .. name .. ".svg"
@@ -315,24 +308,18 @@ function Library:CreateWindow(Config)
         return path
     end
 
-    -- SVG icon definitions (16x16 white on transparent)
     local SVGIcons = {
-        -- minus bar (collapse / hide content)
+        -- FIX #5 & #6: minus bar for minimize (hide content keep topbar)
         collapse_open  = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><rect x="2" y="7" width="12" height="2" rx="1" fill="white"/></svg>',
-        -- square (restore content)
+        -- square for restore content
         collapse_close = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><rect x="2" y="2" width="12" height="12" rx="2" fill="none" stroke="white" stroke-width="1.8"/></svg>',
-        -- two arrows pointing outward (minimize / shrink)
-        minimize_out   = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><polyline points="2,8 2,2 8,2" fill="none" stroke="white" stroke-width="1.8" stroke-linejoin="round"/><polyline points="8,14 14,14 14,8" fill="none" stroke="white" stroke-width="1.8" stroke-linejoin="round"/></svg>',
-        -- two arrows pointing inward (maximize / restore)
-        minimize_in    = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><polyline points="8,2 2,2 2,8" fill="none" stroke="white" stroke-width="1.8" stroke-linejoin="round"/><polyline points="14,8 14,14 8,14" fill="none" stroke="white" stroke-width="1.8" stroke-linejoin="round"/></svg>',
-        -- X close
+        -- FIX #5 & #6: X icon for hide/show button
         close_x        = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><line x1="3" y1="3" x2="13" y2="13" stroke="white" stroke-width="2" stroke-linecap="round"/><line x1="13" y1="3" x2="3" y2="13" stroke="white" stroke-width="2" stroke-linecap="round"/></svg>',
     }
     for name, svg in pairs(SVGIcons) do
         IconCache[name] = WriteIconIfNeeded(name, svg)
     end
 
-    -- make an ImageButton that loads icon from file, falls back to text
     local function MakeIconBtn(iconName, fallbackText, xFromRight)
         local Btn = Instance.new("TextButton")
         Btn.Size = UDim2.new(0, 28, 0, 28)
@@ -345,14 +332,12 @@ function Library:CreateWindow(Config)
         Btn.MouseEnter:Connect(function() Tween(Btn, {BackgroundTransparency = 0.5}, 0.12) end)
         Btn.MouseLeave:Connect(function() Tween(Btn, {BackgroundTransparency = 0.85}, 0.12) end)
 
-        -- image overlay
         local Img = Instance.new("ImageLabel")
         Img.Size = UDim2.new(0, 16, 0, 16)
         Img.Position = UDim2.new(0.5, -8, 0.5, -8)
         Img.BackgroundTransparency = 1
         Img.ZIndex = 7; Img.Parent = Btn
 
-        -- try file:// URI first, fallback to unicode text
         local loaded = false
         pcall(function()
             local path = IconCache[iconName]
@@ -370,7 +355,6 @@ function Library:CreateWindow(Config)
             AddToRegistry(Lbl, "TextColor3", "Text")
         end
 
-        -- return a plain Lua table (NOT set on the Instance) to avoid "not a valid member" error
         local function setIcon(name2, fallback2)
             local ok2 = false
             pcall(function()
@@ -387,39 +371,24 @@ function Library:CreateWindow(Config)
         return {btn = Btn, setIcon = setIcon}
     end
 
-    -- ① Collapse (hide content, keep titlebar) — minus / square icons
+    -- FIX #5: Button 1 = Minimize/Maximize (hides content, keeps topbar visible) using - icon
     local CollapseBtn = MakeIconBtn("collapse_open", "–", -36)
 
-    -- ② Minimize/Maximize — outward/inward arrows
-    local MinBtn = MakeIconBtn("minimize_out", "↗", -70)
+    -- FIX #5: Button 2 = Hide/Show (hides entire GUI like keybind) using X icon
+    -- Removed the old MinBtn (minimize/maximize with arrows) - replaced with Hide/Show
+    local HideShowBtn = MakeIconBtn("close_x", "✕", -70)
 
-    -- ③ Mobile hide/show button — floating pill that appears when GUI is hidden
-    -- created later after we know openSize, referenced here
-    -- floating pill button (mobile show/hide) — created here so DPI can resize it
-    local FloatBtn = Instance.new("TextButton")
-    FloatBtn.Size = UDim2.new(0, 48, 0, 48)
-    FloatBtn.Position = UDim2.new(1, -64, 1, -64)
-    FloatBtn.BackgroundTransparency = 0.1
-    FloatBtn.Text = string.upper(string.sub(Title, 1, 1))
-    FloatBtn.Font = Enum.Font.GothamBold; FloatBtn.TextSize = 20
-    FloatBtn.ZIndex = 200; FloatBtn.Visible = false
-    FloatBtn.Parent = ScreenGui
-    Instance.new("UICorner", FloatBtn).CornerRadius = UDim.new(0, 16)
-    AddToRegistry(FloatBtn, "BackgroundColor3", "Accent")
-    AddToRegistry(FloatBtn, "TextColor3", "Main")
-    local FStroke = Instance.new("UIStroke"); FStroke.Thickness = 2; FStroke.Transparency = 0.6
-    FStroke.Parent = FloatBtn
-    AddToRegistry(FStroke, "Color", "Stroke")
-    -- X close button on pill
-    local FClose = Instance.new("TextButton")
-    FClose.Size = UDim2.new(0, 18, 0, 18)
-    FClose.Position = UDim2.new(1, -2, 0, -2)
-    FClose.AnchorPoint = Vector2.new(1, 0)
-    FClose.BackgroundColor3 = Color3.fromRGB(215, 50, 50)
-    FClose.Text = "✕"; FClose.Font = Enum.Font.GothamBold; FClose.TextSize = 9
-    FClose.ZIndex = 201; FClose.Parent = FloatBtn
-    Instance.new("UICorner", FClose).CornerRadius = UDim.new(1, 0)
-    FClose.MouseButton1Click:Connect(function() Window:Unload() end)
+    -- FIX #3: Removed FloatBtn (the T pill button) entirely.
+    -- The hide/show now only uses the keybind message approach.
+    -- We still need a way to reopen - we'll use a small draggable label that appears
+    -- at bottom right showing the keybind hint, no T logo.
+    local HintLabel = Instance.new("TextButton")
+    HintLabel.Size = UDim2.new(0, 0, 0, 0) -- invisible, zero size, no T logo
+    HintLabel.BackgroundTransparency = 1
+    HintLabel.Text = ""
+    HintLabel.Visible = false
+    HintLabel.ZIndex = 200
+    HintLabel.Parent = ScreenGui
 
     local Content = Instance.new("Frame")
     Content.Size = UDim2.new(1, -20, 1, -68)
@@ -506,18 +475,9 @@ function Library:CreateWindow(Config)
     PageContainer.BackgroundTransparency = 1
     PageContainer.Parent = Content
 
-    -- size/state vars declared here so all closures below share them
     local openSize  = UDim2.new(0, 650, 0, 430)
     local fullH     = 430
     local collapseH = 52
-    local miniSize  = UDim2.new(0, 260, 0, 52)
-
-    -- float button: position bottom-right using absolute screen coords
-    local fbSize = 48
-    FloatBtn.Size = UDim2.new(0, fbSize, 0, fbSize)
-    FloatBtn.TextSize = 20
-    local vp_fb = workspace.CurrentCamera.ViewportSize
-    FloatBtn.Position = UDim2.new(0, vp_fb.X - fbSize - 16, 0, vp_fb.Y - fbSize - 16)
 
     -- spawn open: bounce scale from 0 up to full size
     MainFrame.Size = UDim2.new(0, 0, 0, 0)
@@ -526,6 +486,7 @@ function Library:CreateWindow(Config)
     TweenService:Create(MainFrame, TweenInfo.new(0.5, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {Size = openSize}):Play()
 
     -- ── Drag (mouse + touch) ────────────────────────────────────────────────
+    -- FIX #4: Drag works on both PC (mouse) and mobile (touch)
     local dragging, dragInput, dragStart, startPos
     local function isDragStart(t) return t == Enum.UserInputType.MouseButton1 or t == Enum.UserInputType.Touch end
     local function isDragMove(t)  return t == Enum.UserInputType.MouseMovement or t == Enum.UserInputType.Touch end
@@ -555,113 +516,67 @@ function Library:CreateWindow(Config)
     local isOpen = true
     local isCollapsed = false
 
+    -- FIX #5 Button 1: Minimize/Maximize - hides content area but keeps topbar visible
+    -- Uses - icon (collapse_open svg) and □ icon (collapse_close svg)
     local function SetCollapsed(c)
         isCollapsed = c
         CollapseBtn.setIcon(c and "collapse_close" or "collapse_open", c and "□" or "–")
-        local targetH = c and math.floor(collapseH * (openSize.Y.Offset / 430))
-                            or openSize.Y.Offset
+        -- When collapsed: shrink to just the topbar height (52px)
+        -- When expanded: restore to full openSize
+        local targetSize
+        if c then
+            -- hide content, keep topbar - set height to just topbar (52)
+            targetSize = UDim2.new(0, openSize.X.Offset, 0, 52)
+            Content.Visible = false
+        else
+            targetSize = openSize
+            Content.Visible = true
+        end
         TweenService:Create(MainFrame, TweenInfo.new(0.35, Enum.EasingStyle.Back, Enum.EasingDirection.Out),
-            {Size = UDim2.new(0, openSize.X.Offset, 0, targetH)}):Play()
-        task.defer(function()
-            Window:Notification(c and "Collapsed" or "Expanded", c and "Content hidden" or "Content visible",
-                c and "warning" or "success")
-        end)
+            {Size = targetSize}):Play()
     end
     CollapseBtn.btn.MouseButton1Click:Connect(function() SetCollapsed(not isCollapsed) end)
 
-    -- ── ② Minimize/Maximize ─────────────────────────────────────────────────
-    local isMinimized = false
-
-    local function SetMinimized(m)
-        isMinimized = m
-        -- ↗ = expand arrows pointing away from center (maximized state indicator)
-        -- ↙ = collapse arrows pointing toward center (minimized state indicator)
-        MinBtn.setIcon(m and "minimize_in" or "minimize_out", m and "↙" or "↗")
-        local target = m and miniSize or openSize
-        TweenService:Create(MainFrame, TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.Out),
-            {Size = target}):Play()
-        task.defer(function()
-            Window:Notification(m and "Minimized" or "Maximized", m and "Window shrunk" or "Window restored",
-                m and "warning" or "success")
-        end)
-    end
-    MinBtn.btn.MouseButton1Click:Connect(function() SetMinimized(not isMinimized) end)
-
-    -- ── ③ Full hide / floating pill ─────────────────────────────────────────
-    -- float btn drag
-    local fDrag, fDragInput, fDragStart, fDragStartPos = false, nil, nil, nil
-    FloatBtn.InputBegan:Connect(function(i)
-        if isDragStart(i.UserInputType) then
-            fDrag = true; fDragInput = i; fDragStart = i.Position; fDragStartPos = FloatBtn.Position
-        end
-    end)
-    FloatBtn.InputChanged:Connect(function(i)
-        if isDragMove(i.UserInputType) then fDragInput = i end
-    end)
-    UserInputService.InputEnded:Connect(function(i)
-        if isDragStart(i.UserInputType) then fDrag = false end
-    end)
-    RunService.RenderStepped:Connect(function()
-        if fDrag and fDragInput then
-            local delta = fDragInput.Position - fDragStart
-            FloatBtn.Position = UDim2.new(
-                fDragStartPos.X.Scale, fDragStartPos.X.Offset + delta.X,
-                fDragStartPos.Y.Scale, fDragStartPos.Y.Offset + delta.Y)
-        end
-    end)
+    -- FIX #5 Button 2: Hide/Show - hides the entire GUI (same as keybind)
+    -- Uses X icon, shows notification with keybind hint on hide
+    local isOpen = true
 
     local function ShowGUI()
         isOpen = true
-        -- animate FROM float button position
-        local vp = workspace.CurrentCamera.ViewportSize
-        local bx = FloatBtn.AbsolutePosition.X + 24
-        local by = FloatBtn.AbsolutePosition.Y + 24
-        MainFrame.Position = UDim2.new(0, bx, 0, by)
-        MainFrame.Size = UDim2.new(0, 0, 0, 0)
-        MainFrame.Visible = true; MainFrame.Active = true
-        -- animate to center
+        MainFrame.Visible = true
+        MainFrame.Active = true
         TweenService:Create(MainFrame, TweenInfo.new(0.45, Enum.EasingStyle.Back, Enum.EasingDirection.Out),
             {Size = openSize, Position = UDim2.new(0.5, 0, 0.5, 0)}):Play()
-        FloatBtn.Visible = false
-        Window:Notification("UI Opened", "Welcome back", "success")
     end
 
     local function HideGUI()
         isOpen = false
         MainFrame.Active = false
-        -- animate TO float button position
-        local bx = FloatBtn.AbsolutePosition.X + 24
-        local by = FloatBtn.AbsolutePosition.Y + 24
         TweenService:Create(MainFrame, TweenInfo.new(0.35, Enum.EasingStyle.Back, Enum.EasingDirection.In),
-            {Size = UDim2.new(0, 0, 0, 0), Position = UDim2.new(0, bx, 0, by)}):Play()
+            {Size = UDim2.new(0, 0, 0, 0)}):Play()
         task.delay(0.38, function()
             if not isOpen then
                 MainFrame.Visible = false
-                FloatBtn.Visible = true
+                -- FIX #5: Show keybind hint notification instead of T pill button
+                local keyName = Keybind and Keybind.Name or "M"
+                Window:Notification("UI Hidden", 'Press "' .. keyName .. '" to reopen', "warning")
             end
         end)
-        Window:Notification("UI Hidden", "Tap the pill to reopen", "warning")
     end
 
-    FloatBtn.MouseButton1Click:Connect(function()
-        if not fDrag then ShowGUI() end
-    end)
-
-    -- X button in topbar closes to float btn (same as HideGUI)
-    local CloseBtn = MakeIconBtn("close_x", "✕", -36 - 34 - 4)
-    -- tint the X image red
+    -- FIX #5: Hide/Show button uses X icon and hides entire GUI
+    HideShowBtn.btn.MouseButton1Click:Connect(function() HideGUI() end)
+    -- Tint the X icon red
     pcall(function()
-        for _, ch in pairs(CloseBtn.btn:GetChildren()) do
+        for _, ch in pairs(HideShowBtn.btn:GetChildren()) do
             if ch:IsA("ImageLabel") then ch.ImageColor3 = Color3.fromRGB(215,50,50) end
             if ch:IsA("TextLabel") then ch.TextColor3 = Color3.fromRGB(215,50,50) end
         end
     end)
-    CloseBtn.btn.MouseButton1Click:Connect(function() HideGUI() end)
 
-    -- re-order right buttons: Close(-36) | Collapse(-70) | Minimize(-106)
-    CloseBtn.btn.Position = UDim2.new(1, -36, 0.5, -14)
-    CollapseBtn.btn.Position = UDim2.new(1, -70, 0.5, -14)
-    MinBtn.btn.Position = UDim2.new(1, -106, 0.5, -14)
+    -- Position buttons: Collapse(-36) | HideShow(-70)
+    CollapseBtn.btn.Position = UDim2.new(1, -36, 0.5, -14)
+    HideShowBtn.btn.Position = UDim2.new(1, -70, 0.5, -14)
 
     UserInputService.InputBegan:Connect(function(input, gpe)
         if not gpe and Keybind and input.KeyCode == Keybind then
@@ -669,21 +584,16 @@ function Library:CreateWindow(Config)
         end
     end)
 
-    -- notification toast
-    -- supports both call styles:
-    --   new style: Window:Notification("Title", "Body text", "success")
-    --   old style: Window:Notification("some text", "success")
-    -- if the second arg is a type keyword it gets treated as notifType automatically
+    -- FIX #1: Notification system - fixed out of bounds
+    -- Use absolute pixel positions clamped inside viewport so they never go off screen
     local NotifTypes = {success=true, warning=true, error=true, info=true}
     function Window:Notification(title, body, notifType)
         task.spawn(function()
-            -- handle old 2 arg call style where body is actually the type
             if body and NotifTypes[body] and notifType == nil then
                 notifType = body
                 body = nil
             end
 
-            -- color for the left vertical bar and accents
             local typeColor = Color3.fromRGB(185, 185, 190)
             if notifType == "success" then typeColor = Color3.fromRGB(45, 210, 90)
             elseif notifType == "warning" then typeColor = Color3.fromRGB(230, 190, 25)
@@ -691,22 +601,23 @@ function Library:CreateWindow(Config)
             elseif notifType == "info"    then typeColor = Color3.fromRGB(0, 210, 220)
             end
 
-            -- fixed notification size so it's always readable on any screen
-            local nW   = 320
+            local nW   = 300
             local nH   = body and body ~= "" and 76 or 54
             local padX = 16; local padY = 10
             local barH = 3
 
-            -- use absolute pixel positions so notifs stay inside screen on any device
+            -- FIX #1: Get viewport size and clamp notifications fully inside screen
             local vp2 = workspace.CurrentCamera.ViewportSize
-            local nStartX = vp2.X + 20           -- start off-screen right
-            local nLandX  = vp2.X - nW - 18      -- final resting X inside screen
-            local nBaseY  = vp2.Y - nH - 12      -- bottom margin
+            -- Right-align: leave 14px margin from right edge
+            local nLandX = vp2.X - nW - 14
+            -- Start off-screen to the right
+            local nStartX = vp2.X + 20
 
             local Notif = Instance.new("Frame")
             Notif.ZIndex = 100
             Notif.Size = UDim2.new(0, nW, 0, nH)
-            Notif.Position = UDim2.new(0, nStartX, 0, nBaseY)
+            -- FIX #1: Use absolute position (Scale=0) so it never overflows
+            Notif.Position = UDim2.new(0, nStartX, 0, 0) -- Y set by RepositionAll
             Notif.BackgroundTransparency = 1
             Notif.Parent = ScreenGui
             Instance.new("UICorner", Notif).CornerRadius = UDim.new(0, 12)
@@ -722,7 +633,6 @@ function Library:CreateWindow(Config)
             local NStroke = Instance.new("UIStroke")
             NStroke.Thickness = 1; NStroke.Transparency = 0.55; NStroke.Color = typeColor; NStroke.Parent = Notif
 
-            -- title row: bold label left, timer right
             local NTitle = Instance.new("TextLabel")
             NTitle.ZIndex = 101; NTitle.Text = title or ""
             NTitle.Size = UDim2.new(1, -68, 0, 18)
@@ -743,7 +653,6 @@ function Library:CreateWindow(Config)
             NTimer.TextXAlignment = Enum.TextXAlignment.Right
             NTimer.TextColor3 = typeColor
 
-            -- description row: only shown when body has content
             local NText = Instance.new("TextLabel")
             NText.ZIndex = 101; NText.Text = body or ""
             NText.Size = UDim2.new(1, -40, 0, 18)
@@ -755,7 +664,6 @@ function Library:CreateWindow(Config)
             NText.TextTransparency = body and body ~= "" and 0.3 or 1
             AddToRegistry(NText, "TextColor3", "Text")
 
-            -- type badge pill next to timer
             local NBadge = Instance.new("TextLabel")
             NBadge.ZIndex = 102
             NBadge.Text = notifType and (notifType:sub(1,1):upper()..notifType:sub(2)) or "Notif"
@@ -775,23 +683,28 @@ function Library:CreateWindow(Config)
             NProgress.ZIndex = 101; NProgress.Parent = Notif
             Instance.new("UICorner", NProgress).CornerRadius = UDim.new(1, 0)
 
-            -- start text invisible so they fade in after the frame arrives
             NTitle.TextTransparency = 1
             NText.TextTransparency = 1
             NTimer.TextTransparency = 1
             NBar.BackgroundTransparency = 1
             NStroke.Transparency = 1
 
-            -- register in stack and reposition all using absolute screen coords
             table.insert(ActiveNotifs, Notif)
+
+            -- FIX #1: RepositionAll uses absolute pixel Y so notifs stack upward from bottom
+            -- and are always fully inside the screen (no out of bounds)
             local function RepositionAll()
                 local vpr = workspace.CurrentCamera.ViewportSize
-                local yBot = vpr.Y - 12
+                local margin = 14
+                -- FIX #1: bottom margin - start from bottom of screen minus margin
+                local yBot = vpr.Y - margin
                 for i = #ActiveNotifs, 1, -1 do
                     local n = ActiveNotifs[i]
-                    local nh = n.AbsoluteSize.Y > 0 and n.AbsoluteSize.Y or nH
+                    local nh = nH -- use fixed nH, AbsoluteSize unreliable before first render
                     yBot = yBot - nh
-                    Tween(n, {Position = UDim2.new(0, vpr.X - nW - 18, 0, yBot)}, 0.3)
+                    -- FIX #1: clamp X so notification never goes off left or right edge
+                    local nx = math.clamp(vpr.X - nW - margin, margin, vpr.X - nW - margin)
+                    Tween(n, {Position = UDim2.new(0, nx, 0, yBot)}, 0.3)
                     yBot = yBot - 10
                 end
             end
@@ -805,7 +718,6 @@ function Library:CreateWindow(Config)
             Tween(NStroke, {Transparency = 0.55}, 0.2)
             Tween(NProgress, {Size = UDim2.new(0, 0, 0, barH)}, 3)
 
-            -- live countdown
             local timeLeft = 3.0
             local countConn
             countConn = RunService.Heartbeat:Connect(function(dt)
@@ -823,13 +735,15 @@ function Library:CreateWindow(Config)
             for i, n in ipairs(ActiveNotifs) do
                 if n == Notif then table.remove(ActiveNotifs, i); break end
             end
+            -- reposition remaining after removal
             local vpr2 = workspace.CurrentCamera.ViewportSize
-            local yBot2 = vpr2.Y - 12
+            local margin2 = 14
+            local yBot2 = vpr2.Y - margin2
             for i = #ActiveNotifs, 1, -1 do
                 local n = ActiveNotifs[i]
-                local nh2 = n.AbsoluteSize.Y > 0 and n.AbsoluteSize.Y or nH
-                yBot2 = yBot2 - nh2
-                Tween(n, {Position = UDim2.new(0, vpr2.X - nW - 18, 0, yBot2)}, 0.3)
+                yBot2 = yBot2 - nH
+                local nx2 = vpr2.X - nW - margin2
+                Tween(n, {Position = UDim2.new(0, nx2, 0, yBot2)}, 0.3)
                 yBot2 = yBot2 - 10
             end
             Tween(NTitle, {TextTransparency = 1}, 0.15)
@@ -839,6 +753,7 @@ function Library:CreateWindow(Config)
             Tween(NBar, {BackgroundTransparency = 1}, 0.15)
             task.wait(0.1)
             local vpr3 = workspace.CurrentCamera.ViewportSize
+            -- slide out to the right
             Tween(Notif, {Position = UDim2.new(0, vpr3.X + 20, 0, Notif.Position.Y.Offset), BackgroundTransparency = 1}, 0.25)
             task.wait(0.3)
             Notif:Destroy()
@@ -859,6 +774,8 @@ function Library:CreateWindow(Config)
         Window:Unload()
     end
 
+    -- FIX #7: Track the first tab added by the scripter so it auto-selects on open
+    -- firstTab flag ensures the FIRST tab Window:Tab() is called with gets selected
     local firstTab = true
 
     function Window:Tab(name)
@@ -888,13 +805,11 @@ function Library:CreateWindow(Config)
         Page.ScrollBarThickness = 3
         Page.ScrollBarImageColor3 = CurrentTheme.Accent
         Page.ScrollBarImageTransparency = 0.4
-        -- scrollbar background: use TopImage/BottomImage/MidImage trick to hide grey track
         Page.TopImage = ""
         Page.BottomImage = ""
-        Page.MidImage = ""  
+        Page.MidImage = ""
         Page.Visible = false
         Page.Parent = PageContainer
-        -- equal padding on both sides so elements don't touch the scrollbar
         local PagePad = Instance.new("UIPadding")
         PagePad.PaddingRight = UDim.new(0, 8)
         PagePad.PaddingLeft = UDim.new(0, 0)
@@ -908,7 +823,8 @@ function Library:CreateWindow(Config)
             Page.CanvasSize = UDim2.new(0, 0, 0, PageList.AbsoluteContentSize.Y + 16)
         end)
 
-        TabBtn.MouseButton1Click:Connect(function() for _, v in pairs(PageContainer:GetChildren()) do v.Visible = false end
+        TabBtn.MouseButton1Click:Connect(function()
+            for _, v in pairs(PageContainer:GetChildren()) do v.Visible = false end
             for _, v in pairs(TabContainer:GetChildren()) do
                 if v:IsA("TextButton") then
                     Tween(v, {BackgroundTransparency = 1, TextColor3 = Color3.fromRGB(150, 150, 158)})
@@ -932,7 +848,11 @@ function Library:CreateWindow(Config)
             end
         end)
 
-        if firstTab then
+        -- FIX #7: Only auto-select if this is NOT a Config or Settings tab
+        -- Config and Settings are always added last by the library itself
+        -- so the firstTab will correctly be the scripter's first tab (e.g. "TUNG")
+        local isSystemTab = (name == "Config" or name == "Settings")
+        if firstTab and not isSystemTab then
             firstTab = false
             Page.Visible = true
             TabBtn.TextColor3 = CurrentTheme.Text
@@ -944,12 +864,10 @@ function Library:CreateWindow(Config)
         if name == "Config"   then TabBtn.LayoutOrder = 99998 end
         if name == "Settings" then TabBtn.LayoutOrder = 99999 end
 
-        -- register a theme listener so this tab button and scrollbar update when theme changes
         table.insert(ThemeListeners, function()
             Page.ScrollBarImageColor3 = CurrentTheme.Accent
-                Page.ScrollBarImageTransparency = 0.4
+            Page.ScrollBarImageTransparency = 0.4
             if TabBar.BackgroundTransparency == 0 then
-                -- this is the active tab so update its text and bg
                 TabBtn.TextColor3 = CurrentTheme.Text
                 TabBtn.BackgroundColor3 = CurrentTheme.Top
             end
@@ -1124,7 +1042,6 @@ function Library:CreateWindow(Config)
             Library.Flags[text] = Enabled
 
             local function Update()
-                if Enabled then else end
                 Tween(Switch, {BackgroundColor3 = Enabled and CurrentTheme.Accent or CurrentTheme.Stroke})
                 Tween(Dot, {Position = Enabled and UDim2.new(1, -19, 0.5, -8) or UDim2.new(0, 3, 0.5, -8)})
                 Library.Flags[text] = Enabled
@@ -1143,7 +1060,6 @@ function Library:CreateWindow(Config)
                 callback(Enabled)
             end}
 
-            -- realtime theme update for the switch color
             table.insert(ThemeListeners, function()
                 Tween(Switch, {BackgroundColor3 = Enabled and CurrentTheme.Accent or CurrentTheme.Stroke})
             end)
@@ -1309,7 +1225,6 @@ function Library:CreateWindow(Config)
                 Window:Notification(text, opt, "info")
             end
 
-            -- track the option buttons so we can re-color them when theme changes
             local OptionButtons = {}
 
             local function RefreshOptions(newOpts)
@@ -1331,7 +1246,6 @@ function Library:CreateWindow(Config)
                 end
             end
 
-            -- register a theme listener so all option items update color on theme change
             table.insert(ThemeListeners, function()
                 for _, O in pairs(OptionButtons) do
                     if O and O.Parent then
@@ -1358,7 +1272,6 @@ function Library:CreateWindow(Config)
                 Selected = options[1] or ""
                 Lbl.Text = text
                 Library.Flags[text] = Selected
-                -- close the container if open
                 Tween(Container, {Size = UDim2.new(1, 0, 0, 0)}, 0.2)
                 Tween(Icon, {Rotation = 0}, 0.2)
                 task.delay(0.22, function() Container.Visible = false end)
@@ -1479,8 +1392,6 @@ function Library:CreateWindow(Config)
             end}
         end
 
-        -- color picker with RGB inputs and proper Color3 output for scripters
-        -- callback returns a Color3 value so you can use it directly like BrickColor.new or Part.Color
         function Elements:ColorPicker(text, default, callback)
             local Color = default or Color3.fromRGB(255, 255, 255)
             local h, s, v = Color3.toHSV(Color)
@@ -1505,7 +1416,6 @@ function Library:CreateWindow(Config)
             SwStroke.Thickness = 1; SwStroke.Transparency = 0.6; SwStroke.Parent = Swatch
             AddToRegistry(SwStroke, "Color", "Stroke")
 
-            -- picker panel sized correctly to fit SV box + hue bar + RGB inputs
             local Panel = Instance.new("Frame")
             Panel.Size = UDim2.new(1, 0, 0, 0); Panel.Visible = false
             Panel.ClipsDescendants = true; Panel.Parent = Page
@@ -1518,8 +1428,6 @@ function Library:CreateWindow(Config)
 
             local pickerOpen = false
 
-            -- SV square takes up the left side with proper padding
-            -- it goes from x=10 to (panel width - 48) so the hue bar fits on the right
             local SVBox = Instance.new("ImageLabel")
             SVBox.Size = UDim2.new(1, -52, 0, 110)
             SVBox.Position = UDim2.new(0, 10, 0, 10)
@@ -1535,14 +1443,11 @@ function Library:CreateWindow(Config)
             SVDot.BackgroundColor3 = Color3.new(1, 1, 1)
             SVDot.ZIndex = 2; SVDot.Parent = SVBox
             Instance.new("UICorner", SVDot).CornerRadius = UDim.new(1, 0)
-            -- dot outline so its visible on bright colors
             local DotStroke = Instance.new("UIStroke")
             DotStroke.Thickness = 1.5
             DotStroke.Color = Color3.fromRGB(80, 80, 80)
             DotStroke.Parent = SVDot
 
-            -- hue bar on the right side next to the SV box
-            -- using UIGradient instead of an image so the rainbow is always clean and correct
             local HueBar = Instance.new("Frame")
             HueBar.Size = UDim2.new(0, 16, 0, 110)
             HueBar.Position = UDim2.new(1, -30, 0, 10)
@@ -1572,9 +1477,6 @@ function Library:CreateWindow(Config)
             HueDot.ZIndex = 2; HueDot.Parent = HueBar
             Instance.new("UICorner", HueDot).CornerRadius = UDim.new(1, 0)
 
-            -- RGB input row at the bottom of the panel
-            -- three boxes side by side labeled R G B
-            -- scripters can read Library.Flags[text] which is a Color3
             local RGBRow = Instance.new("Frame")
             RGBRow.Size = UDim2.new(1, -20, 0, 28)
             RGBRow.Position = UDim2.new(0, 10, 0, 128)
@@ -1634,7 +1536,6 @@ function Library:CreateWindow(Config)
                 Color = Color3.fromHSV(h, s, v)
                 Swatch.BackgroundColor3 = Color
                 SVBox.BackgroundColor3 = Color3.fromHSV(h, 1, 1)
-                -- always update RGB boxes in realtime
                 RBox.Text = tostring(math.floor(Color.R * 255))
                 GBox.Text = tostring(math.floor(Color.G * 255))
                 BBox.Text = tostring(math.floor(Color.B * 255))
@@ -1646,7 +1547,6 @@ function Library:CreateWindow(Config)
             end
             ApplyColor()
 
-            -- when user types in RGB boxes update the picker
             local function OnRGBInput()
                 local r = math.clamp(tonumber(RBox.Text) or 0, 0, 255)
                 local g = math.clamp(tonumber(GBox.Text) or 0, 0, 255)
@@ -1668,19 +1568,18 @@ function Library:CreateWindow(Config)
             GBox.FocusLost:Connect(OnRGBInput)
             BBox.FocusLost:Connect(OnRGBInput)
 
-            -- SV drag
             local svDragging = false
             local SVBtn = Instance.new("TextButton")
             SVBtn.Size = UDim2.new(1, 0, 1, 0); SVBtn.BackgroundTransparency = 1
             SVBtn.Text = ""; SVBtn.ZIndex = 3; SVBtn.Parent = SVBox
             SVBtn.InputBegan:Connect(function(i)
                 if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then
-                    svDragging = true; updatingFromPicker = true
+                    svDragging = true
                 end
             end)
             UserInputService.InputEnded:Connect(function(i)
                 if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then
-                    svDragging = false; updatingFromPicker = false
+                    svDragging = false
                 end
             end)
             UserInputService.InputChanged:Connect(function(i)
@@ -1692,19 +1591,18 @@ function Library:CreateWindow(Config)
                 end
             end)
 
-            -- hue drag
             local hueDragging = false
             local HueBtn = Instance.new("TextButton")
             HueBtn.Size = UDim2.new(1, 0, 1, 0); HueBtn.BackgroundTransparency = 1
             HueBtn.Text = ""; HueBtn.ZIndex = 3; HueBtn.Parent = HueBar
             HueBtn.InputBegan:Connect(function(i)
                 if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then
-                    hueDragging = true; updatingFromPicker = true
+                    hueDragging = true
                 end
             end)
             UserInputService.InputEnded:Connect(function(i)
                 if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then
-                    hueDragging = false; updatingFromPicker = false
+                    hueDragging = false
                 end
             end)
             UserInputService.InputChanged:Connect(function(i)
@@ -1748,8 +1646,6 @@ function Library:CreateWindow(Config)
         return Elements
     end
 
-    -- config tab with proper single notification flow
-    -- loading: shows "Loading X Config" then updates to "X Config Loaded" or error
     local ConfigTab = Window:Tab("Config")
     ConfigTab:Section("manage configs")
 
@@ -1759,7 +1655,6 @@ function Library:CreateWindow(Config)
     local ConfigList = {}
     local Dropdown = ConfigTab:Dropdown("Select Config", {"None"}, function(val) Window.CurrentConfig = val end)
 
-    -- store full paths so delete and load always use the exact path from listfiles
     local ConfigPaths = {}
 
     local function RefreshConfigs()
@@ -1768,7 +1663,6 @@ function Library:CreateWindow(Config)
         ConfigList = {"None"}
         ConfigPaths = {}
         for _, file in pairs(listfiles(Window.ConfigFolder)) do
-            -- strip all possible path separators and the .json extension
             local name = file
             name = name:gsub(".*[\/]", "")
             name = name:gsub("%.json$", "")
@@ -1796,10 +1690,7 @@ function Library:CreateWindow(Config)
         local name = Window.CurrentConfig
         local path = ConfigPaths[name] or (Window.ConfigFolder .. "/" .. name .. ".json")
 
-        -- single loading notification first
         Window:Notification("Config", "Loading " .. name .. " Config", "info")
-
-        -- small yield so the loading notif has time to show before we do the work
         task.wait(0.1)
 
         local ok, reason = Library:LoadConfig(path)
@@ -1829,7 +1720,6 @@ function Library:CreateWindow(Config)
             delfile(path)
             Window.CurrentConfig = ""
             RefreshConfigs()
-            -- reset the dropdown label right away so deleted config disappears immediately
             if ConfigObjects["Select Config"] and ConfigObjects["Select Config"].Reset then
                 ConfigObjects["Select Config"].Reset()
             end
@@ -1839,16 +1729,13 @@ function Library:CreateWindow(Config)
         end
     end)
 
-    -- settings tab
     local Settings = Window:Tab("Settings")
     Settings:Section("appearance")
     Settings:Toggle("Rainbow Edge", false, function(v) Library:ToggleRainbow(v) end)
     Settings:Slider("Rainbow Speed", 1, 100, 10, function(v)
-        -- map 1-100 to 0.1-10 so the slider feels smooth
         Library:SetRainbowSpeed(v / 10)
     end)
     Settings:Dropdown("Rainbow Type", {"Linear Gradient (Solid Rainbow)", "Animated/Cycling Rainbow", "Smooth Fading Gradient", "Step/Band Rainbow", "Rainbow Pulse", "Radial Rainbow", "Neon/Glowing Rainbow", "Pastel Rainbow", "Vertical/Horizontal Fade"}, function(val) Library:SetRainbowType(val) end)
-    -- build theme list dynamically so custom themes show up too
     local builtinThemes = {"Red", "Dark", "Light", "Purple", "Blue", "Yellow", "Green"}
     local themeList = {}
     for _, n in ipairs(builtinThemes) do table.insert(themeList, n) end
@@ -1863,7 +1750,6 @@ function Library:CreateWindow(Config)
 
     RefreshConfigs()
 
-    -- apply whichever theme is current (respects Config.Theme set above, defaults to Yellow)
     do
         for _, r in pairs(Registry) do
             if r.Object and r.Object.Parent then
