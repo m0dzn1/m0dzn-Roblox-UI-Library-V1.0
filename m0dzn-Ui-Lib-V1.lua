@@ -9,7 +9,7 @@
 ]]
 
 print([[
-script loaded
+script loaded.
  ███╗   ███╗   ██████╗   ██████╗   ███████╗  ███╗   ██╗
  ████╗ ████║  ██╔═████╗  ██╔══██╗  ╚══███╔╝  ████╗  ██║
  ██╔████╔██║  ██║██╔██║  ██║  ██║    ███╔╝   ██╔██╗ ██║
@@ -464,7 +464,9 @@ function Library:CreateWindow(Config)
     Avatar.Size = UDim2.new(0, 28, 0, 28)
     Avatar.Position = UDim2.new(0, 11, 0.5, -14)
     Avatar.BackgroundColor3 = Color3.fromRGB(200, 200, 205)
-    Avatar.Image = Players:GetUserThumbnailAsync(LocalPlayer.UserId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size48x48)
+    pcall(function()
+        Avatar.Image = Players:GetUserThumbnailAsync(LocalPlayer.UserId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size48x48)
+    end)
     Avatar.Parent = ProfileFrame
     Instance.new("UICorner", Avatar).CornerRadius = UDim.new(1, 0)
 
@@ -504,12 +506,11 @@ function Library:CreateWindow(Config)
     PageContainer.BackgroundTransparency = 1
     PageContainer.Parent = Content
 
-    -- position centered on screen (no size scaling per user request)
-    local VP = workspace.CurrentCamera.ViewportSize
-    openSize  = UDim2.new(0, 650, 0, 430)
-    fullH     = 430
-    collapseH = 52
-    miniSize  = UDim2.new(0, 260, 0, 52)
+    -- size/state vars declared here so all closures below share them
+    local openSize  = UDim2.new(0, 650, 0, 430)
+    local fullH     = 430
+    local collapseH = 52
+    local miniSize  = UDim2.new(0, 260, 0, 52)
 
     -- float button: position bottom-right using absolute screen coords
     local fbSize = 48
@@ -537,7 +538,10 @@ function Library:CreateWindow(Config)
         if isDragMove(input.UserInputType) then dragInput = input end
     end)
     UserInputService.InputEnded:Connect(function(input)
-        if isDragStart(input.UserInputType) then dragging = false end
+        if input.UserInputType == Enum.UserInputType.MouseButton1
+        or input.UserInputType == Enum.UserInputType.Touch then
+            dragging = false
+        end
     end)
     RunService.RenderStepped:Connect(function()
         if dragging and dragInput then
@@ -547,13 +551,8 @@ function Library:CreateWindow(Config)
         end
     end)
 
-    -- ── DPI + size state ─────────────────────────────────────────────────────
+    -- ── state vars ─────────────────────────────────────────────────────────
     local isOpen = true
-    local openSize = UDim2.new(0, 650, 0, 430) -- overwritten after DPI calc below
-
-    -- ── ① Collapse: hide content keep titlebar ──────────────────────────────
-    -- collapseH is just the topbar height, fullH is the normal open height
-    local collapseH, fullH = 52, 430  -- updated after DPI
     local isCollapsed = false
 
     local function SetCollapsed(c)
@@ -563,13 +562,14 @@ function Library:CreateWindow(Config)
                             or openSize.Y.Offset
         TweenService:Create(MainFrame, TweenInfo.new(0.35, Enum.EasingStyle.Back, Enum.EasingDirection.Out),
             {Size = UDim2.new(0, openSize.X.Offset, 0, targetH)}):Play()
-        Window:Notification(c and "Collapsed" or "Expanded", c and "Content hidden" or "Content visible",
-            c and "warning" or "success")
+        task.defer(function()
+            Window:Notification(c and "Collapsed" or "Expanded", c and "Content hidden" or "Content visible",
+                c and "warning" or "success")
+        end)
     end
     CollapseBtn.btn.MouseButton1Click:Connect(function() SetCollapsed(not isCollapsed) end)
 
     -- ── ② Minimize/Maximize ─────────────────────────────────────────────────
-    local miniSize   -- set after DPI calc
     local isMinimized = false
 
     local function SetMinimized(m)
@@ -580,8 +580,10 @@ function Library:CreateWindow(Config)
         local target = m and miniSize or openSize
         TweenService:Create(MainFrame, TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.Out),
             {Size = target}):Play()
-        Window:Notification(m and "Minimized" or "Maximized", m and "Window shrunk" or "Window restored",
-            m and "warning" or "success")
+        task.defer(function()
+            Window:Notification(m and "Minimized" or "Maximized", m and "Window shrunk" or "Window restored",
+                m and "warning" or "success")
+        end)
     end
     MinBtn.btn.MouseButton1Click:Connect(function() SetMinimized(not isMinimized) end)
 
@@ -886,8 +888,10 @@ function Library:CreateWindow(Config)
         Page.ScrollBarThickness = 3
         Page.ScrollBarImageColor3 = CurrentTheme.Accent
         Page.ScrollBarImageTransparency = 0.4
-        -- transparent background behind scrollbar so no grey box
-        Page.ScrollingFrameImageColor3 = Color3.new(0,0,0)
+        -- scrollbar background: use TopImage/BottomImage/MidImage trick to hide grey track
+        Page.TopImage = ""
+        Page.BottomImage = ""
+        Page.MidImage = ""  
         Page.Visible = false
         Page.Parent = PageContainer
         -- equal padding on both sides so elements don't touch the scrollbar
