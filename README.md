@@ -1,13 +1,13 @@
 # 🤑🤑 m0dzn UI Library — V1.0
 
-A clean, fully themeable UI library for Roblox scripts. Smooth animations, real config system, live color picker, 9 rainbow border modes. Default theme is **Yellow**.
+A clean, fully themeable UI library for Roblox scripts. Smooth animations, real config system, live color picker, 9 rainbow border modes
 
 ---
 
 ## 🚀 Load
 
 ```lua
-local Library = loadstring(game:HttpGet("YOUR_RAW_URL_HERE"))()
+local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/m0dzn1/m0dzn-Roblox-UI-Library-V1.0/refs/heads/main/m0dzn-ui-lib-V1.lua"))()
 ```
 
 ---
