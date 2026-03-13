@@ -9,7 +9,7 @@
 ]]
 
 print([[
-script loaded.
+script loaded
 ]])
 
 local TweenService = game:GetService("TweenService")
@@ -307,30 +307,89 @@ function Library:CreateWindow(Config)
     TitleLabel.ZIndex = 5; TitleLabel.Parent = Topbar
     AddToRegistry(TitleLabel, "TextColor3", "Text")
 
-    -- simple icon buttons using text labels — no file:/// paths needed, works on all executors
-    local function MakeIconBtn(iconText, xFromRight)
+    -- modern icon buttons drawn with frames — no unicode/font issues, works on all executors
+    local function MakeIconBtn(iconType, xFromRight)
         local Btn = Instance.new("TextButton")
         Btn.Size = UDim2.new(0, 28, 0, 28)
         Btn.Position = UDim2.new(1, xFromRight, 0.5, -14)
         Btn.BackgroundTransparency = 0.85
-        Btn.Text = iconText
-        Btn.Font = Enum.Font.GothamBold
-        Btn.TextSize = 14
+        Btn.Text = ""
         Btn.ZIndex = 6; Btn.Parent = Topbar
         Instance.new("UICorner", Btn).CornerRadius = UDim.new(0, 8)
         AddToRegistry(Btn, "BackgroundColor3", "Top")
-        AddToRegistry(Btn, "TextColor3", "Text")
         Btn.MouseEnter:Connect(function() Tween(Btn, {BackgroundTransparency = 0.5}, 0.12) end)
         Btn.MouseLeave:Connect(function() Tween(Btn, {BackgroundTransparency = 0.85}, 0.12) end)
 
-        local function setIcon(_, fallback2)
-            Btn.Text = fallback2
+        local iconParts = {}
+
+        local function DrawIcon(iType)
+            -- clear old parts
+            for _, p in ipairs(iconParts) do pcall(function() p:Destroy() end) end
+            iconParts = {}
+            local function Part(x, y, w, h, r, color)
+                local f = Instance.new("Frame")
+                f.Size = UDim2.new(0, w, 0, h)
+                f.Position = UDim2.new(0, x, 0, y)
+                f.BackgroundColor3 = color or Color3.new(1,1,1)
+                f.BorderSizePixel = 0
+                f.ZIndex = 7
+                f.Parent = Btn
+                if r then Instance.new("UICorner", f).CornerRadius = UDim.new(0, r) end
+                table.insert(iconParts, f)
+                return f
+            end
+
+            if iType == "minimize" then
+                -- horizontal bar (minus)
+                Part(7, 13, 14, 2, 1)
+            elseif iType == "restore" then
+                -- small square outline (two overlapping L-shapes)
+                -- outer square border using 4 thin frames
+                Part(6,  6,  16, 2,  1) -- top
+                Part(6,  20, 16, 2,  1) -- bottom
+                Part(6,  6,  2,  16, 1) -- left
+                Part(20, 6,  2,  16, 1) -- right
+            elseif iType == "close" then
+                -- X using two rotated frames via UICorner trick — use two diagonal bars
+                -- bar 1: top-left to bottom-right
+                local b1 = Part(7, 7, 14, 2, 1)
+                b1.Rotation = 45
+                b1.AnchorPoint = Vector2.new(0.5, 0.5)
+                b1.Position = UDim2.new(0.5, 0, 0.5, 0)
+                -- bar 2: top-right to bottom-left
+                local b2 = Part(7, 7, 14, 2, 1)
+                b2.Rotation = -45
+                b2.AnchorPoint = Vector2.new(0.5, 0.5)
+                b2.Position = UDim2.new(0.5, 0, 0.5, 0)
+            end
         end
-        return {btn = Btn, setIcon = setIcon}
+
+        DrawIcon(iconType)
+
+        local currentIcon = iconType
+        local function setIcon(newType)
+            currentIcon = newType
+            DrawIcon(newType)
+            -- tint close button parts red
+            if newType == "close" then
+                for _, p in ipairs(iconParts) do
+                    p.BackgroundColor3 = Color3.fromRGB(215, 50, 50)
+                end
+            end
+        end
+
+        -- initial tint for close button
+        if iconType == "close" then
+            for _, p in ipairs(iconParts) do
+                p.BackgroundColor3 = Color3.fromRGB(215, 50, 50)
+            end
+        end
+
+        return {btn = Btn, setIcon = setIcon, getParts = function() return iconParts end}
     end
 
-    local CollapseBtn = MakeIconBtn("–", -36)
-    local HideShowBtn = MakeIconBtn("✕", -70)
+    local CollapseBtn = MakeIconBtn("minimize", -36)
+    local HideShowBtn = MakeIconBtn("close", -70)
 
     -- FIX #3: Removed FloatBtn (the T pill button) entirely.
     -- The hide/show now only uses the keybind message approach.
@@ -474,12 +533,9 @@ function Library:CreateWindow(Config)
     -- Uses - icon (collapse_open svg) and □ icon (collapse_close svg)
     local function SetCollapsed(c)
         isCollapsed = c
-        CollapseBtn.setIcon(c and "collapse_close" or "collapse_open", c and "□" or "–")
-        -- When collapsed: shrink to just the topbar height (52px)
-        -- When expanded: restore to full openSize
+        CollapseBtn.setIcon(c and "restore" or "minimize")
         local targetSize
         if c then
-            -- hide content, keep topbar - set height to just topbar (52)
             targetSize = UDim2.new(0, openSize.X.Offset, 0, 52)
             Content.Visible = false
         else
@@ -518,15 +574,7 @@ function Library:CreateWindow(Config)
         end)
     end
 
-    -- FIX #5: Hide/Show button uses X icon and hides entire GUI
     HideShowBtn.btn.MouseButton1Click:Connect(function() HideGUI() end)
-    -- Tint the X icon red
-    pcall(function()
-        for _, ch in pairs(HideShowBtn.btn:GetChildren()) do
-            if ch:IsA("ImageLabel") then ch.ImageColor3 = Color3.fromRGB(215,50,50) end
-            if ch:IsA("TextLabel") then ch.TextColor3 = Color3.fromRGB(215,50,50) end
-        end
-    end)
 
     -- Position buttons: Collapse(-36) | HideShow(-70)
     CollapseBtn.btn.Position = UDim2.new(1, -36, 0.5, -14)
@@ -1771,13 +1819,22 @@ function Library:CreateWindow(Config)
     ConfigTab:Button("Delete Config", function()
         if Window.CurrentConfig == "" or Window.CurrentConfig == "None" then return end
         local name = Window.CurrentConfig
-        local path = ConfigPaths[name] or (Window.ConfigFolder .. "/" .. name .. ".json")
+        -- try both the cached path and a freshly built path
+        local paths = {
+            ConfigPaths[name],
+            Window.ConfigFolder .. "/" .. name .. ".json",
+            Window.ConfigFolder .. "\\" .. name .. ".json",
+        }
         pcall(function()
-            if isfile(path) then
-                delfile(path)
+            for _, path in ipairs(paths) do
+                if path and isfile(path) then
+                    delfile(path)
+                    break
+                end
             end
         end)
         Window.CurrentConfig = ""
+        task.wait(0.05) -- small wait so filesystem catches up
         RefreshConfigs()
         if ConfigObjects["Select Config"] and ConfigObjects["Select Config"].Reset then
             ConfigObjects["Select Config"].Reset()
