@@ -1,10 +1,10 @@
 # 🤑🤑 m0dzn UI Library — V1.0
 
-A clean, fully themeable UI library for Roblox scripts. Smooth animations, real config system, live color picker, 9 rainbow border modes
+clean fully themeable ui lib for roblox scripts. smooth animations, real config system, live color picker, 9 rainbow border modes
 
 ---
 
-## 🚀 Load
+## 🚀 load
 
 ```lua
 local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/m0dzn1/m0dzn-Roblox-UI-Library-V1.0/refs/heads/main/m0dzn-ui-lib-V1.lua"))()
@@ -12,9 +12,9 @@ local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/m0dzn
 
 ---
 
-## 🪟 Create a Window
+## 🪟 create a window
 
-The simplest setup:
+simplest setup:
 
 ```lua
 local Window = Library:CreateWindow({
@@ -24,32 +24,30 @@ local Window = Library:CreateWindow({
 local Main = Window:Tab("Main")
 ```
 
-Both `Keybind` and `Theme` are optional — they just let you customise the experience for whoever uses your script.
+`Keybind` and `Theme` are both optional, just lets u customize the vibe for whoever uses ur script
 
 ---
 
-## ⌨️ Custom Keybind
+## ⌨️ keybind
 
-Pass any `Enum.KeyCode` value as `Keybind`. The user can also change it live in the Settings tab, but whatever you put here is the starting keybind.
+pass any `Enum.KeyCode` as `Keybind`. user can also change it live in the settings tab, but whatever u put here is the default
 
 ```lua
 local Window = Library:CreateWindow({
     Title   = "My Hub",
-    Keybind = Enum.KeyCode.RightShift,  -- change to any key
+    Keybind = Enum.KeyCode.RightShift,
 })
 ```
 
-Common choices: `Enum.KeyCode.M`, `Enum.KeyCode.RightShift`, `Enum.KeyCode.Insert`, `Enum.KeyCode.F4`
+common ones: `M`, `RightShift`, `Insert`, `F4`
 
 ---
 
-## 🎨 Custom Theme
+## 🎨 themes
 
-There are two ways to set a theme.
+two ways to do it
 
-### Method 1 — Pick a built-in
-
-Pass the name of any built-in theme as a string:
+### method 1 — built in themes
 
 ```lua
 local Window = Library:CreateWindow({
@@ -58,50 +56,48 @@ local Window = Library:CreateWindow({
 })
 ```
 
-### Method 2 — Define your own colors
-
-Pass a table with RGB values. You only need to fill in the slots you want to change — anything you leave out falls back to the current default.
+### method 2 — make ur own
 
 ```lua
 local Window = Library:CreateWindow({
     Title  = "My Hub",
     Theme  = {
-        Name   = "Ocean",           -- internal name, used by :SetTheme() later
-        Main   = {10,  18,  30},    -- window background
-        Top    = {18,  28,  45},    -- topbar + element tile backgrounds
-        Text   = {220, 235, 255},   -- all text labels
-        Accent = {60,  160, 255},   -- toggles ON, slider fill, accent bars
-        Stroke = {35,  55,  90},    -- borders, dividers, toggle OFF color
+        Name   = "Ocean",
+        Main   = {10,  18,  30},    -- window bg
+        Top    = {18,  28,  45},    -- tiles n topbar
+        Text   = {220, 235, 255},   -- all text
+        Accent = {60,  160, 255},   -- toggles, sliders, bars
+        Stroke = {35,  55,  90},    -- borders n dividers
     },
 })
 ```
 
-You can also pass a real `Color3` instead of an RGB table if you prefer:
+u can also pass a real `Color3` instead of rgb table if u want:
 
 ```lua
 Accent = Color3.fromRGB(60, 160, 255),
 ```
 
-### Color slot reference
+### color slots
 
-| Slot | What it colors |
-|------|---------------|
-| `Main` | Window background |
-| `Top` | Topbar + all element tile backgrounds |
-| `Text` | Every label, button text, dropdown text |
-| `Accent` | Toggle ON, slider fill + number, dropdown arrow, section labels, left accent bars |
-| `Stroke` | Toggle OFF, slider track, all border strokes, dividers |
+| slot | what it does |
+|------|--------------|
+| `Main` | window background |
+| `Top` | topbar + all tile backgrounds |
+| `Text` | every label and button text |
+| `Accent` | toggle on, slider fill, dropdown arrow, section labels |
+| `Stroke` | toggle off, slider track, borders, dividers |
 
-### Switch theme at runtime
+### change theme at runtime
 
 ```lua
-Library:SetTheme("Purple")   -- switch to any built-in
-Library:SetTheme("Ocean")    -- or any theme you registered in Theme.Name
+Library:SetTheme("Purple")
+Library:SetTheme("Ocean")  -- works with custom ones too if u gave it a Name
 ```
 
 ---
 
-## 📋 Elements
+## 📋 elements
 
 ### Section
 ```lua
@@ -131,12 +127,41 @@ end)
 ```
 
 ### Slider
-Click the number box on the right to type a value directly.
+
+u got 4 options depending on what limits u want
+
+**normal — fixed range, shows the drag track**
 ```lua
 Main:Slider("WalkSpeed", 16, 500, 16, function(Value)
     game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = Value
 end)
 ```
+
+**inf — no limits at all, just a textbox u type into**
+pass `nil, nil` for min and max
+```lua
+Main:Slider("Multiplier", nil, nil, 1, function(Value)
+    print(Value)  -- can be literally any number
+end)
+```
+
+**min only — cant go below X but no max cap**
+pass the min then `nil` for max
+```lua
+Main:Slider("Jump Power", 0, nil, 50, function(Value)
+    print(Value)  -- never goes below 0
+end)
+```
+
+**max only — cant go above X but no min cap**
+pass `nil` for min then the max
+```lua
+Main:Slider("Fog", nil, 1000, 500, function(Value)
+    print(Value)  -- never goes above 1000
+end)
+```
+
+> when using inf/one-sided mode the track bar is hidden and a small `∞` shows next to the textbox. just type ur value and press enter
 
 ### Dropdown
 ```lua
@@ -167,7 +192,7 @@ end)
 ```
 
 ### Color Picker
-RGB inputs update in realtime while dragging. Touch supported.
+rgb inputs update in realtime while dragging. touch works too
 ```lua
 Main:ColorPicker("ESP Color", Color3.fromRGB(255, 100, 100), function(Color)
     _G.ESPColor = Color
@@ -176,69 +201,134 @@ end)
 
 ---
 
-## 🔔 Notifications
+## 🔔 notifications
 
-Stack from the bottom-right corner, pushing older ones up. Each has a title, optional body, colored left bar, countdown timer, and a progress bar.
+stacks from bottom right, pushes older ones up. each one has title, optional body, colored bar, countdown timer and progress bar
 
-| Type | Color | Example |
+| type | color | example |
 |------|-------|---------|
-| Default | 🩶 Grey | `Window:Notification("Title", "Body")` |
-| Success | 🟢 Green | `Window:Notification("Title", "Body", "success")` |
-| Warning | 🟡 Yellow | `Window:Notification("Title", "Body", "warning")` |
-| Error | 🔴 Red | `Window:Notification("Title", "Body", "error")` |
-| Info | 🩵 Cyan | `Window:Notification("Title", "Body", "info")` |
+| default | 🩶 grey | `Window:Notification("Title", "Body")` |
+| success | 🟢 green | `Window:Notification("Title", "Body", "success")` |
+| warning | 🟡 yellow | `Window:Notification("Title", "Body", "warning")` |
+| error | 🔴 red | `Window:Notification("Title", "Body", "error")` |
+| info | 🩵 cyan | `Window:Notification("Title", "Body", "info")` |
 
-Short 2-arg style still works:
+short 2 arg style works too:
 ```lua
 Window:Notification("Done", "success")
 ```
 
-Notifications fire automatically on every element action.
+notifs fire automatically on every element action btw
 
 ---
 
-## 🪟 Window Controls (Topbar)
+## 🪟 window buttons
 
-| Button | Action |
-|--------|--------|
-| `—` / `□` | Collapse — hides content, keeps the titlebar |
-| `↗` / `↙` | Minimize — shrinks to a small bar, click to restore |
-| `✕` | Close — hides the window, shows the floating pill |
+| button | what it does |
+|--------|--------------|
+| `—` | collapse — hides content but keeps the titlebar, click again to expand |
+| `✕` | hide — same as pressing ur keybind, closes the whole window |
 
-Icons are loaded from SVG files written to `m0dzn_icons/` on first run. Falls back to Unicode if the executor doesn't support `file://` URIs.
-
----
-
-## 📱 Floating Pill
-
-Shows up after closing the window. Draggable anywhere on screen (PC + mobile touch). Tap to reopen with an animation. Has a small `✕` to fully unload.
+icons are loaded from svg files written to `m0dzn_icons/` on first run. falls back to unicode if ur executor doesnt support file uris
 
 ---
 
-## ⚙️ Settings Tab
+## ⚙️ settings tab
 
-- 🌈 **Rainbow Edge** — animated RGB border (off = normal border)
-- 🎨 **Rainbow Type** — 9 styles
-- 🚀 **Rainbow Speed** — 1–100 (10 = default)
-- 🖌️ **Theme** — live theme switcher
-- ⌨️ **Menu Keybind** — change show/hide key
+- 🌈 **Rainbow Edge** — rgb animated border
+- 🎨 **Rainbow Type** — 9 different styles
+- 🚀 **Rainbow Speed** — 0 to 10 (1 is default)
+- 🖌️ **Theme** — switch themes live
+- ⌨️ **Menu Keybind** — change ur open/close key
 - ❌ **Unload UI**
 
 ---
 
-## 💾 Config Tab
+## 💾 config tab
 
-Type a name  **Save Config**. Later: pick from dropdown  **Load Config** or **Delete Config**. Dropdown resets in realtime after delete.
+type a name → **Save Config**. then pick from the dropdown → **Load Config** or **Delete Config**. dropdown updates right away after deleting
 
 ---
 
-## 📦 Flags
+## 📦 flags
+
+ok so basically every element u make automatically saves its current value into `Library.Flags`. the key is just whatever name u gave the element
+
+so like if u made a slider called `"WalkSpeed"` u can just do this anywhere in ur script:
 
 ```lua
-Library.Flags["WalkSpeed"]  -- number
-Library.Flags["Auto Farm"]  -- bool
-Library.Flags["ESP Color"]  -- Color3
-Library.Flags["Fly Key"]    -- string
+print(Library.Flags["WalkSpeed"])  -- prints whatever the slider is currently set to
 ```
+
+thats it. the lib handles updating it for u, u dont have to do anything extra
+
+---
+
+### why is this useful
+
+say u got a loop running and u want it to check the current slider value every tick instead of only when the user moves the slider. instead of making a variable and updating it manually in the callback u can just read the flag directly:
+
+```lua
+-- without flags (annoying, have to track it urself)
+local mySpeed = 16
+Main:Slider("WalkSpeed", 0, 500, 16, function(v)
+    mySpeed = v  -- have to do this every time
+end)
+
+task.spawn(function()
+    while true do
+        print(mySpeed)  -- works but kinda ugly
+        task.wait(0.1)
+    end
+end)
+```
+
+```lua
+-- with flags (cleaner, just read it whenever)
+Main:Slider("WalkSpeed", 0, 500, 16, function(v) end)
+
+task.spawn(function()
+    while true do
+        print(Library.Flags["WalkSpeed"])  -- always up to date, no extra variable needed
+        task.wait(0.1)
+    end
+end)
+```
+
+---
+
+### what type each element saves
+
+| element | what u get |
+|---------|-----------|
+| Slider | `number` — current value |
+| Toggle | `boolean` — `true` or `false` |
+| Dropdown | `string` — whatever option is selected |
+| Textbox | `string` — whatever was typed |
+| Keybind | `string` — key name like `"F"` or `"E"` |
+| Value | `string` — whatever is in the box |
+| ColorPicker | `Color3` — current picked color |
+
+---
+
+### quick example
+
+```lua
+Main:Toggle("Auto Farm", false, function(v) end)
+Main:Slider("Farm Delay", 0, 5, 1, function(v) end)
+
+task.spawn(function()
+    while true do
+        if Library.Flags["Auto Farm"] then  -- check if toggle is on
+            print("farming with delay", Library.Flags["Farm Delay"])
+            task.wait(Library.Flags["Farm Delay"])  -- use slider value as wait time
+        else
+            task.wait(0.1)
+        end
+    end
+end)
+```
+
+basically just use `Library.Flags["element name"]` anywhere and it always has the latest value. pretty handy ngl
 
 ---
