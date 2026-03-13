@@ -9,7 +9,7 @@
 ]]
 
 print([[
-script loaded
+script loaded.
 ]])
 
 local TweenService = game:GetService("TweenService")
@@ -577,11 +577,25 @@ function Library:CreateWindow(Config)
         end
     end)
 
-    -- FIX #1: Notification system - fixed out of bounds
-    -- Use absolute pixel positions clamped inside viewport so they never go off screen
+    -- notification system
+    -- each entry in ActiveNotifs is {frame = Frame, source = "internal"/"scripter", kill = fn}
+    -- when scripter fires their own notif, all currently alive "internal" ones get instantly dismissed
     local NotifTypes = {success=true, warning=true, error=true, info=true}
-    function Window:Notification(title, body, notifType)
+
+    -- internal helper that actually builds and shows a notification
+    -- source = "internal" (auto-fired by elements) or "scripter" (called by scripter directly)
+    local function SpawnNotif(title, body, notifType, source)
         task.spawn(function()
+            -- if this is a scripter notif, instantly kill all internal ones still alive
+            if source == "scripter" then
+                for i = #ActiveNotifs, 1, -1 do
+                    local entry = ActiveNotifs[i]
+                    if entry.source == "internal" and entry.kill then
+                        entry.kill()
+                    end
+                end
+            end
+
             if body and NotifTypes[body] and notifType == nil then
                 notifType = body
                 body = nil
@@ -599,18 +613,13 @@ function Library:CreateWindow(Config)
             local padX = 16; local padY = 10
             local barH = 3
 
-            -- FIX #1: Get viewport size and clamp notifications fully inside screen
             local vp2 = workspace.CurrentCamera.ViewportSize
-            -- Right-align: leave 14px margin from right edge
-            local nLandX = vp2.X - nW - 14
-            -- Start off-screen to the right
             local nStartX = vp2.X + 20
 
             local Notif = Instance.new("Frame")
             Notif.ZIndex = 100
             Notif.Size = UDim2.new(0, nW, 0, nH)
-            -- FIX #1: Use absolute position (Scale=0) so it never overflows
-            Notif.Position = UDim2.new(0, nStartX, 0, 0) -- Y set by RepositionAll
+            Notif.Position = UDim2.new(0, nStartX, 0, 0)
             Notif.BackgroundTransparency = 1
             Notif.Parent = ScreenGui
             Instance.new("UICorner", Notif).CornerRadius = UDim.new(0, 12)
@@ -682,28 +691,60 @@ function Library:CreateWindow(Config)
             NBar.BackgroundTransparency = 1
             NStroke.Transparency = 1
 
-            table.insert(ActiveNotifs, Notif)
+            -- killed = true means this notif got dismissed early (e.g. replaced by scripter notif)
+            local killed = false
+            local entry = {frame = Notif, source = source, kill = nil}
 
-            -- FIX #1: RepositionAll uses absolute pixel Y so notifs stack upward from bottom
-            -- and are always fully inside the screen (no out of bounds)
+            -- kill function: instantly fade out and remove from stack
+            entry.kill = function()
+                if killed then return end
+                killed = true
+                for i, e in ipairs(ActiveNotifs) do
+                    if e.frame == Notif then table.remove(ActiveNotifs, i); break end
+                end
+                Tween(Notif, {BackgroundTransparency = 1}, 0.15)
+                Tween(NTitle, {TextTransparency = 1}, 0.15)
+                Tween(NText, {TextTransparency = 1}, 0.15)
+                Tween(NTimer, {TextTransparency = 1}, 0.15)
+                Tween(NBadge, {TextTransparency = 1, BackgroundTransparency = 1}, 0.15)
+                Tween(NBar, {BackgroundTransparency = 1}, 0.15)
+                task.delay(0.2, function()
+                    local vpr_k = workspace.CurrentCamera.ViewportSize
+                    Tween(Notif, {Position = UDim2.new(0, vpr_k.X + 20, 0, Notif.Position.Y.Offset)}, 0.2)
+                    task.delay(0.25, function() pcall(function() Notif:Destroy() end) end)
+                end)
+                -- reposition what's left
+                task.delay(0.05, function()
+                    local vpr_r = workspace.CurrentCamera.ViewportSize
+                    local margin_r = 14
+                    local yBot_r = vpr_r.Y - margin_r
+                    for i = #ActiveNotifs, 1, -1 do
+                        local e = ActiveNotifs[i]
+                        yBot_r = yBot_r - nH
+                        Tween(e.frame, {Position = UDim2.new(0, vpr_r.X - nW - margin_r, 0, yBot_r)}, 0.25)
+                        yBot_r = yBot_r - 10
+                    end
+                end)
+            end
+
+            table.insert(ActiveNotifs, entry)
+
             local function RepositionAll()
                 local vpr = workspace.CurrentCamera.ViewportSize
                 local margin = 14
-                -- FIX #1: bottom margin - start from bottom of screen minus margin
                 local yBot = vpr.Y - margin
                 for i = #ActiveNotifs, 1, -1 do
-                    local n = ActiveNotifs[i]
-                    local nh = nH -- use fixed nH, AbsoluteSize unreliable before first render
-                    yBot = yBot - nh
-                    -- FIX #1: clamp X so notification never goes off left or right edge
+                    local e = ActiveNotifs[i]
+                    yBot = yBot - nH
                     local nx = math.clamp(vpr.X - nW - margin, margin, vpr.X - nW - margin)
-                    Tween(n, {Position = UDim2.new(0, nx, 0, yBot)}, 0.3)
+                    Tween(e.frame, {Position = UDim2.new(0, nx, 0, yBot)}, 0.3)
                     yBot = yBot - 10
                 end
             end
             RepositionAll()
             Tween(Notif, {BackgroundTransparency = 0.06}, 0.3)
             task.wait(0.2)
+            if killed then return end
             Tween(NTitle, {TextTransparency = 0}, 0.2)
             Tween(NText, {TextTransparency = body and body ~= "" and 0.3 or 1}, 0.2)
             Tween(NTimer, {TextTransparency = 0}, 0.2)
@@ -714,6 +755,7 @@ function Library:CreateWindow(Config)
             local timeLeft = 3.0
             local countConn
             countConn = RunService.Heartbeat:Connect(function(dt)
+                if killed then countConn:Disconnect(); return end
                 timeLeft = timeLeft - dt
                 if timeLeft <= 0 then
                     NTimer.Text = "0.0s"
@@ -724,19 +766,19 @@ function Library:CreateWindow(Config)
             end)
 
             task.wait(3)
+            if killed then return end
             countConn:Disconnect()
-            for i, n in ipairs(ActiveNotifs) do
-                if n == Notif then table.remove(ActiveNotifs, i); break end
+            for i, e in ipairs(ActiveNotifs) do
+                if e.frame == Notif then table.remove(ActiveNotifs, i); break end
             end
-            -- reposition remaining after removal
             local vpr2 = workspace.CurrentCamera.ViewportSize
             local margin2 = 14
             local yBot2 = vpr2.Y - margin2
             for i = #ActiveNotifs, 1, -1 do
-                local n = ActiveNotifs[i]
+                local e = ActiveNotifs[i]
                 yBot2 = yBot2 - nH
                 local nx2 = vpr2.X - nW - margin2
-                Tween(n, {Position = UDim2.new(0, nx2, 0, yBot2)}, 0.3)
+                Tween(e.frame, {Position = UDim2.new(0, nx2, 0, yBot2)}, 0.3)
                 yBot2 = yBot2 - 10
             end
             Tween(NTitle, {TextTransparency = 1}, 0.15)
@@ -746,11 +788,21 @@ function Library:CreateWindow(Config)
             Tween(NBar, {BackgroundTransparency = 1}, 0.15)
             task.wait(0.1)
             local vpr3 = workspace.CurrentCamera.ViewportSize
-            -- slide out to the right
             Tween(Notif, {Position = UDim2.new(0, vpr3.X + 20, 0, Notif.Position.Y.Offset), BackgroundTransparency = 1}, 0.25)
             task.wait(0.3)
-            Notif:Destroy()
+            pcall(function() Notif:Destroy() end)
         end)
+    end
+
+    -- public function scripters call — tagged as "scripter" so it clears internal notifs
+    function Window:Notification(title, body, notifType)
+        SpawnNotif(title, body, notifType, "scripter")
+    end
+
+    -- internal function used by elements (toggles, buttons, sliders etc) — tagged "internal"
+    -- scripter notifs will instantly dismiss these
+    local function InternalNotif(title, body, notifType)
+        SpawnNotif(title, body, notifType, "internal")
     end
 
     function Window:SetKeybind(key) Keybind = key end
@@ -991,7 +1043,7 @@ function Library:CreateWindow(Config)
                 task.wait(0.1)
                 Tween(Btn, {Size = UDim2.new(1, 0, 0, 44)}, 0.15)
                 callback()
-                Window:Notification(text, "Activated", "success")
+                InternalNotif(text, "Activated", "success")
             end)
             Btn.MouseEnter:Connect(function() Tween(Btn, {BackgroundTransparency = 0.0}, 0.18) end)
             Btn.MouseLeave:Connect(function() Tween(Btn, {BackgroundTransparency = 0.04}, 0.18) end)
@@ -1044,7 +1096,7 @@ function Library:CreateWindow(Config)
 
             ClickBtn.MouseButton1Click:Connect(function()
                 Enabled = not Enabled; Update()
-                Window:Notification(text, Enabled and "Enabled" or "Disabled", Enabled and "success" or "error")
+                InternalNotif(text, Enabled and "Enabled" or "Disabled", Enabled and "success" or "error")
             end)
             ConfigObjects[text] = {Type = "Toggle", Value = Enabled, Set = function(val)
                 Enabled = val; Library.Flags[text] = val
@@ -1192,7 +1244,7 @@ function Library:CreateWindow(Config)
                     if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then
                         if sliding then
                             sliding = false
-                            Window:Notification(text, tostring(Val), "info")
+                            InternalNotif(text, tostring(Val), "info")
                         end
                     end
                 end)
@@ -1266,7 +1318,7 @@ function Library:CreateWindow(Config)
                 Tween(Container, {Size = UDim2.new(1, 0, 0, 0)}, 0.28)
                 Tween(Icon, {Rotation = 0}, 0.28)
                 task.wait(0.3); Container.Visible = false
-                Window:Notification(text, opt, "info")
+                InternalNotif(text, opt, "info")
             end
 
             local OptionButtons = {}
@@ -1356,7 +1408,7 @@ function Library:CreateWindow(Config)
                 if ConfigObjects[text] then ConfigObjects[text].Value = Box.Text end
                 callback(Box.Text)
                 if Box.Text ~= "" then
-                    Window:Notification(text, Box.Text, "info")
+                    InternalNotif(text, Box.Text, "info")
                 end
             end)
             ConfigObjects[text] = {Type = "Textbox", Value = "", Set = function(val)
@@ -1395,7 +1447,7 @@ function Library:CreateWindow(Config)
                     Key = input.KeyCode; KeyLabel.Text = Key.Name
                     Library.Flags[text] = Key.Name; ConfigObjects[text].Value = Key.Name
                     callback(Key)
-                    Window:Notification("Keybind", "Changed to " .. Key.Name)
+                    InternalNotif("Keybind", "Changed to " .. Key.Name)
                 else
                     KeyLabel.Text = Key.Name
                 end
@@ -1668,7 +1720,7 @@ function Library:CreateWindow(Config)
                     local r = math.floor(Color.R * 255)
                     local g = math.floor(Color.G * 255)
                     local b = math.floor(Color.B * 255)
-                    Window:Notification(text, r..", "..g..", "..b, "info")
+                    InternalNotif(text, r..", "..g..", "..b, "info")
                 end
             end)
 
@@ -1720,43 +1772,43 @@ function Library:CreateWindow(Config)
 
     ConfigTab:Button("Refresh List", function() RefreshConfigs() end)
     ConfigTab:Button("Save Config", function()
-        if ConfigName == "" then Window:Notification("Config", "Enter a name first", "warning"); return end
+        if ConfigName == "" then InternalNotif("Config", "Enter a name first", "warning"); return end
         Library:SaveConfig(ConfigName, Window.ConfigFolder)
         RefreshConfigs()
-        Window:Notification("Config", ConfigName .. " Saved", "success")
+        InternalNotif("Config", ConfigName .. " Saved", "success")
     end)
 
     ConfigTab:Button("Load Config", function()
         if Window.CurrentConfig == "" or Window.CurrentConfig == "None" then
-            Window:Notification("Config", "Select a config first", "warning"); return
+            InternalNotif("Config", "Select a config first", "warning"); return
         end
 
         local name = Window.CurrentConfig
         local path = ConfigPaths[name] or (Window.ConfigFolder .. "/" .. name .. ".json")
 
-        Window:Notification("Config", "Loading " .. name .. " Config", "info")
+        InternalNotif("Config", "Loading " .. name .. " Config", "info")
         task.wait(0.1)
 
         local ok, reason = Library:LoadConfig(path)
 
         if ok then
             task.wait(2.8)
-            Window:Notification("Config", name .. " Config Loaded", "success")
+            InternalNotif("Config", name .. " Config Loaded", "success")
         elseif reason == "file_missing" then
             task.wait(2.8)
-            Window:Notification("Config", "Error To Load " .. name .. " Config", "error")
+            InternalNotif("Config", "Error To Load " .. name .. " Config", "error")
         elseif reason == "bad_data" then
             task.wait(2.8)
-            Window:Notification("Config", "Error To Load " .. name .. " Config", "error")
+            InternalNotif("Config", "Error To Load " .. name .. " Config", "error")
         elseif reason == "partial_load" then
             task.wait(2.8)
-            Window:Notification("Config", "Error To Load " .. name .. " Config", "error")
+            InternalNotif("Config", "Error To Load " .. name .. " Config", "error")
         end
     end)
 
     ConfigTab:Button("Delete Config", function()
         if Window.CurrentConfig == "" or Window.CurrentConfig == "None" then
-            Window:Notification("Config", "Select a config first", "warning"); return
+            InternalNotif("Config", "Select a config first", "warning"); return
         end
         local name = Window.CurrentConfig
         local path = ConfigPaths[name] or (Window.ConfigFolder .. "/" .. name .. ".json")
@@ -1767,9 +1819,9 @@ function Library:CreateWindow(Config)
             if ConfigObjects["Select Config"] and ConfigObjects["Select Config"].Reset then
                 ConfigObjects["Select Config"].Reset()
             end
-            Window:Notification("Config", name .. " Deleted", "info")
+            InternalNotif("Config", name .. " Deleted", "info")
         else
-            Window:Notification("Config", "Config file not found", "error")
+            InternalNotif("Config", "Config file not found", "error")
         end
     end)
 
