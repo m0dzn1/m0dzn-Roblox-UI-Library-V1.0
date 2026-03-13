@@ -1065,20 +1065,38 @@ function Library:CreateWindow(Config)
             end)
         end
 
+        -- Slider supports two call styles:
+        --   Limited:   Elements:Slider("Name", min, max, default, callback)
+        --              Shows a draggable track. Textbox also clamps to min/max.
+        --   Unlimited: Elements:Slider("Name", nil, nil, default, callback)
+        --              No track shown. Textbox accepts any number (no clamp).
+        --              You can also pass only one bound:
+        --              Elements:Slider("Name", 0, nil, 5, callback)  -- min 0, no max
+        --              Elements:Slider("Name", nil, 100, 50, callback) -- no min, max 100
         function Elements:Slider(text, min, max, default, callback)
-            local Val = default or min
-            local Frame = MakeTile(64)
+            -- detect unlimited mode: true when BOTH min and max are nil
+            local unlimited = (min == nil and max == nil)
+            -- normalise: keep nil as nil, convert numbers
+            min = tonumber(min)
+            max = tonumber(max)
+
+            local Val = tonumber(default) or (min or 0)
+            -- choose tile height: taller when we show a track, shorter when unlimited
+            local tileH = unlimited and 44 or 64
+            local Frame = MakeTile(tileH)
 
             local Lbl = Instance.new("TextLabel")
             Lbl.Text = text; Lbl.Size = UDim2.new(1, -30, 0, 20)
-            Lbl.Position = UDim2.new(0, 16, 0, 10); Lbl.BackgroundTransparency = 1
+            Lbl.Position = UDim2.new(0, 16, 0, unlimited and 12 or 10); Lbl.BackgroundTransparency = 1
             Lbl.Font = Enum.Font.GothamMedium; Lbl.TextSize = 13
             Lbl.TextXAlignment = Enum.TextXAlignment.Left; Lbl.Parent = Frame
             AddToRegistry(Lbl, "TextColor3", "Text")
 
+            -- value textbox — wider when unlimited so the label ∞ hint fits
+            local numW = unlimited and 72 or 52
             local Num = Instance.new("TextBox")
-            Num.Text = tostring(Val); Num.Size = UDim2.new(0, 52, 0, 22)
-            Num.Position = UDim2.new(1, -62, 0, 9)
+            Num.Text = tostring(Val); Num.Size = UDim2.new(0, numW, 0, 22)
+            Num.Position = UDim2.new(1, -(numW + 10), 0, unlimited and 11 or 9)
             Num.BackgroundTransparency = 0.08
             Num.Font = Enum.Font.GothamBold; Num.TextSize = 12
             Num.TextXAlignment = Enum.TextXAlignment.Center; Num.Parent = Frame
@@ -1091,77 +1109,110 @@ function Library:CreateWindow(Config)
             AddToRegistry(NumStroke, "Color", "Stroke")
             Num.Focused:Connect(function() Tween(NumStroke, {Transparency = 0.2}, 0.15) end)
 
-            local Track = Instance.new("Frame")
-            Track.Size = UDim2.new(1, -30, 0, 5); Track.Position = UDim2.new(0, 16, 0, 46)
-            Track.BorderSizePixel = 0; Track.Parent = Frame
-            Instance.new("UICorner", Track).CornerRadius = UDim.new(1, 0)
-            AddToRegistry(Track, "BackgroundColor3", "Stroke")
+            -- small ∞ hint label shown only in unlimited mode
+            if unlimited then
+                local HintLbl = Instance.new("TextLabel")
+                HintLbl.Text = "∞"; HintLbl.Size = UDim2.new(0, 14, 0, 14)
+                HintLbl.Position = UDim2.new(1, -(numW + 10) - 16, 0, 18)
+                HintLbl.BackgroundTransparency = 1
+                HintLbl.Font = Enum.Font.GothamBold; HintLbl.TextSize = 11
+                HintLbl.TextTransparency = 0.4; HintLbl.Parent = Frame
+                AddToRegistry(HintLbl, "TextColor3", "Accent")
+            end
 
-            local Fill = Instance.new("Frame")
-            Fill.Size = UDim2.new((Val - min) / (max - min), 0, 1, 0); Fill.Parent = Track
-            Instance.new("UICorner", Fill).CornerRadius = UDim.new(1, 0)
-            AddToRegistry(Fill, "BackgroundColor3", "Accent")
+            -- track + fill + knob only shown when we have both bounds (limited mode)
+            local Track, Fill, Knob, Bar
+            if not unlimited then
+                Track = Instance.new("Frame")
+                Track.Size = UDim2.new(1, -30, 0, 5); Track.Position = UDim2.new(0, 16, 0, 46)
+                Track.BorderSizePixel = 0; Track.Parent = Frame
+                Instance.new("UICorner", Track).CornerRadius = UDim.new(1, 0)
+                AddToRegistry(Track, "BackgroundColor3", "Stroke")
 
-            local Knob = Instance.new("Frame")
-            Knob.Size = UDim2.new(0, 12, 0, 12); Knob.AnchorPoint = Vector2.new(0.5, 0.5)
-            Knob.Position = UDim2.new((Val - min) / (max - min), 0, 0.5, 0)
-            Knob.BackgroundColor3 = Color3.new(1, 1, 1); Knob.ZIndex = 2; Knob.Parent = Track
-            Instance.new("UICorner", Knob).CornerRadius = UDim.new(1, 0)
+                local initP = (min and max and max ~= min) and ((Val - min) / (max - min)) or 0
+                Fill = Instance.new("Frame")
+                Fill.Size = UDim2.new(initP, 0, 1, 0); Fill.Parent = Track
+                Instance.new("UICorner", Fill).CornerRadius = UDim.new(1, 0)
+                AddToRegistry(Fill, "BackgroundColor3", "Accent")
 
-            local Bar = Instance.new("TextButton")
-            Bar.Size = UDim2.new(1, 0, 0, 18); Bar.Position = UDim2.new(0, 0, 0.5, -9)
-            Bar.BackgroundTransparency = 1; Bar.Text = ""; Bar.ZIndex = 3; Bar.Parent = Track
+                Knob = Instance.new("Frame")
+                Knob.Size = UDim2.new(0, 12, 0, 12); Knob.AnchorPoint = Vector2.new(0.5, 0.5)
+                Knob.Position = UDim2.new(initP, 0, 0.5, 0)
+                Knob.BackgroundColor3 = Color3.new(1, 1, 1); Knob.ZIndex = 2; Knob.Parent = Track
+                Instance.new("UICorner", Knob).CornerRadius = UDim.new(1, 0)
+
+                Bar = Instance.new("TextButton")
+                Bar.Size = UDim2.new(1, 0, 0, 18); Bar.Position = UDim2.new(0, 0, 0.5, -9)
+                Bar.BackgroundTransparency = 1; Bar.Text = ""; Bar.ZIndex = 3; Bar.Parent = Track
+            end
 
             Library.Flags[text] = Val
 
             local function Update(newVal)
+                -- clamp only when bounds exist
+                if min ~= nil and max ~= nil then
+                    newVal = math.clamp(math.floor(newVal), min, max)
+                elseif min ~= nil then
+                    newVal = math.max(math.floor(newVal), min)
+                elseif max ~= nil then
+                    newVal = math.min(math.floor(newVal), max)
+                else
+                    newVal = math.floor(newVal)
+                end
                 Val = newVal
-                local p = (Val - min) / (max - min)
-                Tween(Fill, {Size = UDim2.new(p, 0, 1, 0)}, 0.16)
-                Tween(Knob, {Position = UDim2.new(p, 0, 0.5, 0)}, 0.16)
                 Num.Text = tostring(Val)
                 Library.Flags[text] = Val
                 ConfigObjects[text].Value = Val
+                -- update track visuals only when available
+                if Track and Fill and Knob and min ~= nil and max ~= nil and max ~= min then
+                    local p = (Val - min) / (max - min)
+                    Tween(Fill, {Size = UDim2.new(p, 0, 1, 0)}, 0.16)
+                    Tween(Knob, {Position = UDim2.new(p, 0, 0.5, 0)}, 0.16)
+                end
                 callback(Val)
             end
 
             local function Drag(input)
+                if not Track or min == nil or max == nil or max == min then return end
                 local p = math.clamp((input.Position.X - Track.AbsolutePosition.X) / Track.AbsoluteSize.X, 0, 1)
-                Update(math.floor(min + (max - min) * p))
+                Update(min + (max - min) * p)
             end
 
             Num.FocusLost:Connect(function()
                 Tween(NumStroke, {Transparency = 0.75}, 0.15)
                 local typed = tonumber(Num.Text)
                 if typed then
-                    Update(math.clamp(math.floor(typed), min, max))
+                    Update(typed)
                 else
                     Num.Text = tostring(Val)
                 end
             end)
 
-            local sliding = false
-            Bar.InputBegan:Connect(function(i)
-                if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then
-                    sliding = true; Drag(i)
-                end
-            end)
-            UserInputService.InputEnded:Connect(function(i)
-                if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then
-                    if sliding then
-                        sliding = false
-                        Window:Notification(text, tostring(Val), "info")
+            if Bar then
+                local sliding = false
+                Bar.InputBegan:Connect(function(i)
+                    if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then
+                        sliding = true; Drag(i)
                     end
-                end
-            end)
-            UserInputService.InputChanged:Connect(function(i)
-                if sliding and (i.UserInputType == Enum.UserInputType.MouseMovement or i.UserInputType == Enum.UserInputType.Touch) then Drag(i) end
-            end)
-            ConfigObjects[text] = {Type = "Slider", Value = Val, Set = function(val) Update(val) end}
+                end)
+                UserInputService.InputEnded:Connect(function(i)
+                    if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then
+                        if sliding then
+                            sliding = false
+                            Window:Notification(text, tostring(Val), "info")
+                        end
+                    end
+                end)
+                UserInputService.InputChanged:Connect(function(i)
+                    if sliding and (i.UserInputType == Enum.UserInputType.MouseMovement or i.UserInputType == Enum.UserInputType.Touch) then Drag(i) end
+                end)
+            end
+
+            ConfigObjects[text] = {Type = "Slider", Value = Val, Set = function(val) Update(tonumber(val) or Val) end}
 
             table.insert(ThemeListeners, function()
-                Fill.BackgroundColor3 = CurrentTheme.Accent
-                Track.BackgroundColor3 = CurrentTheme.Stroke
+                if Fill then Fill.BackgroundColor3 = CurrentTheme.Accent end
+                if Track then Track.BackgroundColor3 = CurrentTheme.Stroke end
                 Num.TextColor3 = CurrentTheme.Accent
             end)
         end
@@ -1732,8 +1783,9 @@ function Library:CreateWindow(Config)
     local Settings = Window:Tab("Settings")
     Settings:Section("appearance")
     Settings:Toggle("Rainbow Edge", false, function(v) Library:ToggleRainbow(v) end)
-    Settings:Slider("Rainbow Speed", 1, 100, 10, function(v)
-        Library:SetRainbowSpeed(v / 10)
+    -- Rainbow Speed: limited 0.1–10, shows track slider
+    Settings:Slider("Rainbow Speed", 0, 10, 1, function(v)
+        Library:SetRainbowSpeed(v)
     end)
     Settings:Dropdown("Rainbow Type", {"Linear Gradient (Solid Rainbow)", "Animated/Cycling Rainbow", "Smooth Fading Gradient", "Step/Band Rainbow", "Rainbow Pulse", "Radial Rainbow", "Neon/Glowing Rainbow", "Pastel Rainbow", "Vertical/Horizontal Fade"}, function(val) Library:SetRainbowType(val) end)
     local builtinThemes = {"Red", "Dark", "Light", "Purple", "Blue", "Yellow", "Green"}
