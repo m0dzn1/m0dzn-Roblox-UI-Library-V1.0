@@ -199,7 +199,7 @@ function Library:CreateWindow(Config)
     AddToRegistry(MainFrame, "BackgroundColor3", "Main")
 
     local Stroke = Instance.new("UIStroke")
-    Stroke.Thickness = 1.5
+    Stroke.Thickness = 0.5
     Stroke.Transparency = 0
     Stroke.Parent = MainFrame
     AddToRegistry(Stroke, "Color", "Stroke")
