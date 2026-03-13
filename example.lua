@@ -1,100 +1,101 @@
--- 1. load the library
-local m0dznV2 = loadstring(game:HttpGet("https://raw.githubusercontent.com/m0dzn1/m0dzn-Roblox-UI-Library-V1.0/refs/heads/main/m0dzn-Ui-Lib-V1.lua"))()
+-- load the m0dzn v1 ui library
+local m0dznv1 = loadstring(game:HttpGet("https://raw.githubusercontent.com/m0dzn1/m0dzn-Roblox-UI-Library-V1.0/refs/heads/main/m0dzn-Ui-Lib-V1.lua"))()
 
-local Window = m0dznV2:CreateWindow({
-    Title   = "TEST HUB",
-    Keybind = Enum.KeyCode.RightShift,  -- change this to any key you want
+local Window = m0dznv1:CreateWindow({
+    Title = "TEST HUB",
+    Keybind = Enum.KeyCode.RightShift, -- key to open/close
 
-    -- you can use this to set the default theme
-    -- Theme = "Purple",   -- Yellow / Red / Dark / Light / Purple / Blue / Green
+    -- pick a built in theme like this
+    -- Theme = "Purple", -- Yellow / Red / Dark / Light / Purple / Blue / Green
 
-    -- or you can use this to custom your default theme
+    -- or make ur own theme
     Theme = {
-        Name   = "Ocean",               -- give it a name (used internally)
-        Main   = {10,  18,  30},        -- window background
-        Top    = {18,  28,  45},        -- topbar + tile backgrounds
-        Text   = {220, 235, 255},       -- all labels
-        Accent = {60,  160, 255},       -- toggles, sliders, accent bars
-        Stroke = {35,  55,  90},        -- borders and dividers
+        Name = "Ocean",
+        Main = {10, 18, 30},     -- bg
+        Top = {18, 28, 45},      -- tiles
+        Text = {220, 235, 255},  -- text
+        Accent = {60, 160, 255}, -- toggles n sliders
+        Stroke = {35, 55, 90},   -- borders
     },
 })
 
--- 3. create tabs
-local TestTab = Window:Tab("TEST")
+local Tab = Window:Tab("TEST")
 
--- section header
-TestTab:Section("test all modules")
+Tab:Section("elements")
 
--- label
-TestTab:Label("this is a label element")
+Tab:Label("just a label lol")
 
--- paragraph
-TestTab:Paragraph("about this hub", "this ui library was made by m0dzn. it supports toggles, sliders, dropdowns, color pickers, keybinds, and more. all settings are saved through the config tab.")
+Tab:Paragraph("info", "this lib was made by m0dzn, it has toggles sliders dropdowns color pickers keybinds and more, configs are in the config tab")
 
--- button
-TestTab:Button("Test Button", function()
-    Window:Notification("button works!", "success")
+Tab:Button("click me", function()
+    Window:Notification("nice click", "success")
 end)
 
--- toggle
-TestTab:Toggle("Test Toggle", false, function(State)
-    getgenv().TestLoop = State
-    task.spawn(function()
-        while getgenv().TestLoop do
-            print("loop running")
-            task.wait(1)
-        end
-    end)
+Tab:Toggle("some toggle", false, function(on)
+    print("toggle is now", on)
 end)
 
--- slider
-TestTab:Slider("Test Slider", 0, 100, 50, function(Value)
-    print("slider value:", Value)
+-- slider (4 option)
+
+-- normal slider with a range (shows the track bar)
+Tab:Slider("Walk Speed", 0, 100, 16, function(v)
+    game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = v
 end)
 
--- dropdown
-TestTab:Dropdown("Test Dropdown", {"Option A", "Option B", "Option C"}, function(Option)
-    print("selected:", Option)
+-- inf slider, no range just type whatever u want
+-- pass nil nil for no limit
+Tab:Slider("Inf Slider", nil, nil, 50, function(v)
+    print("value is", v)
 end)
 
--- textbox
-TestTab:Textbox("Test Textbox", "type something here...", function(Text)
-    print("typed:", Text)
+-- min only, cant go below 0 but no max cap
+-- pass the min then nil for max
+Tab:Slider("Min Only", 0, nil, 10, function(v)
+    print("value is", v)
 end)
 
--- keybind
-TestTab:Keybind("Test Keybind", Enum.KeyCode.E, function(Key)
-    print("keybind set to:", Key.Name)
+-- max only, cant go above 100 but no min cap
+-- pass nil for min then the max
+Tab:Slider("Max Only", nil, 100, 50, function(v)
+    print("value is", v)
 end)
 
--- value
-TestTab:Value("Test Value", "10", function(Value)
-    print("value changed to:", Value)
+Tab:Dropdown("pick one", {"Option A", "Option B", "Option C"}, function(v)
+    print("picked", v)
 end)
 
--- color picker
-TestTab:ColorPicker("Test Color", Color3.fromRGB(100, 180, 255), function(Color)
-    print("color picked:", Color)
+Tab:Textbox("type here", "enter something...", function(v)
+    print("typed:", v)
 end)
 
--- section
-TestTab:Section("notification types")
-
-TestTab:Button("Default Notif", function()
-    Window:Notification("this is a default notification")
-end)
-TestTab:Button("Success Notif", function()
-    Window:Notification("action completed successfully", "success")
-end)
-TestTab:Button("Warning Notif", function()
-    Window:Notification("be careful with this setting", "warning")
-end)
-TestTab:Button("Error Notif", function()
-    Window:Notification("something went wrong", "error")
-end)
-TestTab:Button("Info Notif", function()
-    Window:Notification("here is some useful info", "info")
+Tab:Keybind("a keybind", Enum.KeyCode.E, function(k)
+    print("key is now", k.Name)
 end)
 
--- startup notification
-Window:Notification("test script loaded", "success")
+Tab:Value("some value", "10", function(v)
+    print("changed to", v)
+end)
+
+Tab:ColorPicker("pick a color", Color3.fromRGB(100, 180, 255), function(c)
+    print("color:", c)
+end)
+
+Tab:Section("notif types")
+
+Tab:Button("default notif", function()
+    Window:Notification("hey this is a notif")
+end)
+Tab:Button("success", function()
+    Window:Notification("it worked!", "success")
+end)
+Tab:Button("warning", function()
+    Window:Notification("careful with this", "warning")
+end)
+Tab:Button("error", function()
+    Window:Notification("something broke lol", "error")
+end)
+Tab:Button("info", function()
+    Window:Notification("just some info", "info")
+end)
+
+Window:Notification("script loaded", "success")
