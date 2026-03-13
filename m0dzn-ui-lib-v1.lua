@@ -9,7 +9,7 @@
 ]]
 
 print([[
-script loaded
+script loaded.
 ]])
 
 local TweenService = game:GetService("TweenService")
@@ -99,12 +99,14 @@ function Library:LoadConfig(path)
     end)
     if not ok or type(data) ~= "table" then return false end
 
+    Library._loading = true
     for flag, val in pairs(data) do
         self.Flags[flag] = val
         if ConfigObjects[flag] and ConfigObjects[flag].Set then
             pcall(function() ConfigObjects[flag].Set(val) end)
         end
     end
+    Library._loading = false
 
     return true
 end
@@ -761,6 +763,7 @@ function Library:CreateWindow(Config)
     -- internal function used by elements (toggles, buttons, sliders etc) — tagged "internal"
     -- scripter notifs will instantly dismiss these
     local function InternalNotif(title, body, notifType)
+        if Library._loading then return end
         SpawnNotif(title, body, notifType, "internal")
     end
 
