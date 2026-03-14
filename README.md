@@ -7,7 +7,7 @@ clean fully themeable ui lib for roblox scripts. smooth animations, real config 
 ## 🚀 load
 
 ```lua
-local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/m0dzn1/m0dzn-Roblox-UI-Library-V1.0/refs/heads/main/m0dzn-ui-lib-v1.lua"))()
+local Library = loadstring(game:HttpGet("https://github.com/m0dzn1/m0dzn-Roblox-UI-Library-V1.0/raw/refs/heads/main/m0dzn-ui-lib-V1.lua"))()
 ```
 
 ---
