@@ -9,7 +9,7 @@
 ]]
 
 print([[
-script loaded
+script loaded.
 ]])
 
 local TweenService = game:GetService("TweenService")
@@ -405,10 +405,25 @@ function Library:CreateWindow(Config)
     Content.BackgroundTransparency = 1
     Content.Parent = MainFrame
 
+    -- Scrollbar track background for the tab sidebar
+    local TabScrollTrack = Instance.new("Frame")
+    TabScrollTrack.Size = UDim2.new(0, 4, 0.84, 0)
+    TabScrollTrack.Position = UDim2.new(0, 134, 0, 0)
+    TabScrollTrack.BackgroundTransparency = 0.75
+    TabScrollTrack.BorderSizePixel = 0
+    TabScrollTrack.Parent = Content
+    Instance.new("UICorner", TabScrollTrack).CornerRadius = UDim.new(1, 0)
+    AddToRegistry(TabScrollTrack, "BackgroundColor3", "Stroke")
+
     local TabContainer = Instance.new("ScrollingFrame")
     TabContainer.Size = UDim2.new(0, 138, 0.84, 0)
     TabContainer.BackgroundTransparency = 1
-    TabContainer.ScrollBarThickness = 0
+    TabContainer.ScrollBarThickness = 4
+    TabContainer.ScrollBarImageColor3 = CurrentTheme.Accent
+    TabContainer.ScrollBarImageTransparency = 0.25
+    TabContainer.TopImage    = "rbxassetid://1281761524"
+    TabContainer.BottomImage = "rbxassetid://1281761524"
+    TabContainer.MidImage    = "rbxassetid://1281761524"
     TabContainer.Parent = Content
 
     local TabList = Instance.new("UIListLayout")
@@ -826,7 +841,7 @@ function Library:CreateWindow(Config)
         Tween(Overlay, {BackgroundTransparency = 0.55}, 0.25)
 
         local Dialog = Instance.new("Frame")
-        Dialog.Size = UDim2.new(0, 252, 0, 0)
+        Dialog.Size = UDim2.new(0, 310, 0, 0)
         Dialog.AnchorPoint = Vector2.new(0.5, 0.5)
         Dialog.Position = UDim2.new(0.5, 0, 0.5, 0)
         Dialog.BackgroundTransparency = 0
@@ -842,8 +857,8 @@ function Library:CreateWindow(Config)
         DStroke.Parent = Dialog
 
         local DAccentBar = Instance.new("Frame")
-        DAccentBar.Size = UDim2.new(0, 3, 0, 32)
-        DAccentBar.Position = UDim2.new(0, 0, 0, 20)
+        DAccentBar.Size = UDim2.new(0, 3, 0, 36)
+        DAccentBar.Position = UDim2.new(0, 0, 0, 22)
         DAccentBar.BorderSizePixel = 0
         DAccentBar.BackgroundColor3 = CurrentTheme.Accent
         DAccentBar.ZIndex = 502
@@ -851,8 +866,8 @@ function Library:CreateWindow(Config)
         Instance.new("UICorner", DAccentBar).CornerRadius = UDim.new(1, 0)
 
         local DTitleDot = Instance.new("Frame")
-        DTitleDot.Size = UDim2.new(0, 7, 0, 7)
-        DTitleDot.Position = UDim2.new(0, 18, 0, 22)
+        DTitleDot.Size = UDim2.new(0, 8, 0, 8)
+        DTitleDot.Position = UDim2.new(0, 20, 0, 24)
         DTitleDot.BorderSizePixel = 0
         DTitleDot.BackgroundColor3 = CurrentTheme.Accent
         DTitleDot.ZIndex = 502
@@ -861,11 +876,11 @@ function Library:CreateWindow(Config)
 
         local DTitle = Instance.new("TextLabel")
         DTitle.Text = "Exit Hub?"
-        DTitle.Size = UDim2.new(1, -36, 0, 20)
-        DTitle.Position = UDim2.new(0, 32, 0, 16)
+        DTitle.Size = UDim2.new(1, -40, 0, 22)
+        DTitle.Position = UDim2.new(0, 36, 0, 18)
         DTitle.BackgroundTransparency = 1
         DTitle.Font = Enum.Font.GothamBold
-        DTitle.TextSize = 14
+        DTitle.TextSize = 15
         DTitle.TextXAlignment = Enum.TextXAlignment.Left
         DTitle.TextColor3 = CurrentTheme.Text
         DTitle.ZIndex = 502
@@ -873,8 +888,8 @@ function Library:CreateWindow(Config)
 
         local DBody = Instance.new("TextLabel")
         DBody.Text = "Are you sure you want to exit the Hub?"
-        DBody.Size = UDim2.new(1, -32, 0, 30)
-        DBody.Position = UDim2.new(0, 16, 0, 42)
+        DBody.Size = UDim2.new(1, -40, 0, 32)
+        DBody.Position = UDim2.new(0, 20, 0, 50)
         DBody.BackgroundTransparency = 1
         DBody.Font = Enum.Font.GothamMedium
         DBody.TextSize = 12
@@ -886,8 +901,8 @@ function Library:CreateWindow(Config)
         DBody.Parent = Dialog
 
         local DDivider = Instance.new("Frame")
-        DDivider.Size = UDim2.new(1, -32, 0, 1)
-        DDivider.Position = UDim2.new(0, 16, 0, 80)
+        DDivider.Size = UDim2.new(1, -40, 0, 1)
+        DDivider.Position = UDim2.new(0, 20, 0, 94)
         DDivider.BackgroundColor3 = CurrentTheme.Stroke
         DDivider.BackgroundTransparency = 0.5
         DDivider.BorderSizePixel = 0
@@ -896,8 +911,8 @@ function Library:CreateWindow(Config)
 
         -- No button — uses theme accent color (matches the UI style)
         local NoBtn = Instance.new("TextButton")
-        NoBtn.Size = UDim2.new(0, 110, 0, 34)
-        NoBtn.Position = UDim2.new(0, 16, 0, 92)
+        NoBtn.Size = UDim2.new(0, 125, 0, 36)
+        NoBtn.Position = UDim2.new(0, 20, 0, 108)
         NoBtn.Text = "No"
         NoBtn.Font = Enum.Font.GothamBold
         NoBtn.TextSize = 13
@@ -911,8 +926,8 @@ function Library:CreateWindow(Config)
 
         -- Confirm button — red
         local ConfirmBtn = Instance.new("TextButton")
-        ConfirmBtn.Size = UDim2.new(0, 110, 0, 34)
-        ConfirmBtn.Position = UDim2.new(1, -126, 0, 92)
+        ConfirmBtn.Size = UDim2.new(0, 125, 0, 36)
+        ConfirmBtn.Position = UDim2.new(1, -145, 0, 108)
         ConfirmBtn.Text = "Confirm"
         ConfirmBtn.Font = Enum.Font.GothamBold
         ConfirmBtn.TextSize = 13
@@ -926,7 +941,7 @@ function Library:CreateWindow(Config)
 
         -- pop in animation
         TweenService:Create(Dialog, TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.Out),
-            {Size = UDim2.new(0, 252, 0, 138)}):Play()
+            {Size = UDim2.new(0, 310, 0, 158)}):Play()
 
         -- No: dismiss dialog, do nothing
         NoBtn.MouseButton1Click:Connect(function()
@@ -1010,6 +1025,16 @@ function Library:CreateWindow(Config)
         TabBar.Parent = TabBtn
         Instance.new("UICorner", TabBar).CornerRadius = UDim.new(1, 0)
         AddToRegistry(TabBar, "BackgroundColor3", "Accent")
+
+        -- Scrollbar track background for this page
+        local PageScrollTrack = Instance.new("Frame")
+        PageScrollTrack.Size = UDim2.new(0, 4, 1, 0)
+        PageScrollTrack.Position = UDim2.new(1, -4, 0, 0)
+        PageScrollTrack.BackgroundTransparency = 0.75
+        PageScrollTrack.BorderSizePixel = 0
+        PageScrollTrack.Parent = PageContainer
+        Instance.new("UICorner", PageScrollTrack).CornerRadius = UDim.new(1, 0)
+        AddToRegistry(PageScrollTrack, "BackgroundColor3", "Stroke")
 
         local Page = Instance.new("ScrollingFrame")
         Page.Size = UDim2.new(1, 0, 1, 0)
@@ -2038,6 +2063,11 @@ function Library:CreateWindow(Config)
     Settings:Button("Unload UI", function() Window:Unload() end, true)
 
     RefreshConfigs()
+
+    -- keep TabContainer scrollbar in sync with theme changes
+    table.insert(ThemeListeners, function()
+        TabContainer.ScrollBarImageColor3 = CurrentTheme.Accent
+    end)
 
     do
         for _, r in pairs(Registry) do
