@@ -112,37 +112,9 @@ end)
 ```
 
 ### Slider
-
-u got 4 options depending on what limits u want
-
-**normal — fixed range, shows the drag track**
 ```lua
 Main:Slider("WalkSpeed", 16, 500, 16, function(Value)
     game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = Value
-end)
-```
-
-**inf — no limits at all, just a textbox u type into**
-pass `nil, nil` for min and max
-```lua
-Main:Slider("Multiplier", nil, nil, 1, function(Value)
-    print(Value)  -- can be literally any number
-end)
-```
-
-**min only — cant go below X but no max cap**
-pass the min then `nil` for max
-```lua
-Main:Slider("Jump Power", 0, nil, 50, function(Value)
-    print(Value)  -- never goes below 0
-end)
-```
-
-**max only — cant go above X but no min cap**
-pass `nil` for min then the max
-```lua
-Main:Slider("Fog", nil, 1000, 500, function(Value)
-    print(Value)  -- never goes above 1000
 end)
 ```
 
