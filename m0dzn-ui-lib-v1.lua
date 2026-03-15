@@ -9,6 +9,7 @@
 ]]
 
 print("script loadded.")
+__________________________________________________________________________________________
 
 local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
