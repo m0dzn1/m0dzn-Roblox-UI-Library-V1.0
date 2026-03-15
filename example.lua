@@ -1,5 +1,5 @@
 -- load the m0dzn v1 ui library
-local m0dznv1 = loadstring(game:HttpGet("https://github.com/m0dzn1/m0dzn-Roblox-UI-Library-V1.0/raw/refs/heads/main/m0dzn-ui-lib-V1.lua"))()
+local m0dznv1 = loadstring(game:HttpGet("https://raw.githubusercontent.com/m0dzn1/m0dzn-Roblox-UI-Library-V1.0/refs/heads/main/m0dzn-ui-lib-V1.lua"))()
 
 local Window = m0dznv1:CreateWindow({
     Title = "TEST HUB",
@@ -25,7 +25,7 @@ Tab:Section("elements")
 
 Tab:Label("just a label lol")
 
-Tab:Paragraph("info", "this lib was made by m0dzn, it has toggles sliders dropdowns color pickers keybinds and more, configs are in the config tab")
+Tab:Paragraph("test", "TEST")
 
 Tab:Button("click me", function()
     Window:Notification("nice click", "success")
@@ -35,32 +35,12 @@ Tab:Toggle("some toggle", false, function(on)
     print("toggle is now", on)
 end)
 
--- slider (4 option)
-
--- normal slider with a range (shows the track bar)
-Tab:Slider("Walk Speed", 0, 100, 16, function(v)
+-- slider 
+Tab:Slider("Walk Speed", 0, 100, 16, function(v) -- 0 = min, 100 = max, 16 = default value
     game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = v
 end)
 
--- inf slider, no range just type whatever u want
--- pass nil nil for no limit
-Tab:Slider("Inf Slider", nil, nil, 50, function(v)
-    print("value is", v)
-end)
-
--- min only, cant go below 0 but no max cap
--- pass the min then nil for max
-Tab:Slider("Min Only", 0, nil, 10, function(v)
-    print("value is", v)
-end)
-
--- max only, cant go above 100 but no min cap
--- pass nil for min then the max
-Tab:Slider("Max Only", nil, 100, 50, function(v)
-    print("value is", v)
-end)
-
-Tab:Dropdown("pick one", {"Option A", "Option B", "Option C"}, function(v)
+Tab:Dropdown("pick one", {"A", "B", "C"}, function(v)
     print("picked", v)
 end)
 
