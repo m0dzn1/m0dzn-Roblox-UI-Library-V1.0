@@ -9,7 +9,7 @@
 ]]
 
 print([[
-script loaded.
+script loaded
 ]])
 
 local TweenService = game:GetService("TweenService")
@@ -1014,12 +1014,14 @@ function Library:CreateWindow(Config)
         local Page = Instance.new("ScrollingFrame")
         Page.Size = UDim2.new(1, 0, 1, 0)
         Page.BackgroundTransparency = 1
-        Page.ScrollBarThickness = 3
+        Page.ScrollBarThickness = 4
         Page.ScrollBarImageColor3 = CurrentTheme.Accent
-        Page.ScrollBarImageTransparency = 0.4
-        Page.TopImage = ""
-        Page.BottomImage = ""
-        Page.MidImage = ""
+        Page.ScrollBarImageTransparency = 0.25
+        -- use a plain white square asset so ScrollBarImageColor3 tints correctly
+        -- empty string causes Roblox to fall back to its default red/pink asset
+        Page.TopImage    = "rbxassetid://1281761524"
+        Page.BottomImage = "rbxassetid://1281761524"
+        Page.MidImage    = "rbxassetid://1281761524"
         Page.Visible = false
         Page.Parent = PageContainer
         local PagePad = Instance.new("UIPadding")
@@ -1075,7 +1077,7 @@ function Library:CreateWindow(Config)
 
         table.insert(ThemeListeners, function()
             Page.ScrollBarImageColor3 = CurrentTheme.Accent
-            Page.ScrollBarImageTransparency = 0.4
+            Page.ScrollBarImageTransparency = 0.25
             if TabBar.BackgroundTransparency == 0 then
                 TabBtn.TextColor3 = CurrentTheme.Text
                 TabBtn.BackgroundColor3 = CurrentTheme.Top
