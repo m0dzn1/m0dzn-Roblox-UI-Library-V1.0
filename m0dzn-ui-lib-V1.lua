@@ -9,7 +9,7 @@
 ]]
 
 print([[
-script loaded.
+script loaded
 ]])
 
 local TweenService = game:GetService("TweenService")
@@ -498,6 +498,17 @@ function Library:CreateWindow(Config)
     PageContainer.Position = UDim2.new(0, 162, 0, 0)
     PageContainer.BackgroundTransparency = 1
     PageContainer.Parent = Content
+
+    -- Single shared scrollbar track rail — lives on Content, never hidden by tab switching
+    local PageScrollTrack = Instance.new("Frame")
+    PageScrollTrack.Size = UDim2.new(0, 4, 1, 0)
+    PageScrollTrack.Position = UDim2.new(1, -4, 0, 0)
+    PageScrollTrack.BackgroundTransparency = 0.72
+    PageScrollTrack.BorderSizePixel = 0
+    PageScrollTrack.ZIndex = 2
+    PageScrollTrack.Parent = PageContainer
+    Instance.new("UICorner", PageScrollTrack).CornerRadius = UDim.new(1, 0)
+    AddToRegistry(PageScrollTrack, "BackgroundColor3", "Stroke")
 
     local openSize  = UDim2.new(0, 650, 0, 430)
 
@@ -992,8 +1003,8 @@ function Library:CreateWindow(Config)
                 MainFrame.Visible = false
             end)
 
-            -- destroy ScreenGui after 5 seconds so the notif finishes showing
-            task.delay(5, function()
+            -- destroy ScreenGui after 3 seconds (notif lasts 3s, so it finishes naturally)
+            task.delay(3, function()
                 pcall(function() ScreenGui:Destroy() end)
             end)
         end)
@@ -1026,16 +1037,6 @@ function Library:CreateWindow(Config)
         Instance.new("UICorner", TabBar).CornerRadius = UDim.new(1, 0)
         AddToRegistry(TabBar, "BackgroundColor3", "Accent")
 
-        -- Scrollbar track background for this page
-        local PageScrollTrack = Instance.new("Frame")
-        PageScrollTrack.Size = UDim2.new(0, 4, 1, 0)
-        PageScrollTrack.Position = UDim2.new(1, -4, 0, 0)
-        PageScrollTrack.BackgroundTransparency = 0.75
-        PageScrollTrack.BorderSizePixel = 0
-        PageScrollTrack.Parent = PageContainer
-        Instance.new("UICorner", PageScrollTrack).CornerRadius = UDim.new(1, 0)
-        AddToRegistry(PageScrollTrack, "BackgroundColor3", "Stroke")
-
         local Page = Instance.new("ScrollingFrame")
         Page.Size = UDim2.new(1, 0, 1, 0)
         Page.BackgroundTransparency = 1
@@ -1063,7 +1064,9 @@ function Library:CreateWindow(Config)
         end)
 
         TabBtn.MouseButton1Click:Connect(function()
-            for _, v in pairs(PageContainer:GetChildren()) do v.Visible = false end
+            for _, v in pairs(PageContainer:GetChildren()) do
+                if v:IsA("ScrollingFrame") then v.Visible = false end
+            end
             for _, v in pairs(TabContainer:GetChildren()) do
                 if v:IsA("TextButton") then
                     Tween(v, {BackgroundTransparency = 1, TextColor3 = Color3.fromRGB(150, 150, 158)})
