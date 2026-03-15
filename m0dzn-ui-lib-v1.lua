@@ -8,7 +8,7 @@
                M0DZN LIBRARY V1.0
 ]]
 
-print("script loadded")
+print("script loadded.")
 
 local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
@@ -406,12 +406,7 @@ function Library:CreateWindow(Config)
     local TabContainer = Instance.new("ScrollingFrame")
     TabContainer.Size = UDim2.new(0, 138, 0.84, 0)
     TabContainer.BackgroundTransparency = 1
-    TabContainer.ScrollBarThickness = 3
-    TabContainer.ScrollBarImageColor3 = CurrentTheme.Accent
-    TabContainer.ScrollBarImageTransparency = 0.2
-    TabContainer.TopImage    = "rbxassetid://1281761524"
-    TabContainer.BottomImage = "rbxassetid://1281761524"
-    TabContainer.MidImage    = "rbxassetid://1281761524"
+    TabContainer.ScrollBarThickness = 0
     TabContainer.Parent = Content
 
     -- Track rail: sits at the right edge of the tab column, always visible
@@ -1021,12 +1016,7 @@ function Library:CreateWindow(Config)
         local Page = Instance.new("ScrollingFrame")
         Page.Size = UDim2.new(1, 0, 1, 0)
         Page.BackgroundTransparency = 1
-        Page.ScrollBarThickness = 3
-        Page.ScrollBarImageColor3 = CurrentTheme.Accent
-        Page.ScrollBarImageTransparency = 0.2
-        Page.TopImage    = "rbxassetid://1281761524"
-        Page.BottomImage = "rbxassetid://1281761524"
-        Page.MidImage    = "rbxassetid://1281761524"
+        Page.ScrollBarThickness = 0
         Page.Visible = false
         Page.Parent = PageContainer
         local PagePad = Instance.new("UIPadding")
@@ -1083,8 +1073,6 @@ function Library:CreateWindow(Config)
         if name == "Settings" then TabBtn.LayoutOrder = 99999 end
 
         table.insert(ThemeListeners, function()
-            Page.ScrollBarImageColor3 = CurrentTheme.Accent
-            Page.ScrollBarImageTransparency = 0.2
             if TabBar.BackgroundTransparency == 0 then
                 TabBtn.TextColor3 = CurrentTheme.Text
                 TabBtn.BackgroundColor3 = CurrentTheme.Top
@@ -2046,11 +2034,7 @@ function Library:CreateWindow(Config)
 
     RefreshConfigs()
 
-    -- keep TabContainer scrollbar in sync with theme changes
-    table.insert(ThemeListeners, function()
-        TabContainer.ScrollBarImageColor3 = CurrentTheme.Accent
-        TabContainer.ScrollBarImageTransparency = 0.2
-    end)
+
 
     do
         for _, r in pairs(Registry) do
