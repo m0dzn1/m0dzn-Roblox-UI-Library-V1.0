@@ -28,18 +28,6 @@ local Main = Window:Tab("Main")
 
 ---
 
-## ⌨️ keybind
-
-pass any `Enum.KeyCode` as `Keybind`. user can also change it live in the settings tab, but whatever u put here is the default
-
-```lua
-    Keybind = Enum.KeyCode.RightShift,
-```
-
-common ones: `M`, `RightShift`, `Insert`, `F4`
-
----
-
 ## 🎨 themes
 
 two ways to do it
