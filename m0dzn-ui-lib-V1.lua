@@ -9,7 +9,7 @@
 ]]
 
 print([[
-script loaded
+script loaded.
 ]])
 
 local TweenService = game:GetService("TweenService")
@@ -815,11 +815,173 @@ function Library:CreateWindow(Config)
     function Window:SetKeybind(key) Keybind = key end
 
     function Window:Unload()
-        MainFrame.Active = false
-        Window:Notification("UI Unloaded", "Library has been destroyed", "error")
-        TweenService:Create(MainFrame, TweenInfo.new(0.35, Enum.EasingStyle.Back, Enum.EasingDirection.In), {Size = UDim2.new(0, 0, 0, 0)}):Play()
-        task.wait(1.2)
-        ScreenGui:Destroy()
+        -- Build confirm dialog styled exactly like the main UI (same theme, tile style)
+        local Overlay = Instance.new("Frame")
+        Overlay.Size = UDim2.new(1, 0, 1, 0)
+        Overlay.Position = UDim2.new(0, 0, 0, 0)
+        Overlay.BackgroundColor3 = Color3.new(0, 0, 0)
+        Overlay.BackgroundTransparency = 1
+        Overlay.ZIndex = 500
+        Overlay.Parent = ScreenGui
+        Tween(Overlay, {BackgroundTransparency = 0.55}, 0.25)
+
+        local Dialog = Instance.new("Frame")
+        Dialog.Size = UDim2.new(0, 252, 0, 0)
+        Dialog.AnchorPoint = Vector2.new(0.5, 0.5)
+        Dialog.Position = UDim2.new(0.5, 0, 0.5, 0)
+        Dialog.BackgroundTransparency = 0
+        Dialog.BackgroundColor3 = CurrentTheme.Main
+        Dialog.ZIndex = 501
+        Dialog.Parent = ScreenGui
+        Instance.new("UICorner", Dialog).CornerRadius = UDim.new(0, 16)
+
+        local DStroke = Instance.new("UIStroke")
+        DStroke.Thickness = 1.5
+        DStroke.Color = CurrentTheme.Stroke
+        DStroke.Transparency = 0
+        DStroke.Parent = Dialog
+
+        local DAccentBar = Instance.new("Frame")
+        DAccentBar.Size = UDim2.new(0, 3, 0, 32)
+        DAccentBar.Position = UDim2.new(0, 0, 0, 20)
+        DAccentBar.BorderSizePixel = 0
+        DAccentBar.BackgroundColor3 = CurrentTheme.Accent
+        DAccentBar.ZIndex = 502
+        DAccentBar.Parent = Dialog
+        Instance.new("UICorner", DAccentBar).CornerRadius = UDim.new(1, 0)
+
+        local DTitleDot = Instance.new("Frame")
+        DTitleDot.Size = UDim2.new(0, 7, 0, 7)
+        DTitleDot.Position = UDim2.new(0, 18, 0, 22)
+        DTitleDot.BorderSizePixel = 0
+        DTitleDot.BackgroundColor3 = CurrentTheme.Accent
+        DTitleDot.ZIndex = 502
+        DTitleDot.Parent = Dialog
+        Instance.new("UICorner", DTitleDot).CornerRadius = UDim.new(0, 2)
+
+        local DTitle = Instance.new("TextLabel")
+        DTitle.Text = "Exit Hub?"
+        DTitle.Size = UDim2.new(1, -36, 0, 20)
+        DTitle.Position = UDim2.new(0, 32, 0, 16)
+        DTitle.BackgroundTransparency = 1
+        DTitle.Font = Enum.Font.GothamBold
+        DTitle.TextSize = 14
+        DTitle.TextXAlignment = Enum.TextXAlignment.Left
+        DTitle.TextColor3 = CurrentTheme.Text
+        DTitle.ZIndex = 502
+        DTitle.Parent = Dialog
+
+        local DBody = Instance.new("TextLabel")
+        DBody.Text = "Are you sure you want to exit the Hub?"
+        DBody.Size = UDim2.new(1, -32, 0, 30)
+        DBody.Position = UDim2.new(0, 16, 0, 42)
+        DBody.BackgroundTransparency = 1
+        DBody.Font = Enum.Font.GothamMedium
+        DBody.TextSize = 12
+        DBody.TextXAlignment = Enum.TextXAlignment.Left
+        DBody.TextWrapped = true
+        DBody.TextColor3 = CurrentTheme.Text
+        DBody.TextTransparency = 0.3
+        DBody.ZIndex = 502
+        DBody.Parent = Dialog
+
+        local DDivider = Instance.new("Frame")
+        DDivider.Size = UDim2.new(1, -32, 0, 1)
+        DDivider.Position = UDim2.new(0, 16, 0, 80)
+        DDivider.BackgroundColor3 = CurrentTheme.Stroke
+        DDivider.BackgroundTransparency = 0.5
+        DDivider.BorderSizePixel = 0
+        DDivider.ZIndex = 502
+        DDivider.Parent = Dialog
+
+        -- No button — uses theme accent color (matches the UI style)
+        local NoBtn = Instance.new("TextButton")
+        NoBtn.Size = UDim2.new(0, 110, 0, 34)
+        NoBtn.Position = UDim2.new(0, 16, 0, 92)
+        NoBtn.Text = "No"
+        NoBtn.Font = Enum.Font.GothamBold
+        NoBtn.TextSize = 13
+        NoBtn.TextColor3 = CurrentTheme.Main
+        NoBtn.BackgroundColor3 = CurrentTheme.Accent
+        NoBtn.ZIndex = 502
+        NoBtn.Parent = Dialog
+        Instance.new("UICorner", NoBtn).CornerRadius = UDim.new(0, 10)
+        NoBtn.MouseEnter:Connect(function() Tween(NoBtn, {BackgroundTransparency = 0.2}, 0.12) end)
+        NoBtn.MouseLeave:Connect(function() Tween(NoBtn, {BackgroundTransparency = 0}, 0.12) end)
+
+        -- Confirm button — red
+        local ConfirmBtn = Instance.new("TextButton")
+        ConfirmBtn.Size = UDim2.new(0, 110, 0, 34)
+        ConfirmBtn.Position = UDim2.new(1, -126, 0, 92)
+        ConfirmBtn.Text = "Confirm"
+        ConfirmBtn.Font = Enum.Font.GothamBold
+        ConfirmBtn.TextSize = 13
+        ConfirmBtn.TextColor3 = Color3.new(1, 1, 1)
+        ConfirmBtn.BackgroundColor3 = Color3.fromRGB(210, 45, 45)
+        ConfirmBtn.ZIndex = 502
+        ConfirmBtn.Parent = Dialog
+        Instance.new("UICorner", ConfirmBtn).CornerRadius = UDim.new(0, 10)
+        ConfirmBtn.MouseEnter:Connect(function() Tween(ConfirmBtn, {BackgroundColor3 = Color3.fromRGB(235, 60, 60)}, 0.12) end)
+        ConfirmBtn.MouseLeave:Connect(function() Tween(ConfirmBtn, {BackgroundColor3 = Color3.fromRGB(210, 45, 45)}, 0.12) end)
+
+        -- pop in animation
+        TweenService:Create(Dialog, TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.Out),
+            {Size = UDim2.new(0, 252, 0, 138)}):Play()
+
+        -- No: dismiss dialog, do nothing
+        NoBtn.MouseButton1Click:Connect(function()
+            TweenService:Create(Dialog, TweenInfo.new(0.25, Enum.EasingStyle.Back, Enum.EasingDirection.In),
+                {Size = UDim2.new(0, 0, 0, 0)}):Play()
+            Tween(Overlay, {BackgroundTransparency = 1}, 0.25)
+            task.delay(0.3, function()
+                pcall(function() Dialog:Destroy() end)
+                pcall(function() Overlay:Destroy() end)
+            end)
+        end)
+
+        -- Confirm: reset all elements, show notif, animate UI away, destroy after 5s
+        ConfirmBtn.MouseButton1Click:Connect(function()
+            -- dismiss dialog
+            TweenService:Create(Dialog, TweenInfo.new(0.22, Enum.EasingStyle.Back, Enum.EasingDirection.In),
+                {Size = UDim2.new(0, 0, 0, 0)}):Play()
+            Tween(Overlay, {BackgroundTransparency = 1}, 0.22)
+            task.delay(0.28, function()
+                pcall(function() Dialog:Destroy() end)
+                pcall(function() Overlay:Destroy() end)
+            end)
+
+            -- reset all registered elements to their default states
+            for flag, obj in pairs(ConfigObjects) do
+                pcall(function()
+                    if obj.Type == "Toggle" then
+                        obj.Set(false)
+                    elseif obj.Type == "Dropdown" then
+                        if obj.Reset then obj.Reset() end
+                    elseif obj.Type == "Textbox" then
+                        obj.Set("")
+                    elseif obj.Type == "ColorPicker" then
+                        obj.Set({R = 1, G = 1, B = 1})
+                    end
+                end)
+            end
+            Library.Flags = {}
+
+            -- show unload notification (visible while UI fades, persists after UI gone)
+            Window:Notification("UI Unloaded", "Library has been destroyed", "error")
+
+            -- animate main frame away
+            MainFrame.Active = false
+            TweenService:Create(MainFrame, TweenInfo.new(0.35, Enum.EasingStyle.Back, Enum.EasingDirection.In),
+                {Size = UDim2.new(0, 0, 0, 0)}):Play()
+            task.delay(0.38, function()
+                MainFrame.Visible = false
+            end)
+
+            -- destroy ScreenGui after 5 seconds so the notif finishes showing
+            task.delay(5, function()
+                pcall(function() ScreenGui:Destroy() end)
+            end)
+        end)
     end
 
     function Window:Destroy()
@@ -1699,7 +1861,13 @@ function Library:CreateWindow(Config)
             end)
             UserInputService.InputEnded:Connect(function(i)
                 if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then
-                    svDragging = false
+                    if svDragging then
+                        svDragging = false
+                        local r = math.floor(Color.R * 255)
+                        local g = math.floor(Color.G * 255)
+                        local b = math.floor(Color.B * 255)
+                        InternalNotif(text, r..", "..g..", "..b, "info")
+                    end
                 end
             end)
             UserInputService.InputChanged:Connect(function(i)
@@ -1722,7 +1890,13 @@ function Library:CreateWindow(Config)
             end)
             UserInputService.InputEnded:Connect(function(i)
                 if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then
-                    hueDragging = false
+                    if hueDragging then
+                        hueDragging = false
+                        local r = math.floor(Color.R * 255)
+                        local g = math.floor(Color.G * 255)
+                        local b = math.floor(Color.B * 255)
+                        InternalNotif(text, r..", "..g..", "..b, "info")
+                    end
                 end
             end)
             UserInputService.InputChanged:Connect(function(i)
@@ -1741,11 +1915,6 @@ function Library:CreateWindow(Config)
                 else
                     Tween(Panel, {Size = UDim2.new(1, 0, 0, 0)}, 0.28)
                     task.wait(0.3); Panel.Visible = false
-                    -- title=text, body="R,G,B" values, type=info
-                    local r = math.floor(Color.R * 255)
-                    local g = math.floor(Color.G * 255)
-                    local b = math.floor(Color.B * 255)
-                    InternalNotif(text, r..", "..g..", "..b, "info")
                 end
             end)
 
