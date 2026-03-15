@@ -3,6 +3,11 @@
 clean fully themeable ui lib for roblox scripts. smooth animations, real config system, live color picker, 9 rainbow border modes
 
 ---
+🖼 Example Image
+
+![Preview](https://github.com/m0dzn1/m0dzn-Roblox-UI-Library-V1.0/blob/main/image.png?raw=true)
+
+---
 
 ## 🚀 load
 
