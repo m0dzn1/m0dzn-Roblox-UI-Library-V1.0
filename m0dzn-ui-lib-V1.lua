@@ -9,7 +9,7 @@
 ]]
 
 print([[
-script loaded.
+script loaded
 ]])
 
 local TweenService = game:GetService("TweenService")
@@ -798,6 +798,9 @@ function Library:CreateWindow(Config)
     end
 
     -- public function scripters call — tagged as "scripter" so it clears internal notifs
+    -- Usage: Window:Notification("title", "body", "type")  → shows "{title}\n{body}"
+    --        Window:Notification("title", "type")           → shows "{title}" only
+    --        Window:Notification("title")                   → shows "{title}" only (default grey)
     function Window:Notification(title, body, notifType)
         SpawnNotif(title, body, notifType, "scripter")
     end
@@ -1013,9 +1016,11 @@ function Library:CreateWindow(Config)
             return F
         end
 
-        -- CHANGE: Button notif — "text\nActivate" with success type
-        -- If callback calls Window:Notification(msg, type), that scripter notif replaces it,
-        -- showing the custom msg instead of "Activate"
+        -- Button notif:
+        --   Default  → title=text, body="Activate", type=success
+        --   Custom   → if callback calls Window:Notification(msg, type),
+        --              that fires as a scripter notif with title=text, body=msg, type=type
+        --              (kills the internal "Activate" one and shows "{text}\n{msg}" instead)
         function Elements:Button(text, callback, silent)
             local Btn = Instance.new("TextButton")
             Btn.Size = UDim2.new(1, 0, 0, 44)
@@ -1044,12 +1049,24 @@ function Library:CreateWindow(Config)
                 Tween(Btn, {Size = UDim2.new(0.97, 0, 0, 40)}, 0.1)
                 task.wait(0.1)
                 Tween(Btn, {Size = UDim2.new(1, 0, 0, 44)}, 0.15)
-                -- CHANGE: "text\nActivate" success — if callback calls Window:Notification,
-                -- that scripter notif kills this one and shows the custom message instead
                 if not silent then
+                    -- Fire internal "Activate" notif first.
+                    -- If callback calls Window:Notification(msg, type), Window:Notification
+                    -- is temporarily overridden to instead fire a notif with title=text, body=msg
+                    -- which kills this internal one and shows the custom message.
+                    local origNotif = Window.Notification
+                    Window.Notification = function(_, msg, nType)
+                        -- restore immediately so it only intercepts once
+                        Window.Notification = origNotif
+                        SpawnNotif(text, msg, nType, "scripter")
+                    end
                     InternalNotif(text, "Activate", "success")
+                    callback()
+                    -- restore in case callback didn't call Notification
+                    Window.Notification = origNotif
+                else
+                    callback()
                 end
-                callback()
             end)
             Btn.MouseEnter:Connect(function() Tween(Btn, {BackgroundTransparency = 0.0}, 0.18) end)
             Btn.MouseLeave:Connect(function() Tween(Btn, {BackgroundTransparency = 0.04}, 0.18) end)
@@ -1105,7 +1122,7 @@ function Library:CreateWindow(Config)
 
             ClickBtn.MouseButton1Click:Connect(function()
                 Enabled = not Enabled
-                -- CHANGE: "text\nEnable" success OR "text\nDisable" default (nil = grey)
+                -- title=text, body="Enable"/"Disable", success/default(grey)
                 if Enabled then
                     InternalNotif(text, "Enable", "success")
                 else
@@ -1243,7 +1260,7 @@ function Library:CreateWindow(Config)
                     if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then
                         if sliding then
                             sliding = false
-                            -- CHANGE: "text\n{value}" info type for slider
+                            -- title=text, body="{value}", type=info
                             InternalNotif(text, tostring(Val), "info")
                         end
                     end
@@ -1315,7 +1332,8 @@ function Library:CreateWindow(Config)
                 Lbl.Text = text .. "   —   " .. opt
                 Library.Flags[text] = opt; ConfigObjects[text].Value = opt
                 if not silent then
-                    InternalNotif(text, nil, "info")
+                    -- title=text, body=opt (the selected value), type=info
+                    InternalNotif(text, opt, "info")
                 end
                 callback(opt)
                 Tween(Container, {Size = UDim2.new(1, 0, 0, 0)}, 0.28)
@@ -1409,7 +1427,8 @@ function Library:CreateWindow(Config)
                 Library.Flags[text] = Box.Text
                 if ConfigObjects[text] then ConfigObjects[text].Value = Box.Text end
                 if not silent and Box.Text ~= "" then
-                    InternalNotif(text, nil, "info")
+                    -- title=text, body=typed text, type=info
+                    InternalNotif(text, Box.Text, "info")
                 end
                 callback(Box.Text)
             end)
@@ -1448,7 +1467,8 @@ function Library:CreateWindow(Config)
                 if input.KeyCode.Name ~= "Unknown" then
                     Key = input.KeyCode; KeyLabel.Text = Key.Name
                     Library.Flags[text] = Key.Name; ConfigObjects[text].Value = Key.Name
-                    InternalNotif(text, nil, "info")
+                    -- title=text, body=key name, type=info
+                    InternalNotif(text, Key.Name, "info")
                     callback(Key)
                 else
                     KeyLabel.Text = Key.Name
@@ -1483,6 +1503,8 @@ function Library:CreateWindow(Config)
 
             ValBox.FocusLost:Connect(function() Library.Flags[text] = ValBox.Text
                 ConfigObjects[text].Value = ValBox.Text
+                -- title=text, body=typed value, type=info
+                InternalNotif(text, ValBox.Text, "info")
                 if callback then callback(ValBox.Text) end
             end)
             ConfigObjects[text] = {Type = "Value", Value = default, Set = function(val)
@@ -1719,7 +1741,11 @@ function Library:CreateWindow(Config)
                 else
                     Tween(Panel, {Size = UDim2.new(1, 0, 0, 0)}, 0.28)
                     task.wait(0.3); Panel.Visible = false
-                    InternalNotif(text, nil, "info")
+                    -- title=text, body="R,G,B" values, type=info
+                    local r = math.floor(Color.R * 255)
+                    local g = math.floor(Color.G * 255)
+                    local b = math.floor(Color.B * 255)
+                    InternalNotif(text, r..", "..g..", "..b, "info")
                 end
             end)
 
