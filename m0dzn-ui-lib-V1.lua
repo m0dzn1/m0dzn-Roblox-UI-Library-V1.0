@@ -9,7 +9,7 @@
 ]]
 
 print([[
-script loaded
+script loaded.
 ]])
 
 local TweenService = game:GetService("TweenService")
@@ -405,24 +405,17 @@ function Library:CreateWindow(Config)
     Content.BackgroundTransparency = 1
     Content.Parent = MainFrame
 
-    -- Scrollbar track background for the tab sidebar
-    local TabScrollTrack = Instance.new("Frame")
-    TabScrollTrack.Size = UDim2.new(0, 4, 0.84, 0)
-    TabScrollTrack.Position = UDim2.new(0, 134, 0, 0)
-    TabScrollTrack.BackgroundTransparency = 0.75
-    TabScrollTrack.BorderSizePixel = 0
-    TabScrollTrack.Parent = Content
-    Instance.new("UICorner", TabScrollTrack).CornerRadius = UDim.new(1, 0)
-    AddToRegistry(TabScrollTrack, "BackgroundColor3", "Stroke")
-
     local TabContainer = Instance.new("ScrollingFrame")
     TabContainer.Size = UDim2.new(0, 138, 0.84, 0)
-    TabContainer.BackgroundTransparency = 1
+    -- BackgroundColor3 = the track rail; BackgroundTransparency controls visibility
+    TabContainer.BackgroundTransparency = 0.82
+    TabContainer.BackgroundColor3 = CurrentTheme.Stroke
     TabContainer.ScrollBarThickness = 4
     TabContainer.ScrollBarImageColor3 = CurrentTheme.Accent
-    TabContainer.ScrollBarImageTransparency = 0.25
-    TabContainer.TopImage    = "rbxassetid://1281761524"
-    TabContainer.BottomImage = "rbxassetid://1281761524"
+    TabContainer.ScrollBarImageTransparency = 0
+    -- empty TopImage/BottomImage removes arrow buttons; MidImage is the thumb
+    TabContainer.TopImage    = ""
+    TabContainer.BottomImage = ""
     TabContainer.MidImage    = "rbxassetid://1281761524"
     TabContainer.Parent = Content
 
@@ -498,17 +491,6 @@ function Library:CreateWindow(Config)
     PageContainer.Position = UDim2.new(0, 162, 0, 0)
     PageContainer.BackgroundTransparency = 1
     PageContainer.Parent = Content
-
-    -- Single shared scrollbar track rail — lives on Content, never hidden by tab switching
-    local PageScrollTrack = Instance.new("Frame")
-    PageScrollTrack.Size = UDim2.new(0, 4, 1, 0)
-    PageScrollTrack.Position = UDim2.new(1, -4, 0, 0)
-    PageScrollTrack.BackgroundTransparency = 0.72
-    PageScrollTrack.BorderSizePixel = 0
-    PageScrollTrack.ZIndex = 2
-    PageScrollTrack.Parent = PageContainer
-    Instance.new("UICorner", PageScrollTrack).CornerRadius = UDim.new(1, 0)
-    AddToRegistry(PageScrollTrack, "BackgroundColor3", "Stroke")
 
     local openSize  = UDim2.new(0, 650, 0, 430)
 
@@ -1039,14 +1021,15 @@ function Library:CreateWindow(Config)
 
         local Page = Instance.new("ScrollingFrame")
         Page.Size = UDim2.new(1, 0, 1, 0)
-        Page.BackgroundTransparency = 1
+        -- BackgroundColor3 = the track rail color, BackgroundTransparency controls how visible it is
+        Page.BackgroundTransparency = 0.82
+        Page.BackgroundColor3 = CurrentTheme.Stroke
         Page.ScrollBarThickness = 4
         Page.ScrollBarImageColor3 = CurrentTheme.Accent
-        Page.ScrollBarImageTransparency = 0.25
-        -- use a plain white square asset so ScrollBarImageColor3 tints correctly
-        -- empty string causes Roblox to fall back to its default red/pink asset
-        Page.TopImage    = "rbxassetid://1281761524"
-        Page.BottomImage = "rbxassetid://1281761524"
+        Page.ScrollBarImageTransparency = 0
+        -- empty TopImage/BottomImage removes arrow buttons; MidImage is the thumb
+        Page.TopImage    = ""
+        Page.BottomImage = ""
         Page.MidImage    = "rbxassetid://1281761524"
         Page.Visible = false
         Page.Parent = PageContainer
@@ -1105,7 +1088,8 @@ function Library:CreateWindow(Config)
 
         table.insert(ThemeListeners, function()
             Page.ScrollBarImageColor3 = CurrentTheme.Accent
-            Page.ScrollBarImageTransparency = 0.25
+            Page.ScrollBarImageTransparency = 0
+            Page.BackgroundColor3 = CurrentTheme.Stroke
             if TabBar.BackgroundTransparency == 0 then
                 TabBtn.TextColor3 = CurrentTheme.Text
                 TabBtn.BackgroundColor3 = CurrentTheme.Top
@@ -2070,6 +2054,8 @@ function Library:CreateWindow(Config)
     -- keep TabContainer scrollbar in sync with theme changes
     table.insert(ThemeListeners, function()
         TabContainer.ScrollBarImageColor3 = CurrentTheme.Accent
+        TabContainer.ScrollBarImageTransparency = 0
+        TabContainer.BackgroundColor3 = CurrentTheme.Stroke
     end)
 
     do
