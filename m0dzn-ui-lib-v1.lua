@@ -5,10 +5,10 @@
  ██║╚██╔╝██║  ████╔╝██║  ██║  ██║   ███╔╝    ██║╚██╗██║
  ██║ ╚═╝ ██║  ╚██████╔╝  ██████╔╝  ███████╗  ██║ ╚████║
  ╚═╝     ╚═╝   ╚═════╝   ╚═════╝   ╚══════╝  ╚═╝  ╚═══╝
-               M0DZN LIBRARY V1.1
+               M0DZN LIBRARY V1.0
 ]]
 
-print("script loadded")
+print("script loadded.")
 
 local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
