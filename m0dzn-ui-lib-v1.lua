@@ -9,7 +9,7 @@
 ]]
 
 print([[
-script loaded
+script loaded.
 ]])
 
 local TweenService = game:GetService("TweenService")
