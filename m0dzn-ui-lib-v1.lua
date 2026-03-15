@@ -5,7 +5,7 @@
  ██║╚██╔╝██║  ████╔╝██║  ██║  ██║   ███╔╝    ██║╚██╗██║
  ██║ ╚═╝ ██║  ╚██████╔╝  ██████╔╝  ███████╗  ██║ ╚████║
  ╚═╝     ╚═╝   ╚═════╝   ╚═════╝   ╚══════╝  ╚═╝  ╚═══╝
-               M0DZN LIBRARY V1.0
+               M0DZN LIBRARY V1.1
 ]]
 
 print("script loadded")
@@ -404,18 +404,26 @@ function Library:CreateWindow(Config)
     Content.Parent = MainFrame
 
     local TabContainer = Instance.new("ScrollingFrame")
-    TabContainer.Size = UDim2.new(0, 138, 0.84, 0)
-    -- BackgroundColor3 = the track rail; BackgroundTransparency controls visibility
-    TabContainer.BackgroundTransparency = 0.82
-    TabContainer.BackgroundColor3 = CurrentTheme.Stroke
-    TabContainer.ScrollBarThickness = 4
+    TabContainer.Size = UDim2.new(0, 135, 0.84, 0)
+    TabContainer.BackgroundTransparency = 1
+    TabContainer.ScrollBarThickness = 3
     TabContainer.ScrollBarImageColor3 = CurrentTheme.Accent
-    TabContainer.ScrollBarImageTransparency = 0
-    -- empty TopImage/BottomImage removes arrow buttons; MidImage is the thumb
-    TabContainer.TopImage    = ""
-    TabContainer.BottomImage = ""
+    TabContainer.ScrollBarImageTransparency = 0.15
+    TabContainer.TopImage    = "rbxassetid://1281761524"
+    TabContainer.BottomImage = "rbxassetid://1281761524"
     TabContainer.MidImage    = "rbxassetid://1281761524"
     TabContainer.Parent = Content
+
+    -- Track rail: sits at the right edge of the tab column, always visible
+    local TabScrollRail = Instance.new("Frame")
+    TabScrollRail.Size = UDim2.new(0, 3, 0.84, 0)
+    TabScrollRail.Position = UDim2.new(0, 135, 0, 0)
+    TabScrollRail.BackgroundTransparency = 0.7
+    TabScrollRail.BorderSizePixel = 0
+    TabScrollRail.ZIndex = 1
+    TabScrollRail.Parent = Content
+    Instance.new("UICorner", TabScrollRail).CornerRadius = UDim.new(1, 0)
+    AddToRegistry(TabScrollRail, "BackgroundColor3", "Stroke")
 
     local TabList = Instance.new("UIListLayout")
     TabList.Padding = UDim.new(0, 4)
@@ -489,6 +497,17 @@ function Library:CreateWindow(Config)
     PageContainer.Position = UDim2.new(0, 162, 0, 0)
     PageContainer.BackgroundTransparency = 1
     PageContainer.Parent = Content
+
+    -- Track rail: sits at the right edge of the page content area, always visible
+    local PageScrollRail = Instance.new("Frame")
+    PageScrollRail.Size = UDim2.new(0, 3, 1, 0)
+    PageScrollRail.Position = UDim2.new(1, -3, 0, 0)
+    PageScrollRail.BackgroundTransparency = 0.7
+    PageScrollRail.BorderSizePixel = 0
+    PageScrollRail.ZIndex = 1
+    PageScrollRail.Parent = Content
+    Instance.new("UICorner", PageScrollRail).CornerRadius = UDim.new(1, 0)
+    AddToRegistry(PageScrollRail, "BackgroundColor3", "Stroke")
 
     local openSize  = UDim2.new(0, 650, 0, 430)
 
@@ -1019,15 +1038,12 @@ function Library:CreateWindow(Config)
 
         local Page = Instance.new("ScrollingFrame")
         Page.Size = UDim2.new(1, 0, 1, 0)
-        -- BackgroundColor3 = the track rail color, BackgroundTransparency controls how visible it is
-        Page.BackgroundTransparency = 0.82
-        Page.BackgroundColor3 = CurrentTheme.Stroke
-        Page.ScrollBarThickness = 4
+        Page.BackgroundTransparency = 1
+        Page.ScrollBarThickness = 3
         Page.ScrollBarImageColor3 = CurrentTheme.Accent
-        Page.ScrollBarImageTransparency = 0
-        -- empty TopImage/BottomImage removes arrow buttons; MidImage is the thumb
-        Page.TopImage    = ""
-        Page.BottomImage = ""
+        Page.ScrollBarImageTransparency = 0.4
+        Page.TopImage    = "rbxassetid://1281761524"
+        Page.BottomImage = "rbxassetid://1281761524"
         Page.MidImage    = "rbxassetid://1281761524"
         Page.Visible = false
         Page.Parent = PageContainer
@@ -1086,8 +1102,7 @@ function Library:CreateWindow(Config)
 
         table.insert(ThemeListeners, function()
             Page.ScrollBarImageColor3 = CurrentTheme.Accent
-            Page.ScrollBarImageTransparency = 0
-            Page.BackgroundColor3 = CurrentTheme.Stroke
+            Page.ScrollBarImageTransparency = 0.4
             if TabBar.BackgroundTransparency == 0 then
                 TabBtn.TextColor3 = CurrentTheme.Text
                 TabBtn.BackgroundColor3 = CurrentTheme.Top
@@ -2049,11 +2064,11 @@ function Library:CreateWindow(Config)
 
     RefreshConfigs()
 
-    -- keep TabContainer scrollbar in sync with theme changes
+    -- keep TabContainer scrollbar and rail in sync with theme changes
     table.insert(ThemeListeners, function()
         TabContainer.ScrollBarImageColor3 = CurrentTheme.Accent
-        TabContainer.ScrollBarImageTransparency = 0
-        TabContainer.BackgroundColor3 = CurrentTheme.Stroke
+        TabContainer.ScrollBarImageTransparency = 0.15
+        TabScrollRail.BackgroundColor3 = CurrentTheme.Stroke
     end)
 
     do
