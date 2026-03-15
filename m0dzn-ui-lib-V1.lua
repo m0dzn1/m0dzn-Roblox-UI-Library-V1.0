@@ -9,7 +9,7 @@
 ]]
 
 print([[
-script loaded
+script loaded.
 ]])
 
 local TweenService = game:GetService("TweenService")
@@ -190,15 +190,10 @@ function Library:CreateWindow(Config)
     Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 16)
     AddToRegistry(MainFrame, "BackgroundColor3", "Main")
 
-    -- FIX #2: Rainbow stroke thickness - default thin (1.5), only go thick when rainbow ON
-    -- The bug was Stroke.Thickness was hardcoded to 0.1 initially but the rainbow loop
-    -- always forced it to 6 whenever RainbowEnabled=true, ignoring user setting.
-    -- Fix: use a separate RainbowThickness variable the scripter can control,
-    -- and when rainbow is OFF restore to exactly 1.5 (thin border).
-    local RainbowThickness = 2  -- thickness used only when rainbow is ON (reasonable default)
+    local RainbowThickness = 2
 
     local Stroke = Instance.new("UIStroke")
-    Stroke.Thickness = 1.5  -- start thin (non-rainbow state)
+    Stroke.Thickness = 1.5
     Stroke.Transparency = 0
     Stroke.Parent = MainFrame
     AddToRegistry(Stroke, "Color", "Stroke")
@@ -212,7 +207,6 @@ function Library:CreateWindow(Config)
         local rot = 0
         while ScreenGui.Parent do
             if RainbowEnabled then
-                -- FIX #2: Only set thickness to RainbowThickness (2), not hardcoded 6
                 if Stroke.Thickness ~= RainbowThickness then
                     Stroke.Thickness = RainbowThickness
                     Stroke.Transparency = 0
@@ -272,7 +266,6 @@ function Library:CreateWindow(Config)
                 end
             else
                 Gradient.Enabled = false
-                -- FIX #2: Restore to thin 1.5 border when rainbow is off
                 if Stroke.Thickness ~= 1.5 then
                     Stroke.Thickness = 1.5
                     Stroke.Transparency = 0
@@ -307,7 +300,6 @@ function Library:CreateWindow(Config)
     TitleLabel.ZIndex = 5; TitleLabel.Parent = Topbar
     AddToRegistry(TitleLabel, "TextColor3", "Text")
 
-    -- modern icon buttons drawn with frames — no unicode/font issues, works on all executors
     local function MakeIconBtn(iconType, xFromRight)
         local Btn = Instance.new("TextButton")
         Btn.Size = UDim2.new(0, 28, 0, 28)
@@ -342,21 +334,32 @@ function Library:CreateWindow(Config)
             if iType == "minimize" then
                 -- horizontal bar (minus)
                 Part(7, 13, 14, 2, 1)
+
+            elseif iType == "expand" then
+                -- Two-arrows expand icon (like image 3: diagonal arrows pointing away from center)
+                -- top-right arrow head: corner bracket ⌐ rotated
+                Part(16, 5,  9, 2, 1)  -- top-right horizontal
+                Part(23, 5,  2, 9, 1)  -- top-right vertical
+                -- bottom-left arrow head
+                Part(5,  21, 9, 2, 1)  -- bottom-left horizontal
+                Part(5,  14, 2, 9, 1)  -- bottom-left vertical
+                -- center diagonal bar
+                local diag = Part(0, 0, 16, 2, 1)
+                diag.AnchorPoint = Vector2.new(0.5, 0.5)
+                diag.Position = UDim2.new(0.5, 0, 0.5, 0)
+                diag.Rotation = 45
+
             elseif iType == "restore" then
-                -- small square outline (two overlapping L-shapes)
-                -- outer square border using 4 thin frames
-                Part(6,  6,  16, 2,  1) -- top
-                Part(6,  20, 16, 2,  1) -- bottom
-                Part(6,  6,  2,  16, 1) -- left
-                Part(20, 6,  2,  16, 1) -- right
+                Part(6,  6,  16, 2,  1)
+                Part(6,  20, 16, 2,  1)
+                Part(6,  6,  2,  16, 1)
+                Part(20, 6,  2,  16, 1)
+
             elseif iType == "close" then
-                -- X using two rotated frames via UICorner trick — use two diagonal bars
-                -- bar 1: top-left to bottom-right
                 local b1 = Part(7, 7, 14, 2, 1)
                 b1.Rotation = 45
                 b1.AnchorPoint = Vector2.new(0.5, 0.5)
                 b1.Position = UDim2.new(0.5, 0, 0.5, 0)
-                -- bar 2: top-right to bottom-left
                 local b2 = Part(7, 7, 14, 2, 1)
                 b2.Rotation = -45
                 b2.AnchorPoint = Vector2.new(0.5, 0.5)
@@ -366,11 +369,8 @@ function Library:CreateWindow(Config)
 
         DrawIcon(iconType)
 
-        local currentIcon = iconType
         local function setIcon(newType)
-            currentIcon = newType
             DrawIcon(newType)
-            -- tint close button parts red
             if newType == "close" then
                 for _, p in ipairs(iconParts) do
                     p.BackgroundColor3 = Color3.fromRGB(215, 50, 50)
@@ -378,7 +378,6 @@ function Library:CreateWindow(Config)
             end
         end
 
-        -- initial tint for close button
         if iconType == "close" then
             for _, p in ipairs(iconParts) do
                 p.BackgroundColor3 = Color3.fromRGB(215, 50, 50)
@@ -388,15 +387,12 @@ function Library:CreateWindow(Config)
         return {btn = Btn, setIcon = setIcon, getParts = function() return iconParts end}
     end
 
-    local CollapseBtn = MakeIconBtn("minimize", -36)
-    local HideShowBtn = MakeIconBtn("close", -70)
+    -- CHANGE: Layout is now [─] [✕] left-to-right  →  minimize=-70, close=-36
+    local CollapseBtn = MakeIconBtn("minimize", -70)
+    local HideShowBtn = MakeIconBtn("close",    -36)
 
-    -- FIX #3: Removed FloatBtn (the T pill button) entirely.
-    -- The hide/show now only uses the keybind message approach.
-    -- We still need a way to reopen - we'll use a small draggable label that appears
-    -- at bottom right showing the keybind hint, no T logo.
     local HintLabel = Instance.new("TextButton")
-    HintLabel.Size = UDim2.new(0, 0, 0, 0) -- invisible, zero size, no T logo
+    HintLabel.Size = UDim2.new(0, 0, 0, 0)
     HintLabel.BackgroundTransparency = 1
     HintLabel.Text = ""
     HintLabel.Visible = false
@@ -489,8 +485,6 @@ function Library:CreateWindow(Config)
     PageContainer.Parent = Content
 
     local openSize  = UDim2.new(0, 650, 0, 430)
-    local fullH     = 430
-    local collapseH = 52
 
     -- spawn open: bounce scale from 0 up to full size
     MainFrame.Size = UDim2.new(0, 0, 0, 0)
@@ -499,7 +493,6 @@ function Library:CreateWindow(Config)
     TweenService:Create(MainFrame, TweenInfo.new(0.5, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {Size = openSize}):Play()
 
     -- ── Drag (mouse + touch) ────────────────────────────────────────────────
-    -- FIX #4: Drag works on both PC (mouse) and mobile (touch)
     local dragging, dragInput, dragStart, startPos
     local function isDragStart(t) return t == Enum.UserInputType.MouseButton1 or t == Enum.UserInputType.Touch end
     local function isDragMove(t)  return t == Enum.UserInputType.MouseMovement or t == Enum.UserInputType.Touch end
@@ -529,27 +522,35 @@ function Library:CreateWindow(Config)
     local isOpen = true
     local isCollapsed = false
 
-    -- FIX #5 Button 1: Minimize/Maximize - hides content area but keeps topbar visible
-    -- Uses - icon (collapse_open svg) and □ icon (collapse_close svg)
+    -- CHANGE: Collapse button — shows expand arrows icon (image 3) when collapsed, smooth tween
     local function SetCollapsed(c)
         isCollapsed = c
-        CollapseBtn.setIcon(c and "restore" or "minimize")
+        -- Smooth icon swap with scale pulse
+        TweenService:Create(CollapseBtn.btn, TweenInfo.new(0.12, Enum.EasingStyle.Quad, Enum.EasingDirection.In),
+            {Size = UDim2.new(0, 20, 0, 20)}):Play()
+        task.delay(0.12, function()
+            CollapseBtn.setIcon(c and "expand" or "minimize")
+            TweenService:Create(CollapseBtn.btn, TweenInfo.new(0.2, Enum.EasingStyle.Back, Enum.EasingDirection.Out),
+                {Size = UDim2.new(0, 28, 0, 28)}):Play()
+        end)
+
         local targetSize
         if c then
+            -- smoothly hide content first, then shrink frame
+            TweenService:Create(Content, TweenInfo.new(0.18, Enum.EasingStyle.Quint, Enum.EasingDirection.Out),
+                {BackgroundTransparency = 1}):Play()
+            task.delay(0.15, function()
+                Content.Visible = false
+            end)
             targetSize = UDim2.new(0, openSize.X.Offset, 0, 52)
-            Content.Visible = false
         else
-            targetSize = openSize
             Content.Visible = true
+            targetSize = openSize
         end
-        TweenService:Create(MainFrame, TweenInfo.new(0.35, Enum.EasingStyle.Back, Enum.EasingDirection.Out),
+        TweenService:Create(MainFrame, TweenInfo.new(0.38, Enum.EasingStyle.Back, Enum.EasingDirection.Out),
             {Size = targetSize}):Play()
     end
     CollapseBtn.btn.MouseButton1Click:Connect(function() SetCollapsed(not isCollapsed) end)
-
-    -- FIX #5 Button 2: Hide/Show - hides the entire GUI (same as keybind)
-    -- Uses X icon, shows notification with keybind hint on hide
-    local isOpen = true
 
     local function ShowGUI()
         isOpen = true
@@ -567,18 +568,14 @@ function Library:CreateWindow(Config)
         task.delay(0.38, function()
             if not isOpen then
                 MainFrame.Visible = false
-                -- FIX #5: Show keybind hint notification instead of T pill button
                 local keyName = Keybind and Keybind.Name or "M"
-                Window:Notification("UI Hidden", 'Press "' .. keyName .. '" to reopen', "warning")
+                -- CHANGE: use "info" type for UI Hidden notification
+                Window:Notification("UI Hidden", 'Press "' .. keyName .. '" to reopen', "info")
             end
         end)
     end
 
     HideShowBtn.btn.MouseButton1Click:Connect(function() HideGUI() end)
-
-    -- Position buttons: Collapse(-36) | HideShow(-70)
-    CollapseBtn.btn.Position = UDim2.new(1, -36, 0.5, -14)
-    HideShowBtn.btn.Position = UDim2.new(1, -70, 0.5, -14)
 
     UserInputService.InputBegan:Connect(function(input, gpe)
         if not gpe and Keybind and input.KeyCode == Keybind then
@@ -586,16 +583,15 @@ function Library:CreateWindow(Config)
         end
     end)
 
-    -- notification system
-    -- each entry in ActiveNotifs is {frame = Frame, source = "internal"/"scripter", kill = fn}
-    -- when scripter fires their own notif, all currently alive "internal" ones get instantly dismissed
+    -- ── Notification System ──────────────────────────────────────────────────
+    -- CHANGE: nH is now always 76 (matching Image 1 size — title + body always same height)
+    -- CHANGE: Toggle fires "FuncName\nEnable" (success) or "FuncName\nDisable" (default/grey)
+    -- CHANGE: Slider fires "FuncName\n{value}" (info)
+    -- CHANGE: Button fires "FuncName\nActivate" (success) — OR custom msg if callback uses Window:Notification
     local NotifTypes = {success=true, warning=true, error=true, info=true}
 
-    -- internal helper that actually builds and shows a notification
-    -- source = "internal" (auto-fired by elements) or "scripter" (called by scripter directly)
     local function SpawnNotif(title, body, notifType, source)
         task.spawn(function()
-            -- if this is a scripter notif, instantly kill all internal ones still alive
             if source == "scripter" then
                 for i = #ActiveNotifs, 1, -1 do
                     local entry = ActiveNotifs[i]
@@ -617,8 +613,9 @@ function Library:CreateWindow(Config)
             elseif notifType == "info"    then typeColor = Color3.fromRGB(0, 210, 220)
             end
 
+            -- CHANGE: fixed height 76 so all notifs are same size (matches Image 1)
             local nW   = 300
-            local nH   = body and body ~= "" and 76 or 54
+            local nH   = 76
             local padX = 16; local padY = 10
             local barH = 3
 
@@ -700,11 +697,9 @@ function Library:CreateWindow(Config)
             NBar.BackgroundTransparency = 1
             NStroke.Transparency = 1
 
-            -- killed = true means this notif got dismissed early (e.g. replaced by scripter notif)
             local killed = false
             local entry = {frame = Notif, source = source, kill = nil}
 
-            -- kill function: instantly fade out and remove from stack
             entry.kill = function()
                 if killed then return end
                 killed = true
@@ -722,7 +717,6 @@ function Library:CreateWindow(Config)
                     Tween(Notif, {Position = UDim2.new(0, vpr_k.X + 20, 0, Notif.Position.Y.Offset)}, 0.2)
                     task.delay(0.25, function() pcall(function() Notif:Destroy() end) end)
                 end)
-                -- reposition what's left
                 task.delay(0.05, function()
                     local vpr_r = workspace.CurrentCamera.ViewportSize
                     local margin_r = 14
@@ -829,8 +823,6 @@ function Library:CreateWindow(Config)
         Window:Unload()
     end
 
-    -- FIX #7: Track the first tab added by the scripter so it auto-selects on open
-    -- firstTab flag ensures the FIRST tab Window:Tab() is called with gets selected
     local firstTab = true
 
     function Window:Tab(name)
@@ -903,9 +895,6 @@ function Library:CreateWindow(Config)
             end
         end)
 
-        -- FIX #7: Only auto-select if this is NOT a Config or Settings tab
-        -- Config and Settings are always added last by the library itself
-        -- so the firstTab will correctly be the scripter's first tab (e.g. "TUNG")
         local isSystemTab = (name == "Config" or name == "Settings")
         if firstTab and not isSystemTab then
             firstTab = false
@@ -1024,7 +1013,9 @@ function Library:CreateWindow(Config)
             return F
         end
 
-        -- silent = true skips the automatic InternalNotif on click (used by config tab buttons)
+        -- CHANGE: Button notif — "text\nActivate" with success type
+        -- If callback calls Window:Notification(msg, type), that scripter notif replaces it,
+        -- showing the custom msg instead of "Activate"
         function Elements:Button(text, callback, silent)
             local Btn = Instance.new("TextButton")
             Btn.Size = UDim2.new(1, 0, 0, 44)
@@ -1053,10 +1044,10 @@ function Library:CreateWindow(Config)
                 Tween(Btn, {Size = UDim2.new(0.97, 0, 0, 40)}, 0.1)
                 task.wait(0.1)
                 Tween(Btn, {Size = UDim2.new(1, 0, 0, 44)}, 0.15)
-                -- fire internal notif FIRST so if callback calls Window:Notification it gets killed
-                -- silent=true skips this (used by config tab so it can control its own notifs)
+                -- CHANGE: "text\nActivate" success — if callback calls Window:Notification,
+                -- that scripter notif kills this one and shows the custom message instead
                 if not silent then
-                    InternalNotif(text, nil, "success")
+                    InternalNotif(text, "Activate", "success")
                 end
                 callback()
             end)
@@ -1070,6 +1061,9 @@ function Library:CreateWindow(Config)
             end)
         end
 
+        -- CHANGE: Toggle notif:
+        --   Enable  → "text\nEnable"  type = "success"
+        --   Disable → "text\nDisable" type = nil (default grey)
         function Elements:Toggle(text, default, callback)
             local Enabled = default or false
             local Tile = MakeTile(44)
@@ -1111,8 +1105,12 @@ function Library:CreateWindow(Config)
 
             ClickBtn.MouseButton1Click:Connect(function()
                 Enabled = not Enabled
-                -- fire notif before Update so if callback has Window:Notification it kills this one
-                InternalNotif(text, nil, Enabled and "success" or "error")
+                -- CHANGE: "text\nEnable" success OR "text\nDisable" default (nil = grey)
+                if Enabled then
+                    InternalNotif(text, "Enable", "success")
+                else
+                    InternalNotif(text, "Disable", nil)
+                end
                 Update()
             end)
             ConfigObjects[text] = {Type = "Toggle", Value = Enabled, Set = function(val)
@@ -1127,23 +1125,12 @@ function Library:CreateWindow(Config)
             end)
         end
 
-        -- Slider supports two call styles:
-        --   Limited:   Elements:Slider("Name", min, max, default, callback)
-        --              Shows a draggable track. Textbox also clamps to min/max.
-        --   Unlimited: Elements:Slider("Name", nil, nil, default, callback)
-        --              No track shown. Textbox accepts any number (no clamp).
-        --              You can also pass only one bound:
-        --              Elements:Slider("Name", 0, nil, 5, callback)  -- min 0, no max
-        --              Elements:Slider("Name", nil, 100, 50, callback) -- no min, max 100
         function Elements:Slider(text, min, max, default, callback)
-            -- detect unlimited mode: true when BOTH min and max are nil
             local unlimited = (min == nil and max == nil)
-            -- normalise: keep nil as nil, convert numbers
             min = tonumber(min)
             max = tonumber(max)
 
             local Val = tonumber(default) or (min or 0)
-            -- choose tile height: taller when we show a track, shorter when unlimited
             local tileH = unlimited and 44 or 64
             local Frame = MakeTile(tileH)
 
@@ -1154,7 +1141,6 @@ function Library:CreateWindow(Config)
             Lbl.TextXAlignment = Enum.TextXAlignment.Left; Lbl.Parent = Frame
             AddToRegistry(Lbl, "TextColor3", "Text")
 
-            -- value textbox — wider when unlimited so the label ∞ hint fits
             local numW = unlimited and 72 or 52
             local Num = Instance.new("TextBox")
             Num.Text = tostring(Val); Num.Size = UDim2.new(0, numW, 0, 22)
@@ -1171,7 +1157,6 @@ function Library:CreateWindow(Config)
             AddToRegistry(NumStroke, "Color", "Stroke")
             Num.Focused:Connect(function() Tween(NumStroke, {Transparency = 0.2}, 0.15) end)
 
-            -- small ∞ hint label shown only in unlimited mode
             if unlimited then
                 local HintLbl = Instance.new("TextLabel")
                 HintLbl.Text = "∞"; HintLbl.Size = UDim2.new(0, 14, 0, 14)
@@ -1182,7 +1167,6 @@ function Library:CreateWindow(Config)
                 AddToRegistry(HintLbl, "TextColor3", "Accent")
             end
 
-            -- track + fill + knob only shown when we have both bounds (limited mode)
             local Track, Fill, Knob, Bar
             if not unlimited then
                 Track = Instance.new("Frame")
@@ -1211,7 +1195,6 @@ function Library:CreateWindow(Config)
             Library.Flags[text] = Val
 
             local function Update(newVal)
-                -- clamp only when bounds exist
                 if min ~= nil and max ~= nil then
                     newVal = math.clamp(math.floor(newVal), min, max)
                 elseif min ~= nil then
@@ -1225,7 +1208,6 @@ function Library:CreateWindow(Config)
                 Num.Text = tostring(Val)
                 Library.Flags[text] = Val
                 ConfigObjects[text].Value = Val
-                -- update track visuals only when available
                 if Track and Fill and Knob and min ~= nil and max ~= nil and max ~= min then
                     local p = (Val - min) / (max - min)
                     Tween(Fill, {Size = UDim2.new(p, 0, 1, 0)}, 0.16)
@@ -1261,7 +1243,8 @@ function Library:CreateWindow(Config)
                     if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then
                         if sliding then
                             sliding = false
-                            InternalNotif(text, nil, "info")
+                            -- CHANGE: "text\n{value}" info type for slider
+                            InternalNotif(text, tostring(Val), "info")
                         end
                     end
                 end)
@@ -1803,13 +1786,11 @@ function Library:CreateWindow(Config)
         local name = Window.CurrentConfig
         local path = ConfigPaths[name] or (Window.ConfigFolder .. "/" .. name .. ".json")
 
-        -- "Loading {name} Config" — default grey notif
         SpawnNotif("Loading " .. name .. " Config", nil, nil, "internal")
 
         local ok = Library:LoadConfig(path)
 
         if ok then
-            -- "{name} Config Loaded" — green success notif, shows right after load
             SpawnNotif(name .. " Config Loaded", nil, "success", "internal")
         else
             SpawnNotif("Failed to load " .. name, nil, "error", "internal")
@@ -1819,7 +1800,6 @@ function Library:CreateWindow(Config)
     ConfigTab:Button("Delete Config", function()
         if Window.CurrentConfig == "" or Window.CurrentConfig == "None" then return end
         local name = Window.CurrentConfig
-        -- try both the cached path and a freshly built path
         local paths = {
             ConfigPaths[name],
             Window.ConfigFolder .. "/" .. name .. ".json",
@@ -1834,7 +1814,7 @@ function Library:CreateWindow(Config)
             end
         end)
         Window.CurrentConfig = ""
-        task.wait(0.05) -- small wait so filesystem catches up
+        task.wait(0.05)
         RefreshConfigs()
         if ConfigObjects["Select Config"] and ConfigObjects["Select Config"].Reset then
             ConfigObjects["Select Config"].Reset()
@@ -1844,7 +1824,6 @@ function Library:CreateWindow(Config)
     local Settings = Window:Tab("Settings")
     Settings:Section("appearance")
     Settings:Toggle("Rainbow Edge", false, function(v) Library:ToggleRainbow(v) end)
-    -- Rainbow Speed: limited 0.1–10, shows track slider
     Settings:Slider("Rainbow Speed", 0, 10, 1, function(v)
         Library:SetRainbowSpeed(v)
     end)
