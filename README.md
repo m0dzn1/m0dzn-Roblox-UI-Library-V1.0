@@ -7,7 +7,7 @@ clean fully themeable ui lib for roblox scripts. smooth animations, real config 
 ## 🚀 load
 
 ```lua
-local Library = loadstring(game:HttpGet("https://github.com/m0dzn1/m0dzn-Roblox-UI-Library-V1.0/raw/refs/heads/main/m0dzn-ui-lib-V1.lua"))()
+local m0dznv1 = loadstring(game:HttpGet("https://github.com/m0dzn1/m0dzn-Roblox-UI-Library-V1.0/raw/refs/heads/main/m0dzn-ui-lib-v1.lua"))()
 ```
 
 ---
@@ -17,7 +17,7 @@ local Library = loadstring(game:HttpGet("https://github.com/m0dzn1/m0dzn-Roblox-
 simplest setup:
 
 ```lua
-local Window = Library:CreateWindow({
+local Window = m0dznv1:CreateWindow({
     Title   = "My Hub",
     Keybind = Enum.KeyCode.M,
 })
