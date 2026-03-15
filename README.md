@@ -12,7 +12,7 @@ local Library = loadstring(game:HttpGet("https://github.com/m0dzn1/m0dzn-Roblox-
 
 ---
 
-## 🪟 create a window
+## 💻 create a window
 
 simplest setup:
 
