@@ -33,10 +33,7 @@ local Main = Window:Tab("Main")
 pass any `Enum.KeyCode` as `Keybind`. user can also change it live in the settings tab, but whatever u put here is the default
 
 ```lua
-local Window = Library:CreateWindow({
-    Title   = "My Hub",
     Keybind = Enum.KeyCode.RightShift,
-})
 ```
 
 common ones: `M`, `RightShift`, `Insert`, `F4`
