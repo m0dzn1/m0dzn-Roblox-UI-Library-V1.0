@@ -8,9 +8,7 @@
                M0DZN LIBRARY V1.0
 ]]
 
-print([[
-script loaded.
-]])
+print("script loadded")
 
 local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
