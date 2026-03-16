@@ -35,10 +35,8 @@
             overflow-x: hidden;
         }
 
-        /* ── Layout ── */
         .layout { display: flex; min-height: 100vh; }
 
-        /* ── Sidebar ── */
         .sidebar {
             width: 260px;
             flex-shrink: 0;
@@ -99,7 +97,6 @@
         }
         .nav-btn .icon { font-size: 1rem; opacity: 0.7; }
 
-        /* ── Overlay (mobile) ── */
         .overlay {
             display: none;
             position: fixed;
@@ -110,7 +107,6 @@
         }
         .overlay.show { display: block; }
 
-        /* ── Main ── */
         .main {
             flex: 1;
             margin-left: 260px;
@@ -121,7 +117,6 @@
         }
         .main.full { margin-left: 0; }
 
-        /* ── Topbar ── */
         .topbar {
             position: sticky;
             top: 0;
@@ -146,7 +141,6 @@
         .hamburger:hover { border-color: var(--red); color: var(--red); }
         .hamburger svg { width: 18px; height: 18px; }
 
-        /* ── Content ── */
         .content {
             padding: 8px 40px 80px;
             max-width: 1000px;
@@ -160,7 +154,6 @@
             to   { opacity: 1; transform: translateY(0); }
         }
 
-        /* ── Typography ── */
         .page-title {
             font-size: clamp(2rem, 5vw, 3.2rem);
             font-weight: 800;
@@ -192,7 +185,6 @@
 
         p, li { color: var(--muted2); line-height: 1.7; font-size: 0.92rem; }
 
-        /* ── Cards grid ── */
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
         .span2 { grid-column: span 2; }
 
@@ -219,7 +211,6 @@
             border-bottom: 1px dashed rgba(255,255,255,0.07);
         }
 
-        /* ── Preview image ── */
         .preview-wrap { margin: 0 auto 40px; max-width: 640px; }
         .preview-img {
             width: 100%;
@@ -229,7 +220,6 @@
             display: block;
         }
 
-        /* ── Code ── */
         .code-wrap {
             position: relative;
             margin-top: 4px;
@@ -266,7 +256,6 @@
         .copy-btn:hover { background: rgba(255,255,255,0.08); color: #fff; border-color: rgba(255,255,255,0.2); }
         .copy-btn svg { width: 14px; height: 14px; fill: currentColor; }
 
-        /* ── Tables ── */
         .table-wrap { overflow-x: auto; margin-top: 12px; border-radius: 12px; border: 1px solid var(--border); }
         table { width: 100%; border-collapse: collapse; background: var(--bg2); }
         th, td { padding: 13px 16px; text-align: left; font-size: 0.88rem; border-bottom: 1px solid var(--border); }
@@ -275,7 +264,6 @@
         td { color: var(--muted2); }
         td:first-child { font-family: var(--mono); font-size: 0.8rem; color: #ff8097; }
 
-        /* ── Blockquote / Note ── */
         .note {
             border-left: 3px solid var(--red);
             padding: 14px 18px;
@@ -287,7 +275,6 @@
             font-style: italic;
         }
 
-        /* ── Section heading ── */
         .section-title {
             font-size: 0.7rem;
             font-weight: 700;
@@ -302,7 +289,6 @@
         }
         .section-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
 
-        /* ── Badges ── */
         .badge {
             display: inline-block;
             font-family: var(--mono);
@@ -315,7 +301,6 @@
             letter-spacing: 0.5px;
         }
 
-        /* ── Ambient ── */
         .orb {
             position: fixed;
             border-radius: 50%;
@@ -329,13 +314,11 @@
 
         .content { position: relative; z-index: 1; }
 
-        /* ── Scrollbar ── */
         ::-webkit-scrollbar { width: 8px; }
         ::-webkit-scrollbar-track { background: var(--bg); }
         ::-webkit-scrollbar-thumb { background: var(--bg3); border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: var(--red); }
 
-        /* ── Mobile ── */
         @media (max-width: 768px) {
             .sidebar { transform: translateX(-100%); }
             .sidebar.open { transform: translateX(0); }
@@ -356,7 +339,6 @@
 
 <div class="layout">
 
-    <!-- Sidebar -->
     <nav class="sidebar" id="sidebar">
         <div class="logo-wrap">
             <div class="logo">M0DZN</div>
@@ -370,12 +352,11 @@
                 <span class="icon">📋</span> Elements
             </button>
             <button class="nav-btn" onclick="switchTab('example', this)">
-                <span class="icon">💻</span> Example Script
+                <span class="icon">💻</span> Example
             </button>
         </div>
     </nav>
 
-    <!-- Main -->
     <div class="main" id="main">
 
         <div class="topbar">
@@ -388,8 +369,9 @@
             </button>
         </div>
 
-        <!-- ──────────────── README ──────────────── -->
         <div class="content">
+
+            <!-- README -->
             <div id="tab-readme" class="tab active">
                 <h1 class="page-title">Documentation</h1>
                 <p class="page-sub">Clean, fully themeable UI lib for Roblox scripts. Smooth animations, real config system, live color picker, and 9 rainbow border modes.</p>
@@ -400,7 +382,7 @@
 
                 <div class="grid">
                     <div class="card span2">
-                        <h2>🚀 Quick Load</h2>
+                        <h2>🚀 Load</h2>
                         <div class="code-wrap">
                             <button class="copy-btn" onclick="copyCode(this)" title="Copy">
                                 <svg viewBox="0 0 16 16"><path d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 0 1 0 1.5h-1.5a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-1.5a.75.75 0 0 1 1.5 0v1.5A1.75 1.75 0 0 1 9.25 16h-7.5A1.75 1.75 0 0 1 0 14.25Z"/><path d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0 1 14.25 11h-7.5A1.75 1.75 0 0 1 5 9.25Zm1.75-.25a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-7.5a.25.25 0 0 0-.25-.25Z"/></svg>
@@ -413,7 +395,7 @@
                 <div class="section-title">Create a Window</div>
                 <div class="grid">
                     <div class="card span2">
-                        <h2>💻 Simplest Setup</h2>
+                        <h2>💻 Setup</h2>
                         <div class="code-wrap">
                             <button class="copy-btn" onclick="copyCode(this)" title="Copy">
                                 <svg viewBox="0 0 16 16"><path d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 0 1 0 1.5h-1.5a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-1.5a.75.75 0 0 1 1.5 0v1.5A1.75 1.75 0 0 1 9.25 16h-7.5A1.75 1.75 0 0 1 0 14.25Z"/><path d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0 1 14.25 11h-7.5A1.75 1.75 0 0 1 5 9.25Zm1.75-.25a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-7.5a.25.25 0 0 0-.25-.25Z"/></svg>
@@ -430,12 +412,13 @@ local Main = Window:Tab("Main")</code></pre>
                 <div class="section-title">Themes</div>
                 <div class="grid">
                     <div class="card">
-                        <h2>🎨 Built-in Themes</h2>
+                        <h2>🎨 Built in Themes</h2>
+                        <p class="el-desc">Dark / Light / Purple / Blue / Red / Yellow / Green</p>
                         <div class="code-wrap">
                             <button class="copy-btn" onclick="copyCode(this)" title="Copy">
                                 <svg viewBox="0 0 16 16"><path d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 0 1 0 1.5h-1.5a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-1.5a.75.75 0 0 1 1.5 0v1.5A1.75 1.75 0 0 1 9.25 16h-7.5A1.75 1.75 0 0 1 0 14.25Z"/><path d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0 1 14.25 11h-7.5A1.75 1.75 0 0 1 5 9.25Zm1.75-.25a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-7.5a.25.25 0 0 0-.25-.25Z"/></svg>
                             </button>
-                            <pre class="tall"><code>Library:CreateWindow({
+                            <pre class="tall"><code>m0dznv1:CreateWindow({
     Title = "My Hub",
     Theme = "Purple",
 })</code></pre>
@@ -443,6 +426,7 @@ local Main = Window:Tab("Main")</code></pre>
                     </div>
                     <div class="card">
                         <h2>🖌️ Custom Theme</h2>
+                        <p class="el-desc">Make ur own with RGB values.</p>
                         <div class="code-wrap">
                             <button class="copy-btn" onclick="copyCode(this)" title="Copy">
                                 <svg viewBox="0 0 16 16"><path d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 0 1 0 1.5h-1.5a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-1.5a.75.75 0 0 1 1.5 0v1.5A1.75 1.75 0 0 1 9.25 16h-7.5A1.75 1.75 0 0 1 0 14.25Z"/><path d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0 1 14.25 11h-7.5A1.75 1.75 0 0 1 5 9.25Zm1.75-.25a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-7.5a.25.25 0 0 0-.25-.25Z"/></svg>
@@ -497,10 +481,10 @@ local Main = Window:Tab("Main")</code></pre>
                 <div class="grid">
                     <div class="card span2">
                         <h2>📦 Library.Flags</h2>
-                        <p style="margin-bottom:14px;">Every element auto-saves its current value into <code>Library.Flags</code>. The key is whatever name you gave the element.</p>
+                        <p style="margin-bottom:14px;">Every element saves its current value into <code>Library.Flags</code> automatically. Key is the name u gave the element.</p>
                         <div class="code-wrap">
                             <button class="copy-btn" onclick="copyCode(this)" title="Copy">
-                                <svg viewBox="0 0 16 16"><path d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 0 1 0 1.5h-1.5a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-1.5a.75.75 0 0 1 1.5 0v1.5A1.75 1.75 0 0 1 9.25 16h-7.5A1.75 1.75 0 0 1 0 14.25Z"/><path d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0 1 14.25 11h-7.5A1.75 1.75 0 0 1 5 9.25Zm1.75-.25a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-7.5a.25.25 0 0 0-.25-.25Z"/></svg>
+                                <svg viewBox="0 0 16 16"><path d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 0 1 0 1.5h-1.5a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-1.5a.75.75 0 0 1 1.5 0v1.5A1.75 1.75 0 0 1 9.25 16h-7.5A1.75 1.75 0 0 1 0 14.25Z"/><path d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0 1 14.25 11h-7.5A1.75 1.75 0 0 1 5 9.25Zm1.75-.25a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-7.7a.25.25 0 0 0-.25-.25Z"/></svg>
                             </button>
                             <pre class="tall"><code>Main:Toggle("Auto Farm", false, function(v) end)
 Main:Slider("Farm Delay", 0, 5, 1, function(v) end)
@@ -534,16 +518,16 @@ end)</code></pre>
 
             </div>
 
-            <!-- ──────────────── ELEMENTS ──────────────── -->
+            <!-- ELEMENTS -->
             <div id="tab-elements" class="tab">
                 <h1 class="page-title">Elements</h1>
-                <p class="page-sub">Everything you can add to your hub.</p>
+                <p class="page-sub">Everything u can drop into ur hub.</p>
 
                 <div class="grid">
 
                     <div class="card">
                         <h2>Section</h2>
-                        <p class="el-desc">A big text divider to separate categories.</p>
+                        <p class="el-desc">Divides ur tab into categories.</p>
                         <div class="code-wrap">
                             <button class="copy-btn" onclick="copyCode(this)" title="Copy">
                                 <svg viewBox="0 0 16 16"><path d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 0 1 0 1.5h-1.5a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-1.5a.75.75 0 0 1 1.5 0v1.5A1.75 1.75 0 0 1 9.25 16h-7.5A1.75 1.75 0 0 1 0 14.25Z"/><path d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0 1 14.25 11h-7.5A1.75 1.75 0 0 1 5 9.25Zm1.75-.25a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-7.5a.25.25 0 0 0-.25-.25Z"/></svg>
@@ -554,7 +538,7 @@ end)</code></pre>
 
                     <div class="card">
                         <h2>Label</h2>
-                        <p class="el-desc">Just text. Good for showing stats or info.</p>
+                        <p class="el-desc">Just text, good for showing info or status.</p>
                         <div class="code-wrap">
                             <button class="copy-btn" onclick="copyCode(this)" title="Copy">
                                 <svg viewBox="0 0 16 16"><path d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 0 1 0 1.5h-1.5a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-1.5a.75.75 0 0 1 1.5 0v1.5A1.75 1.75 0 0 1 9.25 16h-7.5A1.75 1.75 0 0 1 0 14.25Z"/><path d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0 1 14.25 11h-7.5A1.75 1.75 0 0 1 5 9.25Zm1.75-.25a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-7.5a.25.25 0 0 0-.25-.25Z"/></svg>
@@ -565,7 +549,7 @@ end)</code></pre>
 
                     <div class="card">
                         <h2>Paragraph</h2>
-                        <p class="el-desc">Like a label but bigger. Has a title and description.</p>
+                        <p class="el-desc">Like a label but has a title and a description under it.</p>
                         <div class="code-wrap">
                             <button class="copy-btn" onclick="copyCode(this)" title="Copy">
                                 <svg viewBox="0 0 16 16"><path d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 0 1 0 1.5h-1.5a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-1.5a.75.75 0 0 1 1.5 0v1.5A1.75 1.75 0 0 1 9.25 16h-7.5A1.75 1.75 0 0 1 0 14.25Z"/><path d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0 1 14.25 11h-7.5A1.75 1.75 0 0 1 5 9.25Zm1.75-.25a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-7.5a.25.25 0 0 0-.25-.25Z"/></svg>
@@ -576,7 +560,7 @@ end)</code></pre>
 
                     <div class="card">
                         <h2>Button</h2>
-                        <p class="el-desc">Click it, it runs your code.</p>
+                        <p class="el-desc">Click it, runs ur code. That's it.</p>
                         <div class="code-wrap">
                             <button class="copy-btn" onclick="copyCode(this)" title="Copy">
                                 <svg viewBox="0 0 16 16"><path d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 0 1 0 1.5h-1.5a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-1.5a.75.75 0 0 1 1.5 0v1.5A1.75 1.75 0 0 1 9.25 16h-7.5A1.75 1.75 0 0 1 0 14.25Z"/><path d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0 1 14.25 11h-7.5A1.75 1.75 0 0 1 5 9.25Zm1.75-.25a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-7.5a.25.25 0 0 0-.25-.25Z"/></svg>
@@ -587,7 +571,7 @@ end)</code></pre>
 
                     <div class="card">
                         <h2>Toggle</h2>
-                        <p class="el-desc">On/off switch for things like Auto Farm.</p>
+                        <p class="el-desc">On/off switch, good for loops like auto farm.</p>
                         <div class="code-wrap">
                             <button class="copy-btn" onclick="copyCode(this)" title="Copy">
                                 <svg viewBox="0 0 16 16"><path d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 0 1 0 1.5h-1.5a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-1.5a.75.75 0 0 1 1.5 0v1.5A1.75 1.75 0 0 1 9.25 16h-7.5A1.75 1.75 0 0 1 0 14.25Z"/><path d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0 1 14.25 11h-7.5A1.75 1.75 0 0 1 5 9.25Zm1.75-.25a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-7.5a.25.25 0 0 0-.25-.25Z"/></svg>
@@ -600,7 +584,7 @@ end)</code></pre>
 
                     <div class="card">
                         <h2>Slider</h2>
-                        <p class="el-desc">Drag left/right to pick a number.</p>
+                        <p class="el-desc">Drag to pick a number, u can also type it in.</p>
                         <div class="code-wrap">
                             <button class="copy-btn" onclick="copyCode(this)" title="Copy">
                                 <svg viewBox="0 0 16 16"><path d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 0 1 0 1.5h-1.5a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-1.5a.75.75 0 0 1 1.5 0v1.5A1.75 1.75 0 0 1 9.25 16h-7.5A1.75 1.75 0 0 1 0 14.25Z"/><path d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0 1 14.25 11h-7.5A1.75 1.75 0 0 1 5 9.25Zm1.75-.25a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-7.5a.25.25 0 0 0-.25-.25Z"/></svg>
@@ -614,7 +598,7 @@ end)</code></pre>
 
                     <div class="card">
                         <h2>Dropdown</h2>
-                        <p class="el-desc">Open a menu and pick an option from the list.</p>
+                        <p class="el-desc">Opens a list, pick one option.</p>
                         <div class="code-wrap">
                             <button class="copy-btn" onclick="copyCode(this)" title="Copy">
                                 <svg viewBox="0 0 16 16"><path d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 0 1 0 1.5h-1.5a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-1.5a.75.75 0 0 1 1.5 0v1.5A1.75 1.75 0 0 1 9.25 16h-7.5A1.75 1.75 0 0 1 0 14.25Z"/><path d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0 1 14.25 11h-7.5A1.75 1.75 0 0 1 5 9.25Zm1.75-.25a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-7.5a.25.25 0 0 0-.25-.25Z"/></svg>
@@ -627,12 +611,12 @@ end)</code></pre>
 
                     <div class="card">
                         <h2>Textbox</h2>
-                        <p class="el-desc">Lets the user type whatever they want.</p>
+                        <p class="el-desc">User types whatever they want in here.</p>
                         <div class="code-wrap">
                             <button class="copy-btn" onclick="copyCode(this)" title="Copy">
                                 <svg viewBox="0 0 16 16"><path d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 0 1 0 1.5h-1.5a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-1.5a.75.75 0 0 1 1.5 0v1.5A1.75 1.75 0 0 1 9.25 16h-7.5A1.75 1.75 0 0 1 0 14.25Z"/><path d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0 1 14.25 11h-7.5A1.75 1.75 0 0 1 5 9.25Zm1.75-.25a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-7.5a.25.25 0 0 0-.25-.25Z"/></svg>
                             </button>
-                            <pre class="tall"><code>Main:Textbox("Name", "type here...", function(Text)
+                            <pre class="tall"><code>Main:Textbox("Name", "type something...", function(Text)
     print(Text)
 end)</code></pre>
                         </div>
@@ -640,7 +624,7 @@ end)</code></pre>
 
                     <div class="card">
                         <h2>Keybind</h2>
-                        <p class="el-desc">Press a key to trigger something.</p>
+                        <p class="el-desc">Let the user set a hotkey for whatever.</p>
                         <div class="code-wrap">
                             <button class="copy-btn" onclick="copyCode(this)" title="Copy">
                                 <svg viewBox="0 0 16 16"><path d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 0 1 0 1.5h-1.5a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-1.5a.75.75 0 0 1 1.5 0v1.5A1.75 1.75 0 0 1 9.25 16h-7.5A1.75 1.75 0 0 1 0 14.25Z"/><path d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0 1 14.25 11h-7.5A1.75 1.75 0 0 1 5 9.25Zm1.75-.25a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-7.5a.25.25 0 0 0-.25-.25Z"/></svg>
@@ -653,7 +637,7 @@ end)</code></pre>
 
                     <div class="card">
                         <h2>Value</h2>
-                        <p class="el-desc">A tiny input box just for storing a number or string.</p>
+                        <p class="el-desc">Small input for storing a number or string.</p>
                         <div class="code-wrap">
                             <button class="copy-btn" onclick="copyCode(this)" title="Copy">
                                 <svg viewBox="0 0 16 16"><path d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 0 1 0 1.5h-1.5a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-1.5a.75.75 0 0 1 1.5 0v1.5A1.75 1.75 0 0 1 9.25 16h-7.5A1.75 1.75 0 0 1 0 14.25Z"/><path d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0 1 14.25 11h-7.5A1.75 1.75 0 0 1 5 9.25Zm1.75-.25a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-7.5a.25.25 0 0 0-.25-.25Z"/></svg>
@@ -666,7 +650,7 @@ end)</code></pre>
 
                     <div class="card">
                         <h2>Color Picker</h2>
-                        <p class="el-desc">RGB inputs update in realtime while dragging. Touch works too.</p>
+                        <p class="el-desc">Full RGB picker, updates live while u drag. Works on mobile too.</p>
                         <div class="code-wrap">
                             <button class="copy-btn" onclick="copyCode(this)" title="Copy">
                                 <svg viewBox="0 0 16 16"><path d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 0 1 0 1.5h-1.5a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-1.5a.75.75 0 0 1 1.5 0v1.5A1.75 1.75 0 0 1 9.25 16h-7.5A1.75 1.75 0 0 1 0 14.25Z"/><path d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0 1 14.25 11h-7.5A1.75 1.75 0 0 1 5 9.25Zm1.75-.25a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-7.5a.25.25 0 0 0-.25-.25Z"/></svg>
@@ -680,10 +664,10 @@ end)</code></pre>
                 </div>
             </div>
 
-            <!-- ──────────────── EXAMPLE ──────────────── -->
+            <!-- EXAMPLE -->
             <div id="tab-example" class="tab">
                 <h1 class="page-title">Example Script</h1>
-                <p class="page-sub">A complete working script showing every element and notification type.</p>
+                <p class="page-sub">Full working script with every element and all notif types.</p>
 
                 <div class="card">
                     <h2>💻 Full Example</h2>
@@ -753,12 +737,11 @@ Window:Notification("script loaded", "success")</code></pre>
                 </div>
             </div>
 
-        </div><!-- /content -->
-    </div><!-- /main -->
-</div><!-- /layout -->
+        </div>
+    </div>
+</div>
 
 <script>
-    // Sidebar logic
     const sidebar = document.getElementById('sidebar');
     const mainEl  = document.getElementById('main');
     const overlay = document.getElementById('overlay');
@@ -781,7 +764,6 @@ Window:Notification("script loaded", "success")</code></pre>
         sidebar.classList.contains('closed') ? openSidebar() : closeSidebar();
     }
 
-    // Init
     window.addEventListener('DOMContentLoaded', () => {
         if (isMobile()) {
             sidebar.classList.add('closed');
@@ -799,7 +781,6 @@ Window:Notification("script loaded", "success")</code></pre>
         }
     });
 
-    // Tab switching
     function switchTab(id, btn) {
         document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
         document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
@@ -809,7 +790,6 @@ Window:Notification("script loaded", "success")</code></pre>
         if (isMobile()) closeSidebar();
     }
 
-    // Copy button
     const copyIcon = `<svg viewBox="0 0 16 16" fill="currentColor"><path d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 0 1 0 1.5h-1.5a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-1.5a.75.75 0 0 1 1.5 0v1.5A1.75 1.75 0 0 1 9.25 16h-7.5A1.75 1.75 0 0 1 0 14.25Z"/><path d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0 1 14.25 11h-7.5A1.75 1.75 0 0 1 5 9.25Zm1.75-.25a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-7.5a.25.25 0 0 0-.25-.25Z"/></svg>`;
     const checkIcon = `<svg viewBox="0 0 16 16" fill="#4ade80"><path d="M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0Z"/></svg>`;
 
