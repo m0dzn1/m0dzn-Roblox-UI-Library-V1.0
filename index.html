@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <title>M0DZN UI Library V1.0</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500;700&family=Geist:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0c0d11;
+            --bg2: #13141a;
+            --bg3: #1a1b23;
+            --border: rgba(255,255,255,0.07);
+            --border-hi: rgba(255,255,255,0.13);
+            --red: #ff2248;
+            --red-dim: rgba(255,34,72,0.15);
+            --red-glow: rgba(255,34,72,0.35);
+            --text: #f0f0f8;
+            --muted: #6b7080;
+            --muted2: #9399a8;
+            --mono: 'Geist Mono', monospace;
+            --sans: 'Geist', sans-serif;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: var(--sans);
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* ── Layout ── */
+        .layout { display: flex; min-height: 100vh; }
+
+        /* ── Sidebar ── */
+        .sidebar {
+            width: 260px;
+            flex-shrink: 0;
+            background: var(--bg2);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            top: 0; left: 0; bottom: 0;
+            z-index: 200;
+            transition: transform 0.35s cubic-bezier(0.4,0,0.2,1);
+            overflow-y: auto;
+        }
+        .sidebar.closed { transform: translateX(-100%); }
+
+        .logo-wrap {
+            padding: 36px 24px 28px;
+            border-bottom: 1px solid var(--border);
+        }
+        .logo {
+            font-size: 1.85rem;
+            font-weight: 800;
+            letter-spacing: 6px;
+            color: #fff;
+            text-shadow: 0 0 28px var(--red-glow);
+        }
+        .logo-tag {
+            margin-top: 4px;
+            font-family: var(--mono);
+            font-size: 0.65rem;
+            letter-spacing: 3px;
+            color: var(--red);
+            text-transform: uppercase;
+        }
+
+        .nav { padding: 20px 14px; display: flex; flex-direction: column; gap: 6px; }
+        .nav-btn {
+            background: none;
+            border: none;
+            color: var(--muted);
+            font-family: var(--sans);
+            font-size: 0.9rem;
+            font-weight: 600;
+            padding: 13px 16px;
+            border-radius: 10px;
+            cursor: pointer;
+            text-align: left;
+            transition: background 0.2s, color 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .nav-btn:hover { background: rgba(255,255,255,0.04); color: var(--text); }
+        .nav-btn.active {
+            background: var(--red-dim);
+            color: #fff;
+            border: 1px solid rgba(255,34,72,0.25);
+        }
+        .nav-btn .icon { font-size: 1rem; opacity: 0.7; }
+
+        /* ── Overlay (mobile) ── */
+        .overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.55);
+            z-index: 150;
+            backdrop-filter: blur(2px);
+        }
+        .overlay.show { display: block; }
+
+        /* ── Main ── */
+        .main {
+            flex: 1;
+            margin-left: 260px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            transition: margin 0.35s cubic-bezier(0.4,0,0.2,1);
+        }
+        .main.full { margin-left: 0; }
+
+        /* ── Topbar ── */
+        .topbar {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            padding: 16px 32px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            background: linear-gradient(to bottom, var(--bg) 60%, transparent);
+        }
+        .hamburger {
+            background: var(--bg3);
+            border: 1px solid var(--border);
+            color: var(--text);
+            width: 40px; height: 40px;
+            border-radius: 10px;
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            transition: border-color 0.2s, color 0.2s;
+            flex-shrink: 0;
+        }
+        .hamburger:hover { border-color: var(--red); color: var(--red); }
+        .hamburger svg { width: 18px; height: 18px; }
+
+        /* ── Content ── */
+        .content {
+            padding: 8px 40px 80px;
+            max-width: 1000px;
+            width: 100%;
+        }
+
+        .tab { display: none; animation: fadeUp 0.4s ease forwards; }
+        .tab.active { display: block; }
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(16px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ── Typography ── */
+        .page-title {
+            font-size: clamp(2rem, 5vw, 3.2rem);
+            font-weight: 800;
+            letter-spacing: -1px;
+            background: linear-gradient(135deg, #fff 30%, #555);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 12px;
+            line-height: 1.1;
+        }
+        .page-sub {
+            color: var(--muted2);
+            font-size: 1rem;
+            line-height: 1.7;
+            max-width: 560px;
+            margin-bottom: 40px;
+        }
+
+        h2 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        h3 { font-size: 1rem; font-weight: 600; color: var(--muted2); margin-bottom: 10px; margin-top: 20px; }
+
+        p, li { color: var(--muted2); line-height: 1.7; font-size: 0.92rem; }
+
+        /* ── Cards grid ── */
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
+        .span2 { grid-column: span 2; }
+
+        .card {
+            background: var(--bg2);
+            border: 1px solid var(--border);
+            border-top-color: var(--border-hi);
+            border-radius: 18px;
+            padding: 26px;
+            transition: transform 0.25s, border-color 0.25s, box-shadow 0.25s;
+        }
+        .card:hover {
+            transform: translateY(-3px);
+            border-color: rgba(255,34,72,0.22);
+            box-shadow: 0 12px 40px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.04);
+        }
+
+        .el-desc {
+            font-size: 0.82rem;
+            color: var(--muted);
+            font-style: italic;
+            margin-bottom: 14px;
+            padding-bottom: 10px;
+            border-bottom: 1px dashed rgba(255,255,255,0.07);
+        }
+
+        /* ── Preview image ── */
+        .preview-wrap { margin: 0 auto 40px; max-width: 640px; }
+        .preview-img {
+            width: 100%;
+            border-radius: 14px;
+            border: 1px solid var(--border);
+            box-shadow: 0 24px 60px rgba(0,0,0,0.7);
+            display: block;
+        }
+
+        /* ── Code ── */
+        .code-wrap {
+            position: relative;
+            margin-top: 4px;
+        }
+        pre {
+            background: #09090d;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 18px 50px 18px 18px;
+            font-family: var(--mono);
+            font-size: 0.78rem;
+            color: #d4d8e8;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            word-break: break-word;
+            line-height: 1.65;
+        }
+        pre.tall { padding: 20px 20px 20px 20px; }
+        code { font-family: var(--mono); background: #09090d; padding: 2px 7px; border-radius: 5px; color: #ff8097; font-size: 0.82em; border: 1px solid var(--border); }
+        pre code { background: none; padding: 0; color: inherit; border: none; }
+
+        .copy-btn {
+            position: absolute;
+            top: 10px; right: 10px;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid var(--border);
+            color: var(--muted);
+            width: 30px; height: 30px;
+            border-radius: 7px;
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            transition: background 0.2s, color 0.2s, border-color 0.2s;
+        }
+        .copy-btn:hover { background: rgba(255,255,255,0.08); color: #fff; border-color: rgba(255,255,255,0.2); }
+        .copy-btn svg { width: 14px; height: 14px; fill: currentColor; }
+
+        /* ── Tables ── */
+        .table-wrap { overflow-x: auto; margin-top: 12px; border-radius: 12px; border: 1px solid var(--border); }
+        table { width: 100%; border-collapse: collapse; background: var(--bg2); }
+        th, td { padding: 13px 16px; text-align: left; font-size: 0.88rem; border-bottom: 1px solid var(--border); }
+        th { background: rgba(0,0,0,0.3); font-weight: 700; color: #fff; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.5px; }
+        tr:last-child td { border-bottom: none; }
+        td { color: var(--muted2); }
+        td:first-child { font-family: var(--mono); font-size: 0.8rem; color: #ff8097; }
+
+        /* ── Blockquote / Note ── */
+        .note {
+            border-left: 3px solid var(--red);
+            padding: 14px 18px;
+            background: var(--red-dim);
+            border-radius: 0 10px 10px 0;
+            margin: 16px 0;
+            font-size: 0.88rem;
+            color: var(--muted2);
+            font-style: italic;
+        }
+
+        /* ── Section heading ── */
+        .section-title {
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 2.5px;
+            text-transform: uppercase;
+            color: var(--red);
+            margin-bottom: 20px;
+            margin-top: 48px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .section-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+        /* ── Badges ── */
+        .badge {
+            display: inline-block;
+            font-family: var(--mono);
+            font-size: 0.65rem;
+            padding: 3px 8px;
+            border-radius: 5px;
+            background: var(--red-dim);
+            color: var(--red);
+            border: 1px solid rgba(255,34,72,0.2);
+            letter-spacing: 0.5px;
+        }
+
+        /* ── Ambient ── */
+        .orb {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(130px);
+            opacity: 0.22;
+            pointer-events: none;
+            z-index: 0;
+        }
+        .orb1 { width: 500px; height: 500px; background: var(--red); top: -180px; right: -80px; }
+        .orb2 { width: 600px; height: 400px; background: #1b2040; bottom: -200px; left: -100px; }
+
+        .content { position: relative; z-index: 1; }
+
+        /* ── Scrollbar ── */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: var(--bg); }
+        ::-webkit-scrollbar-thumb { background: var(--bg3); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--red); }
+
+        /* ── Mobile ── */
+        @media (max-width: 768px) {
+            .sidebar { transform: translateX(-100%); }
+            .sidebar.open { transform: translateX(0); }
+            .main { margin-left: 0; }
+            .content { padding: 8px 20px 60px; }
+            .topbar { padding: 14px 20px; }
+            .span2 { grid-column: span 1; }
+            .grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="orb orb1"></div>
+<div class="orb orb2"></div>
+
+<div class="overlay" id="overlay" onclick="closeSidebar()"></div>
+
+<div class="layout">
+
+    <!-- Sidebar -->
+    <nav class="sidebar" id="sidebar">
+        <div class="logo-wrap">
+            <div class="logo">M0DZN</div>
+            <div class="logo-tag">UI Library V1.0</div>
+        </div>
+        <div class="nav">
+            <button class="nav-btn active" onclick="switchTab('readme', this)">
+                <span class="icon">📄</span> README
+            </button>
+            <button class="nav-btn" onclick="switchTab('elements', this)">
+                <span class="icon">📋</span> Elements
+            </button>
+            <button class="nav-btn" onclick="switchTab('example', this)">
+                <span class="icon">💻</span> Example Script
+            </button>
+        </div>
+    </nav>
+
+    <!-- Main -->
+    <div class="main" id="main">
+
+        <div class="topbar">
+            <button class="hamburger" onclick="toggleSidebar()" aria-label="Toggle menu">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                    <line x1="3" y1="6" x2="21" y2="6"/>
+                    <line x1="3" y1="12" x2="21" y2="12"/>
+                    <line x1="3" y1="18" x2="21" y2="18"/>
+                </svg>
+            </button>
+        </div>
+
+        <!-- ──────────────── README ──────────────── -->
+        <div class="content">
+            <div id="tab-readme" class="tab active">
+                <h1 class="page-title">Documentation</h1>
+                <p class="page-sub">Clean, fully themeable UI lib for Roblox scripts. Smooth animations, real config system, live color picker, and 9 rainbow border modes.</p>
+
+                <div class="preview-wrap">
+                    <img src="https://github.com/m0dzn1/m0dzn-Roblox-UI-Library-V1.0/raw/main/image.png" alt="M0DZN UI Preview" class="preview-img" onerror="this.style.display='none'">
+                </div>
+
+                <div class="grid">
+                    <div class="card span2">
+                        <h2>🚀 Quick Load</h2>
+                        <div class="code-wrap">
+                            <button class="copy-btn" onclick="copyCode(this)" title="Copy">
+                                <svg viewBox="0 0 16 16"><path d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 0 1 0 1.5h-1.5a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-1.5a.75.75 0 0 1 1.5 0v1.5A1.75 1.75 0 0 1 9.25 16h-7.5A1.75 1.75 0 0 1 0 14.25Z"/><path d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0 1 14.25 11h-7.5A1.75 1.75 0 0 1 5 9.25Zm1.75-.25a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-7.5a.25.25 0 0 0-.25-.25Z"/></svg>
+                            </button>
+                            <pre><code>local m0dznv1 = loadstring(game:HttpGet("https://raw.githubusercontent.com/m0dzn1/m0dzn-Roblox-UI-Library-V1.0/refs/heads/main/m0dzn-Ui-lib-V1.lua"))()</code></pre>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section-title">Create a Window</div>
+                <div class="grid">
+                    <div class="card span2">
+                        <h2>💻 Simplest Setup</h2>
+                        <div class="code-wrap">
+                            <button class="copy-btn" onclick="copyCode(this)" title="Copy">
+                                <svg viewBox="0 0 16 16"><path d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 0 1 0 1.5h-1.5a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-1.5a.75.75 0 0 1 1.5 0v1.5A1.75 1.75 0 0 1 9.25 16h-7.5A1.75 1.75 0 0 1 0 14.25Z"/><path d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0 1 14.25 11h-7.5A1.75 1.75 0 0 1 5 9.25Zm1.75-.25a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-7.5a.25.25 0 0 0-.25-.25Z"/></svg>
+                            </button>
+                            <pre class="tall"><code>local Window = m0dznv1:CreateWindow({
+    Title   = "My Hub",
+    Keybind = Enum.KeyCode.M,
+})
+local Main = Window:Tab("Main")</code></pre>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section-title">Themes</div>
+                <div class="grid">
+                    <div class="card">
+                        <h2>🎨 Built-in Themes</h2>
+                        <div class="code-wrap">
+                            <button class="copy-btn" onclick="copyCode(this)" title="Copy">
+                                <svg viewBox="0 0 16 16"><path d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 0 1 0 1.5h-1.5a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-1.5a.75.75 0 0 1 1.5 0v1.5A1.75 1.75 0 0 1 9.25 16h-7.5A1.75 1.75 0 0 1 0 14.25Z"/><path d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0 1 14.25 11h-7.5A1.75 1.75 0 0 1 5 9.25Zm1.75-.25a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-7.5a.25.25 0 0 0-.25-.25Z"/></svg>
+                            </button>
+                            <pre class="tall"><code>Library:CreateWindow({
+    Title = "My Hub",
+    Theme = "Purple",
+})</code></pre>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <h2>🖌️ Custom Theme</h2>
+                        <div class="code-wrap">
+                            <button class="copy-btn" onclick="copyCode(this)" title="Copy">
+                                <svg viewBox="0 0 16 16"><path d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 0 1 0 1.5h-1.5a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-1.5a.75.75 0 0 1 1.5 0v1.5A1.75 1.75 0 0 1 9.25 16h-7.5A1.75 1.75 0 0 1 0 14.25Z"/><path d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0 1 14.25 11h-7.5A1.75 1.75 0 0 1 5 9.25Zm1.75-.25a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-7.5a.25.25 0 0 0-.25-.25Z"/></svg>
+                            </button>
+                            <pre class="tall"><code>Theme = {
+    Name   = "Ocean",
+    Main   = {10,  18,  30},
+    Top    = {18,  28,  45},
+    Text   = {220, 235, 255},
+    Accent = {60,  160, 255},
+    Stroke = {35,  55,  90},
+}</code></pre>
+                        </div>
+                    </div>
+                    <div class="card span2">
+                        <h2>🎨 Color Slots</h2>
+                        <div class="table-wrap">
+                            <table>
+                                <thead><tr><th>Slot</th><th>What it does</th></tr></thead>
+                                <tbody>
+                                    <tr><td>Main</td><td>Window background</td></tr>
+                                    <tr><td>Top</td><td>Topbar + all tile backgrounds</td></tr>
+                                    <tr><td>Text</td><td>Every label and button text</td></tr>
+                                    <tr><td>Accent</td><td>Toggle on, slider fill, dropdown arrow, section labels</td></tr>
+                                    <tr><td>Stroke</td><td>Toggle off, slider track, borders, dividers</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section-title">Notifications</div>
+                <div class="grid">
+                    <div class="card span2">
+                        <h2>🔔 Notification Types</h2>
+                        <div class="table-wrap">
+                            <table>
+                                <thead><tr><th>Type</th><th>Color</th><th>Example</th></tr></thead>
+                                <tbody>
+                                    <tr><td>default</td><td>🩶 grey</td><td><code>Window:Notification("Title", "Body")</code></td></tr>
+                                    <tr><td>success</td><td>🟢 green</td><td><code>Window:Notification("Title", "Body", "success")</code></td></tr>
+                                    <tr><td>warning</td><td>🟡 yellow</td><td><code>Window:Notification("Title", "Body", "warning")</code></td></tr>
+                                    <tr><td>error</td><td>🔴 red</td><td><code>Window:Notification("Title", "Body", "error")</code></td></tr>
+                                    <tr><td>info</td><td>🩵 cyan</td><td><code>Window:Notification("Title", "Body", "info")</code></td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section-title">Flags</div>
+                <div class="grid">
+                    <div class="card span2">
+                        <h2>📦 Library.Flags</h2>
+                        <p style="margin-bottom:14px;">Every element auto-saves its current value into <code>Library.Flags</code>. The key is whatever name you gave the element.</p>
+                        <div class="code-wrap">
+                            <button class="copy-btn" onclick="copyCode(this)" title="Copy">
+                                <svg viewBox="0 0 16 16"><path d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 0 1 0 1.5h-1.5a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-1.5a.75.75 0 0 1 1.5 0v1.5A1.75 1.75 0 0 1 9.25 16h-7.5A1.75 1.75 0 0 1 0 14.25Z"/><path d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0 1 14.25 11h-7.5A1.75 1.75 0 0 1 5 9.25Zm1.75-.25a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-7.5a.25.25 0 0 0-.25-.25Z"/></svg>
+                            </button>
+                            <pre class="tall"><code>Main:Toggle("Auto Farm", false, function(v) end)
+Main:Slider("Farm Delay", 0, 5, 1, function(v) end)
+
+task.spawn(function()
+    while true do
+        if Library.Flags["Auto Farm"] then
+            task.wait(Library.Flags["Farm Delay"])
+        else
+            task.wait(0.1)
+        end
+    end
+end)</code></pre>
+                        </div>
+                        <div class="table-wrap" style="margin-top:16px;">
+                            <table>
+                                <thead><tr><th>Element</th><th>Flag Type</th></tr></thead>
+                                <tbody>
+                                    <tr><td>Slider</td><td>number</td></tr>
+                                    <tr><td>Toggle</td><td>boolean</td></tr>
+                                    <tr><td>Dropdown</td><td>string</td></tr>
+                                    <tr><td>Textbox</td><td>string</td></tr>
+                                    <tr><td>Keybind</td><td>string (key name)</td></tr>
+                                    <tr><td>Value</td><td>string</td></tr>
+                                    <tr><td>ColorPicker</td><td>Color3</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- ──────────────── ELEMENTS ──────────────── -->
+            <div id="tab-elements" class="tab">
+                <h1 class="page-title">Elements</h1>
+                <p class="page-sub">Everything you can add to your hub.</p>
+
+                <div class="grid">
+
+                    <div class="card">
+                        <h2>Section</h2>
+                        <p class="el-desc">A big text divider to separate categories.</p>
+                        <div class="code-wrap">
+                            <button class="copy-btn" onclick="copyCode(this)" title="Copy">
+                                <svg viewBox="0 0 16 16"><path d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 0 1 0 1.5h-1.5a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-1.5a.75.75 0 0 1 1.5 0v1.5A1.75 1.75 0 0 1 9.25 16h-7.5A1.75 1.75 0 0 1 0 14.25Z"/><path d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0 1 14.25 11h-7.5A1.75 1.75 0 0 1 5 9.25Zm1.75-.25a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-7.5a.25.25 0 0 0-.25-.25Z"/></svg>
+                            </button>
+                            <pre><code>Main:Section("Combat")</code></pre>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h2>Label</h2>
+                        <p class="el-desc">Just text. Good for showing stats or info.</p>
+                        <div class="code-wrap">
+                            <button class="copy-btn" onclick="copyCode(this)" title="Copy">
+                                <svg viewBox="0 0 16 16"><path d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 0 1 0 1.5h-1.5a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-1.5a.75.75 0 0 1 1.5 0v1.5A1.75 1.75 0 0 1 9.25 16h-7.5A1.75 1.75 0 0 1 0 14.25Z"/><path d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0 1 14.25 11h-7.5A1.75 1.75 0 0 1 5 9.25Zm1.75-.25a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-7.5a.25.25 0 0 0-.25-.25Z"/></svg>
+                            </button>
+                            <pre><code>Main:Label("walkspeed is active")</code></pre>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h2>Paragraph</h2>
+                        <p class="el-desc">Like a label but bigger. Has a title and description.</p>
+                        <div class="code-wrap">
+                            <button class="copy-btn" onclick="copyCode(this)" title="Copy">
+                                <svg viewBox="0 0 16 16"><path d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 0 1 0 1.5h-1.5a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-1.5a.75.75 0 0 1 1.5 0v1.5A1.75 1.75 0 0 1 9.25 16h-7.5A1.75 1.75 0 0 1 0 14.25Z"/><path d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0 1 14.25 11h-7.5A1.75 1.75 0 0 1 5 9.25Zm1.75-.25a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-7.5a.25.25 0 0 0-.25-.25Z"/></svg>
+                            </button>
+                            <pre><code>Main:Paragraph("About", "made by m0dzn.")</code></pre>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h2>Button</h2>
+                        <p class="el-desc">Click it, it runs your code.</p>
+                        <div class="code-wrap">
+                            <button class="copy-btn" onclick="copyCode(this)" title="Copy">
+                                <svg viewBox="0 0 16 16"><path d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 0 1 0 1.5h-1.5a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-1.5a.75.75 0 0 1 1.5 0v1.5A1.75 1.75 0 0 1 9.25 16h-7.5A1.75 1.75 0 0 1 0 14.25Z"/><path d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0 1 14.25 11h-7.5A1.75 1.75 0 0 1 5 9.25Zm1.75-.25a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-7.5a.25.25 0 0 0-.25-.25Z"/></svg>
+                            </button>
+                            <pre><code>Main:Button("Teleport", function() end)</code></pre>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h2>Toggle</h2>
+                        <p class="el-desc">On/off switch for things like Auto Farm.</p>
+                        <div class="code-wrap">
+                            <button class="copy-btn" onclick="copyCode(this)" title="Copy">
+                                <svg viewBox="0 0 16 16"><path d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 0 1 0 1.5h-1.5a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-1.5a.75.75 0 0 1 1.5 0v1.5A1.75 1.75 0 0 1 9.25 16h-7.5A1.75 1.75 0 0 1 0 14.25Z"/><path d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0 1 14.25 11h-7.5A1.75 1.75 0 0 1 5 9.25Zm1.75-.25a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-7.5a.25.25 0 0 0-.25-.25Z"/></svg>
+                            </button>
+                            <pre class="tall"><code>Main:Toggle("Auto Farm", false, function(State)
+    getgenv().AutoFarm = State
+end)</code></pre>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h2>Slider</h2>
+                        <p class="el-desc">Drag left/right to pick a number.</p>
+                        <div class="code-wrap">
+                            <button class="copy-btn" onclick="copyCode(this)" title="Copy">
+                                <svg viewBox="0 0 16 16"><path d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 0 1 0 1.5h-1.5a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-1.5a.75.75 0 0 1 1.5 0v1.5A1.75 1.75 0 0 1 9.25 16h-7.5A1.75 1.75 0 0 1 0 14.25Z"/><path d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0 1 14.25 11h-7.5A1.75 1.75 0 0 1 5 9.25Zm1.75-.25a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-7.5a.25.25 0 0 0-.25-.25Z"/></svg>
+                            </button>
+                            <pre class="tall"><code>Main:Slider("WalkSpeed", 16, 500, 16, function(Value)
+    game.Players.LocalPlayer.Character
+        .Humanoid.WalkSpeed = Value
+end)</code></pre>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h2>Dropdown</h2>
+                        <p class="el-desc">Open a menu and pick an option from the list.</p>
+                        <div class="code-wrap">
+                            <button class="copy-btn" onclick="copyCode(this)" title="Copy">
+                                <svg viewBox="0 0 16 16"><path d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 0 1 0 1.5h-1.5a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-1.5a.75.75 0 0 1 1.5 0v1.5A1.75 1.75 0 0 1 9.25 16h-7.5A1.75 1.75 0 0 1 0 14.25Z"/><path d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0 1 14.25 11h-7.5A1.75 1.75 0 0 1 5 9.25Zm1.75-.25a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-7.5a.25.25 0 0 0-.25-.25Z"/></svg>
+                            </button>
+                            <pre class="tall"><code>Main:Dropdown("Team", {"Red","Blue","Green"}, function(Option)
+    print(Option)
+end)</code></pre>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h2>Textbox</h2>
+                        <p class="el-desc">Lets the user type whatever they want.</p>
+                        <div class="code-wrap">
+                            <button class="copy-btn" onclick="copyCode(this)" title="Copy">
+                                <svg viewBox="0 0 16 16"><path d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 0 1 0 1.5h-1.5a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-1.5a.75.75 0 0 1 1.5 0v1.5A1.75 1.75 0 0 1 9.25 16h-7.5A1.75 1.75 0 0 1 0 14.25Z"/><path d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0 1 14.25 11h-7.5A1.75 1.75 0 0 1 5 9.25Zm1.75-.25a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-7.5a.25.25 0 0 0-.25-.25Z"/></svg>
+                            </button>
+                            <pre class="tall"><code>Main:Textbox("Name", "type here...", function(Text)
+    print(Text)
+end)</code></pre>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h2>Keybind</h2>
+                        <p class="el-desc">Press a key to trigger something.</p>
+                        <div class="code-wrap">
+                            <button class="copy-btn" onclick="copyCode(this)" title="Copy">
+                                <svg viewBox="0 0 16 16"><path d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 0 1 0 1.5h-1.5a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-1.5a.75.75 0 0 1 1.5 0v1.5A1.75 1.75 0 0 1 9.25 16h-7.5A1.75 1.75 0 0 1 0 14.25Z"/><path d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0 1 14.25 11h-7.5A1.75 1.75 0 0 1 5 9.25Zm1.75-.25a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-7.5a.25.25 0 0 0-.25-.25Z"/></svg>
+                            </button>
+                            <pre class="tall"><code>Main:Keybind("Fly Key", Enum.KeyCode.F, function(Key)
+    print(Key.Name)
+end)</code></pre>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h2>Value</h2>
+                        <p class="el-desc">A tiny input box just for storing a number or string.</p>
+                        <div class="code-wrap">
+                            <button class="copy-btn" onclick="copyCode(this)" title="Copy">
+                                <svg viewBox="0 0 16 16"><path d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 0 1 0 1.5h-1.5a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-1.5a.75.75 0 0 1 1.5 0v1.5A1.75 1.75 0 0 1 9.25 16h-7.5A1.75 1.75 0 0 1 0 14.25Z"/><path d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0 1 14.25 11h-7.5A1.75 1.75 0 0 1 5 9.25Zm1.75-.25a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-7.5a.25.25 0 0 0-.25-.25Z"/></svg>
+                            </button>
+                            <pre class="tall"><code>Main:Value("Hitbox Size", 10, function(Value)
+    _G.HitboxSize = tonumber(Value)
+end)</code></pre>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h2>Color Picker</h2>
+                        <p class="el-desc">RGB inputs update in realtime while dragging. Touch works too.</p>
+                        <div class="code-wrap">
+                            <button class="copy-btn" onclick="copyCode(this)" title="Copy">
+                                <svg viewBox="0 0 16 16"><path d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 0 1 0 1.5h-1.5a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-1.5a.75.75 0 0 1 1.5 0v1.5A1.75 1.75 0 0 1 9.25 16h-7.5A1.75 1.75 0 0 1 0 14.25Z"/><path d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0 1 14.25 11h-7.5A1.75 1.75 0 0 1 5 9.25Zm1.75-.25a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-7.5a.25.25 0 0 0-.25-.25Z"/></svg>
+                            </button>
+                            <pre class="tall"><code>Main:ColorPicker("ESP Color", Color3.fromRGB(255,100,100), function(Color)
+    _G.ESPColor = Color
+end)</code></pre>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- ──────────────── EXAMPLE ──────────────── -->
+            <div id="tab-example" class="tab">
+                <h1 class="page-title">Example Script</h1>
+                <p class="page-sub">A complete working script showing every element and notification type.</p>
+
+                <div class="card">
+                    <h2>💻 Full Example</h2>
+                    <div class="code-wrap">
+                        <button class="copy-btn" onclick="copyCode(this)" title="Copy" style="top:14px;">
+                            <svg viewBox="0 0 16 16"><path d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 0 1 0 1.5h-1.5a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-1.5a.75.75 0 0 1 1.5 0v1.5A1.75 1.75 0 0 1 9.25 16h-7.5A1.75 1.75 0 0 1 0 14.25Z"/><path d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0 1 14.25 11h-7.5A1.75 1.75 0 0 1 5 9.25Zm1.75-.25a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-7.5a.25.25 0 0 0-.25-.25Z"/></svg>
+                        </button>
+                        <pre class="tall"><code>local m0dznv1 = loadstring(game:HttpGet("https://raw.githubusercontent.com/m0dzn1/m0dzn-Roblox-UI-Library-V1.0/refs/heads/main/m0dzn-Ui-lib-V1.lua"))()
+local Window = m0dznv1:CreateWindow({
+    Title = "TEST HUB",
+    Keybind = Enum.KeyCode.RightShift,
+    Theme = {
+        Name = "Ocean",
+        Main = {10, 18, 30},
+        Top = {18, 28, 45},
+        Text = {220, 235, 255},
+        Accent = {60, 160, 255},
+        Stroke = {35, 55, 90},
+    },
+})
+local Tab = Window:Tab("TEST")
+Tab:Section("elements")
+Tab:Label("just a label lol")
+Tab:Paragraph("test", "TEST")
+Tab:Button("click me", function()
+    Window:Notification("nice click", "success")
+end)
+Tab:Toggle("some toggle", false, function(on)
+    print("toggle is now", on)
+end)
+Tab:Slider("Walk Speed", 0, 100, 16, function(v)
+    game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = v
+end)
+Tab:Dropdown("pick one", {"A", "B", "C"}, function(v)
+    print("picked", v)
+end)
+Tab:Textbox("type here", "enter something...", function(v)
+    print("typed:", v)
+end)
+Tab:Keybind("a keybind", Enum.KeyCode.E, function(k)
+    print("key is now", k.Name)
+end)
+Tab:Value("some value", "10", function(v)
+    print("changed to", v)
+end)
+Tab:ColorPicker("pick a color", Color3.fromRGB(100, 180, 255), function(c)
+    print("color:", c)
+end)
+Tab:Section("notif types")
+Tab:Button("default notif", function()
+    Window:Notification("hey this is a notif")
+end)
+Tab:Button("success", function()
+    Window:Notification("it worked!", "success")
+end)
+Tab:Button("warning", function()
+    Window:Notification("careful with this", "warning")
+end)
+Tab:Button("error", function()
+    Window:Notification("something broke lol", "error")
+end)
+Tab:Button("info", function()
+    Window:Notification("just some info", "info")
+end)
+Window:Notification("script loaded", "success")</code></pre>
+                    </div>
+                </div>
+            </div>
+
+        </div><!-- /content -->
+    </div><!-- /main -->
+</div><!-- /layout -->
+
+<script>
+    // Sidebar logic
+    const sidebar = document.getElementById('sidebar');
+    const mainEl  = document.getElementById('main');
+    const overlay = document.getElementById('overlay');
+
+    function isMobile() { return window.innerWidth <= 768; }
+
+    function openSidebar() {
+        sidebar.classList.remove('closed');
+        sidebar.classList.add('open');
+        if (isMobile()) { overlay.classList.add('show'); }
+        else { mainEl.classList.remove('full'); }
+    }
+    function closeSidebar() {
+        sidebar.classList.remove('open');
+        sidebar.classList.add('closed');
+        overlay.classList.remove('show');
+        if (!isMobile()) { mainEl.classList.add('full'); }
+    }
+    function toggleSidebar() {
+        sidebar.classList.contains('closed') ? openSidebar() : closeSidebar();
+    }
+
+    // Init
+    window.addEventListener('DOMContentLoaded', () => {
+        if (isMobile()) {
+            sidebar.classList.add('closed');
+        } else {
+            sidebar.classList.remove('closed');
+            mainEl.classList.remove('full');
+        }
+    });
+    window.addEventListener('resize', () => {
+        if (!isMobile()) {
+            overlay.classList.remove('show');
+            if (!sidebar.classList.contains('closed')) {
+                mainEl.classList.remove('full');
+            }
+        }
+    });
+
+    // Tab switching
+    function switchTab(id, btn) {
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById('tab-' + id).classList.add('active');
+        btn.classList.add('active');
+        document.querySelector('.main').scrollTop = 0;
+        if (isMobile()) closeSidebar();
+    }
+
+    // Copy button
+    const copyIcon = `<svg viewBox="0 0 16 16" fill="currentColor"><path d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 0 1 0 1.5h-1.5a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-1.5a.75.75 0 0 1 1.5 0v1.5A1.75 1.75 0 0 1 9.25 16h-7.5A1.75 1.75 0 0 1 0 14.25Z"/><path d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0 1 14.25 11h-7.5A1.75 1.75 0 0 1 5 9.25Zm1.75-.25a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-7.5a.25.25 0 0 0-.25-.25Z"/></svg>`;
+    const checkIcon = `<svg viewBox="0 0 16 16" fill="#4ade80"><path d="M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0Z"/></svg>`;
+
+    function copyCode(btn) {
+        const code = btn.closest('.code-wrap').querySelector('code');
+        navigator.clipboard.writeText(code.innerText).then(() => {
+            btn.innerHTML = checkIcon;
+            btn.style.borderColor = '#4ade80';
+            btn.style.background = 'rgba(74,222,128,0.08)';
+            setTimeout(() => {
+                btn.innerHTML = copyIcon;
+                btn.style.borderColor = '';
+                btn.style.background = '';
+            }, 2000);
+        });
+    }
+</script>
+</body>
+</html>
