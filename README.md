@@ -37,7 +37,7 @@ local Main = Window:Tab("Main")
 
 two ways to do it
 
-### option 1 — built in themes
+### option 1: built in themes
 
 ```lua
 local Window = Library:CreateWindow({
@@ -46,7 +46,7 @@ local Window = Library:CreateWindow({
 })
 ```
 
-### option 2 — make ur own
+### option 2: make ur own
 
 ```lua
 local Window = Library:CreateWindow({
