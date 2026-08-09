@@ -5,7 +5,7 @@
  ██║╚██╔╝██║  ████╔╝██║  ██║  ██║   ███╔╝    ██║╚██╗██║
  ██║ ╚═╝ ██║  ╚██████╔╝  ██████╔╝  ███████╗  ██║ ╚████║
  ╚═╝     ╚═╝   ╚═════╝   ╚═════╝   ╚══════╝  ╚═╝  ╚═══╝
-          M0DZN LIBRARY V1.0 | LIQUID GLASS VERSION (BETA)
+    M0DZN LIBRARY V1.0 | LIQUID GLASS VERSION (BETA)
 ]]
 
 print("script lodded.")
@@ -2205,11 +2205,9 @@ function Library:CreateWindow(Config)
         end
     end, true)
 
-    ---------------------------------------------------------------------------------
-    -- LIQUID GLASS SETTINGS TAB (replaces old "Settings" / "Theme" tab)
-    ---------------------------------------------------------------------------------
-
-    local GlassTab = Window:Tab("Liquid Glass")
+    -- Settings
+ 
+    local GlassTab = Window:Tab("Settings")
 
     -- GLASS SURFACE
     GlassTab:Section("glass surface")
