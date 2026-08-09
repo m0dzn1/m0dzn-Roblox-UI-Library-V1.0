@@ -5,7 +5,7 @@
  ██║╚██╔╝██║  ████╔╝██║  ██║  ██║   ███╔╝    ██║╚██╗██║
  ██║ ╚═╝ ██║  ╚██████╔╝  ██████╔╝  ███████╗  ██║ ╚████║
  ╚═╝     ╚═╝   ╚═════╝   ╚═════╝   ╚══════╝  ╚═╝  ╚═══╝
-          M0DZN LIBRARY V2.0 — LIQUID GLASS
+          M0DZN LIBRARY V1.0 | LIQUID GLASS VERSION (BETA)
 ]]
 
 print("script lodded.")
