@@ -19,7 +19,7 @@ local CoreGui = game:GetService("CoreGui")
 local Players = game:GetService("Players")
 local HttpService = game:GetService("HttpService")
 
--- wait for localplayer or everything breaks
+-- gotta wait for localplayer for make sure ui lib didnt break
 local LocalPlayer = Players.LocalPlayer
 if not LocalPlayer then
     LocalPlayer = Players:GetPropertyChangedSignal("LocalPlayer"):Wait()
@@ -153,8 +153,8 @@ function Library:CreateWindow(Config)
     ScreenGui.IgnoreGuiInset = true
     ScreenGui.ResetOnSpawn = false
 
-    -- trying different ways to parent the gui, some executors are picky abt this
-    -- syn first, then gethui, then coregui, playergui is the last resort
+    -- some executors are picky af about where you parent the gui
+    -- try syn first, then gethui then coregui and if all else fails just shove it in playergui
     local guiParented = false
     pcall(function()
         if syn and syn.protect_gui then
@@ -203,8 +203,8 @@ function Library:CreateWindow(Config)
     Gradient.Parent = Stroke
     Gradient.Enabled = false
 
-    -- runs every frame, keeps the rainbow border going
-    -- if rainbow is off just put the theme stroke color back
+    -- runs every frame to keep the rainbow border alive
+    -- if rainbow's off just slam the theme stroke color back in
     task.spawn(function()
         local rot = 0
         while ScreenGui.Parent do
@@ -317,7 +317,7 @@ function Library:CreateWindow(Config)
         local iconParts = {}
 
         local function DrawIcon(iType)
-            -- clear old icon parts so we can draw fresh ones
+            -- nuke old icon parts so were drawing fresh
             for _, p in ipairs(iconParts) do pcall(function() p:Destroy() end) end
             iconParts = {}
             local function Part(x, y, w, h, r, color)
@@ -334,18 +334,18 @@ function Library:CreateWindow(Config)
             end
 
             if iType == "minimize" then
-                -- just a flat bar, looks like a minus
+                -- just a flat minus bar
                 Part(7, 13, 14, 2, 1)
 
             elseif iType == "expand" then
-                -- the expand icon, two arrows pointing away from each other
+                -- two arrows pointing away from each other classic expand look
                 -- top right arrow
-                Part(16, 5,  9, 2, 1)  -- top-right horizontal
-                Part(23, 5,  2, 9, 1)  -- top-right vertical
+                Part(16, 5,  9, 2, 1)  -- horizontal bit
+                Part(23, 5,  2, 9, 1)  -- vertical bit
                 -- bottom left arrow
-                Part(5,  21, 9, 2, 1)  -- bottom-left horizontal
-                Part(5,  14, 2, 9, 1)  -- bottom-left vertical
-                -- diagonal bar in the middle connecting both arrows
+                Part(5,  21, 9, 2, 1)  -- horizontal bit
+                Part(5,  14, 2, 9, 1)  -- vertical bit
+                -- diagonal connecting bar in the middle
                 local diag = Part(0, 0, 16, 2, 1)
                 diag.AnchorPoint = Vector2.new(0.5, 0.5)
                 diag.Position = UDim2.new(0.5, 0, 0.5, 0)
@@ -389,12 +389,12 @@ function Library:CreateWindow(Config)
         return {btn = Btn, setIcon = setIcon, getParts = function() return iconParts end}
     end
 
-    -- minus on the left, close x on the right
+    -- minus on the left to collapse red X on the right to close
     local CollapseBtn = MakeIconBtn("minimize", -70)
     local HideShowBtn = MakeIconBtn("close",    -36)
 
     local HintLabel = Instance.new("TextButton")
-    HintLabel.Size = UDim2.new(0, 0, 0, 0) -- invisible, zero size, doesnt show up
+    HintLabel.Size = UDim2.new(0, 0, 0, 0) -- invisible zero-size thing doesn't show up
     HintLabel.BackgroundTransparency = 1
     HintLabel.Text = ""
     HintLabel.Visible = false
@@ -412,8 +412,6 @@ function Library:CreateWindow(Config)
     TabContainer.BackgroundTransparency = 1
     TabContainer.ScrollBarThickness = 0
     TabContainer.Parent = Content
-
-
 
     local TabList = Instance.new("UIListLayout")
     TabList.Padding = UDim.new(0, 4)
@@ -488,11 +486,9 @@ function Library:CreateWindow(Config)
     PageContainer.BackgroundTransparency = 1
     PageContainer.Parent = Content
 
-
-
     local openSize  = UDim2.new(0, 650, 0, 430)
 
-    -- open animation, bounces in from nothing
+    -- open animation lil bounce so it doesnt just pop in ugly
     MainFrame.Size = UDim2.new(0, 0, 0, 0)
     MainFrame.Visible = true
     MainFrame.BackgroundTransparency = 0
@@ -524,16 +520,15 @@ function Library:CreateWindow(Config)
         end
     end)
 
-    -- ui state stuff
+    -- ui open/close state
     local isOpen = true
     local isCollapsed = false
 
-    -- collapse button
-    -- minus when open, swaps to expand arrows when minimized
-    -- tiny scale bounce when the icon swaps
+    -- handles the collapse button
+    -- shows minus when open swaps to expand arrows when minimized
+    -- tiny squish animation when the icon swaps, looks clean
     local function SetCollapsed(c)
         isCollapsed = c
-        -- squish the button a bit then bounce it back while the icon swaps
         TweenService:Create(CollapseBtn.btn, TweenInfo.new(0.12, Enum.EasingStyle.Quad, Enum.EasingDirection.In),
             {Size = UDim2.new(0, 20, 0, 20)}):Play()
         task.delay(0.12, function()
@@ -544,7 +539,7 @@ function Library:CreateWindow(Config)
 
         local targetSize
         if c then
-            -- fade the content out before shrinking the window
+            -- fade content out before shrinking, looks way better
             TweenService:Create(Content, TweenInfo.new(0.18, Enum.EasingStyle.Quint, Enum.EasingDirection.Out),
                 {BackgroundTransparency = 1}):Play()
             task.delay(0.15, function()
@@ -577,7 +572,7 @@ function Library:CreateWindow(Config)
             if not isOpen then
                 MainFrame.Visible = false
                 local keyName = Keybind and Keybind.Name or "M"
-                -- tell the user what key to press to get the ui back
+                -- tell em what key brings it back
                 Window:Notification("UI Hidden", 'Press "' .. keyName .. '" to reopen', "info")
             end
         end)
@@ -591,15 +586,16 @@ function Library:CreateWindow(Config)
         end
     end)
 
-    -- notification system
-    -- every element fires a notif automatically when u interact with it
-    -- if u call Window:Notification() it kills the auto one and shows urs
-    -- format is always the element name on top, body text below
+    -- notif system
+    -- every element auto fires a notif when you touch it
+    -- if you call Window:Notification() yourself it kills the auto one so yours shows instead
+    -- title's always the element name, body is whatever happened
     local NotifTypes = {success=true, warning=true, error=true, info=true}
 
     local function SpawnNotif(title, body, notifType, source)
         task.spawn(function()
             if source == "scripter" then
+                -- kill any pending auto notifs so ours doesn't get buried
                 for i = #ActiveNotifs, 1, -1 do
                     local entry = ActiveNotifs[i]
                     if entry.source == "internal" and entry.kill then
@@ -620,7 +616,7 @@ function Library:CreateWindow(Config)
             elseif notifType == "info"    then typeColor = Color3.fromRGB(0, 210, 220)
             end
 
-            -- all notifs same height so they stack cleanly
+            -- fixed height so they stack nice and even
             local nW   = 300
             local nH   = 76
             local padX = 16; local padY = 10
@@ -804,8 +800,8 @@ function Library:CreateWindow(Config)
         end)
     end
 
-    -- call this to show a notif in the bottom right
-    -- kills any auto notifs so urs always shows on top
+    -- pop a notif in the bottom right corner
+    -- kills any auto notifs so yours always wins
     --
     --   Window:Notification("title", "body", "type")  shows both lines
     --   Window:Notification("title", "type")           just the title
@@ -816,8 +812,7 @@ function Library:CreateWindow(Config)
         SpawnNotif(title, body, notifType, "scripter")
     end
 
-    -- internal version, only the lib uses this
-    -- gets killed instantly if u fire ur own notif
+    -- lib-only version, gets yeeted instantly if you fire your own notif
     local function InternalNotif(title, body, notifType)
         if Library._loading then return end
         SpawnNotif(title, body, notifType, "internal")
@@ -826,8 +821,7 @@ function Library:CreateWindow(Config)
     function Window:SetKeybind(key) Keybind = key end
 
     function Window:Unload()
-        -- the exit confirm dialog
-        -- uses the current theme so it doesnt look out of place
+        -- exit confirm dialog, uses current theme so it doesn't look sus
         local Overlay = Instance.new("Frame")
         Overlay.Size = UDim2.new(1, 0, 1, 0)
         Overlay.Position = UDim2.new(0, 0, 0, 0)
@@ -906,7 +900,7 @@ function Library:CreateWindow(Config)
         DDivider.ZIndex = 502
         DDivider.Parent = Dialog
 
-        -- no button, uses accent color to match the rest of the ui
+        -- no button uses accent color to match the rest of the ui
         local NoBtn = Instance.new("TextButton")
         NoBtn.Size = UDim2.new(0, 125, 0, 36)
         NoBtn.Position = UDim2.new(0, 20, 0, 108)
@@ -921,7 +915,7 @@ function Library:CreateWindow(Config)
         NoBtn.MouseEnter:Connect(function() Tween(NoBtn, {BackgroundTransparency = 0.2}, 0.12) end)
         NoBtn.MouseLeave:Connect(function() Tween(NoBtn, {BackgroundTransparency = 0}, 0.12) end)
 
-        -- confirm button is red so its obvious its a destructive action
+        -- confirm is red so its obvious you're about to nuke the ui
         local ConfirmBtn = Instance.new("TextButton")
         ConfirmBtn.Size = UDim2.new(0, 125, 0, 36)
         ConfirmBtn.Position = UDim2.new(1, -145, 0, 108)
@@ -936,11 +930,11 @@ function Library:CreateWindow(Config)
         ConfirmBtn.MouseEnter:Connect(function() Tween(ConfirmBtn, {BackgroundColor3 = Color3.fromRGB(235, 60, 60)}, 0.12) end)
         ConfirmBtn.MouseLeave:Connect(function() Tween(ConfirmBtn, {BackgroundColor3 = Color3.fromRGB(210, 45, 45)}, 0.12) end)
 
-        -- bounce in animation so it doesnt just appear instantly
+        -- bounce in so it doesn't just snap into existence
         TweenService:Create(Dialog, TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.Out),
             {Size = UDim2.new(0, 310, 0, 158)}):Play()
 
-        -- pressed no, close the dialog and do nothing
+        -- hit no, close the dialog, nothing happens
         NoBtn.MouseButton1Click:Connect(function()
             TweenService:Create(Dialog, TweenInfo.new(0.25, Enum.EasingStyle.Back, Enum.EasingDirection.In),
                 {Size = UDim2.new(0, 0, 0, 0)}):Play()
@@ -951,8 +945,8 @@ function Library:CreateWindow(Config)
             end)
         end)
 
-        -- pressed confirm, they actually wanna leave
-        -- reset everything, fire the notif, fade the ui out
+        -- they actually wanna leave, blow everything up
+        -- reset all flags, fire the notif, shrink it away
         ConfirmBtn.MouseButton1Click:Connect(function()
             -- close the dialog first
             TweenService:Create(Dialog, TweenInfo.new(0.22, Enum.EasingStyle.Back, Enum.EasingDirection.In),
@@ -963,8 +957,8 @@ function Library:CreateWindow(Config)
                 pcall(function() Overlay:Destroy() end)
             end)
 
-            -- reset all elements back to their default values
-            -- toggles off, dropdowns reset, textboxes cleared, colorpickers white
+            -- reset everything back to defaults
+            -- toggles off, dropdowns reset, textboxes cleared, pickers go white
             for flag, obj in pairs(ConfigObjects) do
                 pcall(function()
                     if obj.Type == "Toggle" then
@@ -980,7 +974,7 @@ function Library:CreateWindow(Config)
             end
             Library.Flags = {}
 
-            -- fire the notif now so it shows while the ui is still fading
+            -- fire the notif while the ui is still visible so they can see it
             Window:Notification("UI Unloaded", "Library has been destroyed", "error")
 
             -- shrink the window away
@@ -991,7 +985,7 @@ function Library:CreateWindow(Config)
                 MainFrame.Visible = false
             end)
 
-            -- wait 3s then destroy, gives the notif time to finish
+            -- wait 3s to destroy, gives the notif time to do its thing
             task.delay(3, function()
                 pcall(function() ScreenGui:Destroy() end)
             end)
@@ -1002,7 +996,7 @@ function Library:CreateWindow(Config)
         Window:Unload()
     end
 
-    local firstTab = true -- true until the first scripter tab gets auto-selected
+    local firstTab = true -- stays true until the first scripter tab gets picked
 
     function Window:Tab(name)
         local TabBtn = Instance.new("TextButton")
@@ -1071,8 +1065,8 @@ function Library:CreateWindow(Config)
             end
         end)
 
-        -- config and settings tabs are added by the lib itself
-        -- dont auto select them, only the scripters tabs should auto select
+        -- config and settings are lib tabs, don't auto-select them
+        -- only the scripter's own tabs should get auto-selected
         local isSystemTab = (name == "Config" or name == "Settings")
         if firstTab and not isSystemTab then
             firstTab = false
@@ -1083,7 +1077,7 @@ function Library:CreateWindow(Config)
             TabBar.BackgroundTransparency = 0
         end
 
-        -- push config and settings to the very bottom
+        -- push these two to the very bottom of the list
         if name == "Config"   then TabBtn.LayoutOrder = 99998 end
         if name == "Settings" then TabBtn.LayoutOrder = 99999 end
 
@@ -1191,10 +1185,10 @@ function Library:CreateWindow(Config)
         end
 
         -- button notif behavior
-        --   default  fires "{name}\nActivate" in green
-        --   custom   if the callback calls Window:Notification()
-        --            we intercept it and show "{name}\n{custom msg}" instead
-        --            kills the default one so they dont stack
+        --   by default it fires "{name} / Activate" in green
+        --   if the callback calls Window:Notification() we swap it out
+        --   so the custom msg shows as "{name} / {custom msg}" instead
+        --   kills the default one so they don't stack on each other
         function Elements:Button(text, callback, silent)
             local Btn = Instance.new("TextButton")
             Btn.Size = UDim2.new(1, 0, 0, 44)
@@ -1224,20 +1218,17 @@ function Library:CreateWindow(Config)
                 task.wait(0.1)
                 Tween(Btn, {Size = UDim2.new(1, 0, 0, 44)}, 0.15)
                 if not silent then
-                    -- fire the default Activate notif first
-                    -- then swap out Window:Notification temporarily
-                    -- so if callback calls it we use their msg instead
-                    -- kinda hacky but it works
+                    -- fire the default notif first, then hijack Window:Notification
+                    -- so if callback calls it we replace with their message
+                    -- yeah it's a bit hacky but it works perfectly lol
                     local origNotif = Window.Notification
                     Window.Notification = function(_, msg, nType)
-                        -- put it back right away, only intercept once
-                        Window.Notification = origNotif
+                        Window.Notification = origNotif -- put it back right away
                         SpawnNotif(text, msg, nType, "scripter")
                     end
                     InternalNotif(text, "Activate", "success")
                     callback()
-                    -- put it back just in case callback never called it
-                    Window.Notification = origNotif
+                    Window.Notification = origNotif -- just in case callback never called it
                 else
                     callback()
                 end
@@ -1253,8 +1244,8 @@ function Library:CreateWindow(Config)
         end
 
         -- toggle notifs
-        --   on  fires "{name}\nEnable" green
-        --   off fires "{name}\nDisable" grey
+        --   turning on  = green "{name} / Enable"
+        --   turning off = grey  "{name} / Disable"
         function Elements:Toggle(text, default, callback)
             local Enabled = default or false
             local Tile = MakeTile(44)
@@ -1296,7 +1287,6 @@ function Library:CreateWindow(Config)
 
             ClickBtn.MouseButton1Click:Connect(function()
                 Enabled = not Enabled
-                -- green if turning on, grey if turning off
                 if Enabled then
                     InternalNotif(text, "Enable", "success")
                 else
@@ -1434,7 +1424,7 @@ function Library:CreateWindow(Config)
                     if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then
                         if sliding then
                             sliding = false
-                            -- notif shows the new slider value
+                            -- notif shows what value you landed on
                             InternalNotif(text, tostring(Val), "info")
                         end
                     end
@@ -1506,7 +1496,7 @@ function Library:CreateWindow(Config)
                 Lbl.Text = text .. "   —   " .. opt
                 Library.Flags[text] = opt; ConfigObjects[text].Value = opt
                 if not silent then
-                    -- notif shows which option was picked
+                    -- notif shows which option got picked
                     InternalNotif(text, opt, "info")
                 end
                 callback(opt)
@@ -1601,7 +1591,7 @@ function Library:CreateWindow(Config)
                 Library.Flags[text] = Box.Text
                 if ConfigObjects[text] then ConfigObjects[text].Value = Box.Text end
                 if not silent and Box.Text ~= "" then
-                    -- notif shows what was typed
+                    -- notif shows what they actually typed
                     InternalNotif(text, Box.Text, "info")
                 end
                 callback(Box.Text)
@@ -1641,7 +1631,7 @@ function Library:CreateWindow(Config)
                 if input.KeyCode.Name ~= "Unknown" then
                     Key = input.KeyCode; KeyLabel.Text = Key.Name
                     Library.Flags[text] = Key.Name; ConfigObjects[text].Value = Key.Name
-                    -- notif shows the new keybind
+                    -- notif shows the new key they bound
                     InternalNotif(text, Key.Name, "info")
                     callback(Key)
                 else
@@ -2048,8 +2038,6 @@ function Library:CreateWindow(Config)
     Settings:Button("Unload UI", function() Window:Unload() end, true)
 
     RefreshConfigs()
-
-
 
     do
         for _, r in pairs(Registry) do
